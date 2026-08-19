@@ -1,1 +1,66 @@
 @import "@cbs-site/ui/globals.css";
+
+@theme {
+	--color-brand-navy: #0f1c2b;
+	--color-brand-blue: #1d9dd8;
+	--color-brand-aqua: #a8e0f0;
+	--color-brand-mist: #dcf3fa;
+	--color-brand-paper: #fafbfc;
+}
+
+/* Display: Sora, injetada pelo next/font como --font-sora no body */
+.font-display {
+	font-family: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Névoa aqua: os fundos radiais que tiram a página do branco absoluto */
+.mist-hero {
+	background:
+		radial-gradient(
+			42rem 42rem at 78% 32%,
+			rgb(220 243 250 / 0.9),
+			transparent 65%
+		),
+		radial-gradient(
+			28rem 28rem at 12% 85%,
+			rgb(220 243 250 / 0.55),
+			transparent 70%
+		);
+}
+
+.mist-side {
+	background: radial-gradient(
+		36rem 30rem at var(--mist-x, 85%) 50%,
+		rgb(220 243 250 / 0.65),
+		transparent 68%
+	);
+}
+
+.mist-final {
+	background: radial-gradient(
+		48rem 26rem at 50% 78%,
+		rgb(220 243 250 / 0.8),
+		transparent 70%
+	);
+}
+
+/* Aceno da seta de scroll: sobe e desce devagar, some via opacidade externa */
+@keyframes scroll-nudge {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(0.4rem);
+	}
+}
+
+.scroll-hint-arrow {
+	animation: scroll-nudge 2.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.scroll-hint-arrow {
+		animation: none;
+	}
+}

@@ -1,24 +1,26 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Sora } from "next/font/google";
 
 import "../index.css";
-import Header from "@/components/header";
-import Providers from "@/components/providers";
 
-const geistSans = Geist({
+const sora = Sora({
 	subsets: ["latin"],
-	variable: "--font-geist-sans",
-});
-
-const geistMono = Geist_Mono({
-	subsets: ["latin"],
-	variable: "--font-geist-mono",
+	variable: "--font-sora",
 });
 
 export const metadata: Metadata = {
-	description: "cbs-site",
-	title: "cbs-site",
+	description:
+		"A CBS fabrica saneantes com a sua marca e envia de fábricas ao lado dos CDs do Mercado Livre. Terceirização completa de produção: você vende, a gente fabrica e envia.",
+	title: "CBS — Companhia Brasileira de Saneantes",
 };
+
+const DIRECTION_CONTRACT = `impeccable-direction b61342a9/870fbad3 (user-pinned)
+THESIS: A home é a jornada de um pacote que nasce numa bolha de sabão e termina no CD do Mercado Livre; recusa o hero estático com cards de benefícios.
+OWN-WORLD: Branco #FAFBFC quase absoluto; navy #0F1C2B e azul #1D9DD8 da marca; aquas #A8E0F0/#DCF3FA; bolhas de vidro e caixas de papelão com fita azul como únicos sólidos; caminho líquido em SVG; display Sora.
+STORY: O contratante entende que a CBS fabrica e envia sob a marca dele, acredita em frete + qualidade + ANVISA, e chama no WhatsApp.
+FIRST VIEWPORT: Headline à esquerda com CTA; à direita bolhas 3D com a caixa dentro da maior; no primeiro scroll a bolha estoura e a caixa desce a página.
+FORM: Bolha-Pacote, comp aprovado .impeccable/mocks/comp-bolha-pacote.png; jornada cronológica (modelo → qualidade → malha → chegada).
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md`;
 
 export default function RootLayout({
 	children,
@@ -26,16 +28,14 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en" suppressHydrationWarning>
+		<html lang="pt-BR" suppressHydrationWarning>
 			<body
-				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+				className={`${sora.variable} bg-brand-paper text-brand-navy antialiased`}
 			>
-				<Providers>
-					<div className="grid h-svh grid-rows-[auto_1fr]">
-						<Header />
-						{children}
-					</div>
-				</Providers>
+				<script id="direction-contract" type="text/x-impeccable-contract">
+					{DIRECTION_CONTRACT}
+				</script>
+				{children}
 			</body>
 		</html>
 	);

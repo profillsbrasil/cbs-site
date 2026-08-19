@@ -25,7 +25,9 @@
       "!**/.svelte-kit",
       "!**/wrangler.jsonc",
       "!**/.source",
-      "!**/convex/_generated"
+      "!**/convex/_generated",
+      "!**/.superpowers",
+      "!**/.impeccable"
     ]
   },
   "formatter": {
@@ -85,6 +87,16 @@
     "ultracite/biome/next"
   ],
   "overrides": [
+    {
+      "includes": ["apps/web/src/components/home/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noUnknownAttribute": "off"
+          }
+        }
+      }
+    },
     {
       "includes": ["packages/ui/src/components/**"],
       "linter": {

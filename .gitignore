@@ -56,3 +56,11 @@ coverage
 .cache
 tmp
 temp
+
+.superpowers/
+
+# Comps de design não escolhidos (fica só o aprovado)
+.impeccable/mocks/*
+!.impeccable/mocks/comp-bolha-pacote.png
+!.impeccable/mocks/comp-bolha-pacote.json
+.impeccable/questions/
