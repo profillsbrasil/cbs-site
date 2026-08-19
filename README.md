@@ -1,75 +1,32 @@
 # cbs-site
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines Next.js, and more.
+Site institucional da **CBS — Companhia Brasileira de Saneantes**: terceirização completa de produção de saneantes, com fábricas ao lado dos centros de distribuição do Mercado Livre. Divulgação de marca, só português, sem backend.
 
-## Features
+Monorepo bun workspaces: `apps/web` (Next.js 16 + Turbopack + three.js/R3F) e `packages/{ui,env,config}` (shadcn/ui compartilhado).
 
-- **TypeScript** - For type safety and improved developer experience
-- **Next.js** - Full-stack React framework
-- **TailwindCSS** - Utility-first CSS for rapid UI development
-- **Shared UI package** - shadcn/ui primitives live in `packages/ui`
-- **Biome** - Linting and formatting
-
-## Getting Started
-
-First, install the dependencies:
+## Rodar
 
 ```bash
 bun install
+bun run dev:web   # http://localhost:3001 (porta pinada)
 ```
 
-Then, run the development server:
+## Qualidade
 
 ```bash
-bun run dev
+bun run check        # lint/format (Ultracite/Biome)
+bun run fix          # aplicar fixes
+bun run check-types  # TypeScript
 ```
 
-Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
+## Documentação
 
-## UI Customization
+- `CONTEXT.md` — glossário de domínio (vocabulário canônico do negócio)
+- `apps/web/PRODUCT.md` — verdade do produto (público, posicionamento, restrições)
+- `apps/web/DESIGN.md` — design system construído (paleta, tipografia, regras)
+- `docs/superpowers/specs/` — specs de design aprovadas
+- `docs/agents/` — convenções para agentes (issues, triagem, domínio)
 
-React web apps in this stack share shadcn/ui primitives through `packages/ui`.
+## Home 3D
 
-- Change design tokens and global styles in `packages/ui/src/styles/globals.css`
-- Update shared primitives in `packages/ui/src/components/*`
-- Adjust shadcn aliases or style config in `packages/ui/components.json` and `apps/web/components.json`
-
-### Add more shared components
-
-Run this from the project root to add more primitives to the shared UI package:
-
-```bash
-npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
-```
-
-Import shared components like this:
-
-```tsx
-import { Button } from "@cbs-site/ui/components/button";
-```
-
-### Add app-specific blocks
-
-If you want to add app-specific blocks instead of shared primitives, run the shadcn CLI from `apps/web`.
-
-## Git Hooks and Formatting
-
-- Run checks: `bun run check`
-
-## Project Structure
-
-```
-cbs-site/
-├── apps/
-│   ├── web/         # Frontend application (Next.js)
-├── packages/
-│   ├── ui/          # Shared shadcn/ui components and styles
-```
-
-## Available Scripts
-
-- `bun run dev`: Start all applications in development mode
-- `bun run build`: Build all applications
-- `bun run dev:web`: Start only the web application
-- `bun run check-types`: Check TypeScript types across all apps
-- `bun run check`: Run Biome formatting and linting
+Canvas WebGL único (`apps/web/src/components/home/scene3d.tsx`) com grupos ancorados no DOM: a bolha do hero estoura no primeiro scroll e a caixa CBS percorre um caminho líquido em SVG, parando nas estações (frasco, selo, caminhão) até pousar na doca. Em telas <1024px ou com `prefers-reduced-motion`, a jornada desliga e a caixa fica estática na bolha.

@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-19T22:05:23Z",
+  "title": "Design System: CBS — Companhia Brasileira de Saneantes",
+  "extensions": {
+    "colorMeta": {
+      "brand-navy": {
+        "role": "primary",
+        "displayName": "Navy",
+        "canonical": "#0f1c2b",
+        "tonalRamp": ["#142539", "#25456a", "#356297", "#4a80c0", "#77a0d0", "#a0bdde", "#c6d7eb", "#ecf2f8"]
+      },
+      "brand-blue": {
+        "role": "secondary",
+        "displayName": "Azul CBS",
+        "canonical": "#1d9dd8",
+        "tonalRamp": ["#093143", "#115c7e", "#1883b4", "#27a7e2", "#5dbde9", "#8fd1f0", "#bce4f6", "#e9f6fc"]
+      },
+      "brand-aqua": {
+        "role": "tertiary",
+        "displayName": "Aqua",
+        "canonical": "#a8e0f0",
+        "tonalRamp": ["#0b3541", "#15637a", "#1e8eae", "#2eb5db", "#62c7e4", "#92d8ec", "#bee8f4", "#e9f7fb"]
+      },
+      "brand-mist": {
+        "role": "neutral",
+        "displayName": "Brand Mist",
+        "canonical": "#dcf3fa",
+        "tonalRamp": ["#0a3643", "#12647d", "#198fb3", "#29b6e0", "#5ec8e8", "#8fd9ef", "#bce8f5", "#e9f7fc"]
+      },
+      "brand-paper": {
+        "role": "neutral",
+        "displayName": "Brand Paper",
+        "canonical": "#fafbfc",
+        "tonalRamp": ["#1d2630", "#364759", "#4c6680", "#6685a3", "#8ca3ba", "#afbfcf", "#cfd9e2", "#eff2f5"]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "White",
+        "canonical": "#ffffff",
+        "tonalRamp": ["#1a1a1a", "#333333", "#4d4d4d", "#666666", "#999999", "#cccccc", "#e6e6e6", "#f7f7f7"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Sora Display",
+        "purpose": "Reservado a h1/h2 e ao wordmark do rodapé; aplicado pela classe manual .font-display, não por um utilitário de tema Tailwind."
+      },
+      "body": {
+        "displayName": "Body Sans (Inter Variable)",
+        "purpose": "Corpo de texto herdado do token --font-sans de @cbs-site/ui; a variável --font-geist-sans é carregada em layout.tsx mas não está conectada a nenhum seletor."
+      }
+    },
+    "motion": [
+      { "name": "ease-reveal", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Easing de entrada padrão de Reveal/RevealList, 0.45-0.55s." },
+      { "name": "journey-progress", "value": "motionValue compartilhado (0-1)", "purpose": "Único canal de sincronização entre a caixa 3D viajante e o pathLength do caminho líquido SVG." }
+    ],
+    "breakpoints": [
+      { "name": "journey-threshold", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "CTA Primário (WhatsApp)",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Pílula navy com ícone WhatsApp inline; vira azul e sobe 2px no hover.",
+      "html": "<a class=\"ds-btn-primary\" href=\"#\"><svg class=\"ds-btn-icon\" viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347M12.05 24a11.9 11.9 0 0 1-5.68-1.446L.06 24l1.588-5.945A11.86 11.86 0 0 1 .16 11.89C.16 5.335 5.5 0 12.05 0a11.82 11.82 0 0 1 8.412 3.48 11.82 11.82 0 0 1 3.48 8.413C23.94 18.446 18.6 23.78 12.05 23.78Z\"/></svg>Chamar no WhatsApp</a>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 12px; background: #0f1c2b; color: #ffffff; padding: 16px 32px; border-radius: 9999px; font-weight: 600; font-size: 16px; text-decoration: none; box-shadow: 0 10px 20px rgb(15 28 43 / 0.25); transition: background 0.2s, box-shadow 0.2s, transform 0.2s; } .ds-btn-primary:hover, .ds-btn-primary:focus-visible { background: #1d9dd8; box-shadow: 0 14px 24px rgb(29 157 216 / 0.3); transform: translateY(-2px); } .ds-btn-icon { width: 20px; height: 20px; transition: transform 0.2s; } .ds-btn-primary:hover .ds-btn-icon { transform: scale(1.1); }"
+    },
+    {
+      "name": "CTA Secundário (E-mail)",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Pílula fantasma com borda navy translúcida; borda e texto viram azul no hover, sem sombra.",
+      "html": "<a class=\"ds-btn-secondary\" href=\"#\"><svg class=\"ds-btn-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><rect x=\"2\" y=\"4\" width=\"20\" height=\"16\" rx=\"2\"/><path d=\"m22 6-10 7L2 6\"/></svg>Enviar e-mail</a>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; gap: 12px; background: rgb(255 255 255 / 0.6); color: #0f1c2b; border: 1px solid rgb(15 28 43 / 0.15); padding: 16px 32px; border-radius: 9999px; font-weight: 600; font-size: 16px; text-decoration: none; transition: border-color 0.2s, color 0.2s, transform 0.2s; } .ds-btn-secondary:hover, .ds-btn-secondary:focus-visible { border-color: #1d9dd8; color: #1d9dd8; transform: translateY(-2px); }"
+    },
+    {
+      "name": "Chip de Praça",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Pílula informativa (não interativa) usada na lista de praças da malha de fábricas.",
+      "html": "<ul class=\"ds-chip-list\"><li class=\"ds-chip\">São Paulo</li><li class=\"ds-chip\">Minas Gerais</li><li class=\"ds-chip\">Curitiba</li></ul>",
+      "css": ".ds-chip-list { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; margin: 0; } .ds-chip { background: #dcf3fa; color: #0f1c2b; font-weight: 500; font-size: 14px; padding: 6px 16px; border-radius: 9999px; }"
+    },
+    {
+      "name": "Navbar",
+      "kind": "nav",
+      "refersTo": "nav-cta",
+      "description": "Navbar sticky com logo à esquerda e um único CTA de WhatsApp compacto à direita; sem menu de links.",
+      "html": "<header class=\"ds-navbar\"><span class=\"ds-navbar-logo\">CBS</span><a class=\"ds-nav-cta\" href=\"#\">WhatsApp</a></header>",
+      "css": ".ds-navbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; background: rgb(250 251 252 / 0.95); border-bottom: 1px solid rgb(15 28 43 / 0.08); box-shadow: 0 1px 2px rgb(15 28 43 / 0.05); } .ds-navbar-logo { font-family: var(--font-sora), sans-serif; font-weight: 700; color: #0f1c2b; } .ds-nav-cta { display: inline-flex; align-items: center; gap: 8px; background: #0f1c2b; color: #ffffff; font-weight: 600; font-size: 14px; padding: 10px 20px; border-radius: 9999px; text-decoration: none; transition: background 0.2s; } .ds-nav-cta:hover, .ds-nav-cta:focus-visible { background: #1d9dd8; }"
+    },
+    {
+      "name": "Vinheta de Bolha (aproximação 2D)",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Aproximação plana do motivo de vidro 3D (SoapBubble em react-three-fiber) que envelopa cada objeto de estação — usada aqui só como referência visual estática do halo/vidro, não como substituto do canvas WebGL real.",
+      "html": "<div class=\"ds-bubble\"><span class=\"ds-bubble-glare\"></span></div>",
+      "css": ".ds-bubble { position: relative; width: 160px; height: 160px; border-radius: 9999px; background: radial-gradient(circle at 30% 25%, rgb(255 255 255 / 0.85), rgb(191 233 247 / 0.35) 45%, rgb(29 157 216 / 0.12) 80%); backdrop-filter: blur(2px); box-shadow: inset 0 0 24px rgb(255 255 255 / 0.6), 0 12px 28px rgb(15 28 43 / 0.12); } .ds-bubble-glare { position: absolute; top: 18%; left: 22%; width: 30%; height: 18%; border-radius: 9999px; background: rgb(255 255 255 / 0.8); filter: blur(4px); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "A Bolha-Pacote",
+    "overview": "A home é a jornada de um pacote: nasce numa bolha de sabão de vidro no hero e desce a página até pousar no CD do Mercado Livre. O mundo é quase todo branco (#FAFBFC) — decisão de marca pinada, porque \"empresa de limpeza precisa parecer limpa\" — e os únicos sólidos que aparecem são as bolhas de vidro e a caixa de papelão com fita azul; tudo o resto é tinta plana (navy/azul) sobre papel. A página não usa cards com sombra nem grades de benefícios: o storytelling acontece num único canvas WebGL fixo, ancorado a elementos do DOM, com um traço líquido em SVG que persegue a caixa enquanto ela viaja. O mundo é implementado, não só desenhado: um Scene3D fixo de tela cheia renderiza bolhas de sabão sobre grupos que leem a posição de elementos DOM marcados a cada frame — a cena 3D nunca tem layout próprio, ela segue a página. Um único valor compartilhado (journeyProgress) sincroniza a caixa 3D viajante com o preenchimento do traço SVG, então os dois nunca dessincronizam. Essa coreografia só roda em telas ≥1024px sem prefers-reduced-motion; abaixo disso a página degrada para uma versão estática, com a caixa parada dentro da bolha do hero.",
+    "keyCharacteristics": [
+      "Superfície branca dominante (#FAFBFC/#FFFFFF); navy e azul são tinta de acento, nunca fundo de seção inteira.",
+      "Um único canvas WebGL fixo por trás de toda a página, ancorado a marcadores DOM (data-s-anchor/data-j-anchor).",
+      "Todo objeto 3D de estação vive dentro de uma bolha de vidro — nunca aparece nu.",
+      "Raio binário: pílula (rounded-full) ou nenhum raio; sem meio-termo.",
+      "Sem box-shadow em contêineres de conteúdo; profundidade vem do vidro WebGL e de névoas aqua radiais.",
+      "Título sempre em Sora (.font-display); corpo de texto sempre no sans herdado do pacote @cbs-site/ui."
+    ],
+    "rules": [
+      { "name": "A Regra do Branco Dominante", "body": "Nenhuma seção da home tem fundo de cor sólida navy/azul/aqua; essas três cores existem só como tinta ou como névoa translúcida sobre o papel. É um compromisso de marca pinado no PRODUCT.md.", "section": "colors" },
+      { "name": "A Regra dos Dois Brancos", "body": "Brand Paper (#fafbfc) é a tela da página; branco puro (#ffffff) marca o que deve ler como 'acima' da tela — rodapé, CTA fantasma, texto sobre navy/azul.", "section": "colors" },
+      { "name": "A Regra do Display Só em Título", "body": ".font-display (Sora) aparece só em h1/h2 e no wordmark do rodapé; corpo e rótulos ficam sempre no sans herdado.", "section": "typography" },
+      { "name": "A Regra da Classe Manual", "body": "Sora é aplicado pela classe CSS manual .font-display, não por um utilitário de tema Tailwind — esse caminho falhou neste build.", "section": "typography" },
+      { "name": "A Regra do Limiar da Jornada", "body": "A coreografia de scroll só roda em telas ≥1024px sem prefers-reduced-motion; abaixo disso a caixa fica parada na bolha do hero e o SVG do caminho não renderiza.", "section": "elevation" },
+      { "name": "A Regra do Sem-Sombra-em-Superfície-Plana", "body": "Nenhum contêiner de conteúdo recebe box-shadow; sombra é reservada às pílulas de CTA e à divisória quase invisível da navbar.", "section": "elevation" },
+      { "name": "A Regra do Raio Binário", "body": "Toda forma 2D é pílula completa ou sem raio nenhum; rounded-md/lg/xl não aparecem em lugar nenhum da home.", "section": "elevation" },
+      { "name": "A Regra do Envelope de Bolha", "body": "Nenhum objeto 3D de estação é renderizado fora de uma SoapBubble; a bolha é a moldura obrigatória.", "section": "elevation" },
+      { "name": "A Regra do Progresso Único", "body": "journeyProgress é o único canal de coreografia entre a cena 3D e o SVG; um novo elemento amarrado ao scroll deve ler/escrever esse valor, não criar um segundo listener.", "section": "elevation" },
+      { "name": "A Regra da Suavização", "body": "Toda entrada de seção usa cubic-bezier(0.16, 1, 0.3, 1), 0.45-0.55s, stagger de 60ms por item; com prefers-reduced-motion vira fade simples sem deslocamento em y.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do manter a página dominantemente branca (brand-paper/white); navy e azul entram como tinta e acento, nunca como fundo de seção inteira.",
+      "Do envolver todo objeto 3D de estação numa SoapBubble de vidro — nunca renderizar o modelo nu.",
+      "Do ancorar a névoa (mist-side) do mesmo lado do objeto 3D da seção, nunca do lado do texto.",
+      "Do usar rounded-full para qualquer elemento interativo novo e nenhum raio para contêineres de texto.",
+      "Do respeitar prefers-reduced-motion: qualquer animação nova precisa de um fallback estático.",
+      "Do aplicar o título display com a classe literal font-display, não um utilitário Tailwind de fonte."
+    ],
+    "donts": [
+      "Don't adicionar box-shadow a contêineres de conteúdo; sombra é só para pílulas de CTA e a divisória quase invisível da navbar.",
+      "Don't introduzir um raio intermediário (rounded-md/lg/xl); a linguagem de forma 2D é binária.",
+      "Don't depender da variável --font-geist-sans para o corpo de texto — ela não está conectada a nenhum seletor; o corpo renderiza hoje em Inter Variable.",
+      "Don't usar marrom kraft (textura da caixa de papelão) como cor de UI, texto ou fundo — é um tom de material fotográfico do objeto 3D, não um token de marca."
+    ]
+  }
+}

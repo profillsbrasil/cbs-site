@@ -21,6 +21,10 @@ Labels canônicos do `/triage`, sem renomear. See `docs/agents/triage-labels.md`
 
 Single-context: `CONTEXT.md` na raiz + `docs/adr/`. See `docs/agents/domain.md`.
 
+### Produto e design
+
+Verdade do produto em `apps/web/PRODUCT.md`; design system construído em `apps/web/DESIGN.md`. Ler antes de mexer em UI.
+
 ## Ultracite Code Standards
 
 This project uses **Ultracite**, a zero-config preset that enforces strict code quality standards through automated formatting and linting.
