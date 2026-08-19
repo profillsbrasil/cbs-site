@@ -13,6 +13,10 @@ Site institucional (divulgação de marca, só português, sem backend). Monorep
 
 Issues vivem no GitHub (`profillsbrasil/cbs-site`), via `gh` CLI. See `docs/agents/issue-tracker.md`.
 
+### Triage labels
+
+Labels canônicos do `/triage`, sem renomear. See `docs/agents/triage-labels.md`.
+
 ### Domain docs
 
 Single-context: `CONTEXT.md` na raiz + `docs/adr/`. See `docs/agents/domain.md`.
