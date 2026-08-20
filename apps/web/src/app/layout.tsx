@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Sora } from "next/font/google";
 
+import { AppMotionConfig } from "@/components/motion-config";
+
 import "../index.css";
 
 const sora = Sora({
@@ -35,7 +37,7 @@ export default function RootLayout({
 				<script id="direction-contract" type="text/x-impeccable-contract">
 					{DIRECTION_CONTRACT}
 				</script>
-				{children}
+				<AppMotionConfig>{children}</AppMotionConfig>
 			</body>
 		</html>
 	);
