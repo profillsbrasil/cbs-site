@@ -267,7 +267,9 @@ const BAU_FRENTE_X = BAU_X + BAU_COMPRIMENTO / 2;
 const BAU_TRAS_X = BAU_X - BAU_COMPRIMENTO / 2;
 
 const CABINE_COMPRIMENTO = 0.5;
-const CABINE_ALTURA = 0.6;
+// Teto da cabine a ~80% do teto do baú, como num Tector (cabine baixa, mas
+// não um degrau de meio caminhão).
+const CABINE_ALTURA = 0.74;
 const CABINE_LARGURA = 0.88;
 const CABINE_BASE_Y = 0.2;
 const CABINE_X = BAU_FRENTE_X + 0.06 + CABINE_COMPRIMENTO / 2;
@@ -278,6 +280,18 @@ const WHEEL_Z = BAU_LARGURA / 2 - 0.06;
 const RODA_FRENTE_X = CABINE_X + 0.02;
 const RODA_TRAS_A_X = BAU_X - 0.18;
 const RODA_TRAS_B_X = BAU_X - 0.52;
+
+/** Altura total do caminhão (chão em y=0 até o teto do baú). Quem ancora o
+ * modelo usa isto como `unitHeight` para o chão cair exatamente na borda
+ * inferior da âncora. */
+export const CAMINHAO_ALTURA = BAU_Y + BAU_ALTURA / 2;
+
+// Chassi: longarina entre a traseira do baú e a frente da cabine — nunca
+// sobrando para fora do corpo.
+const CHASSI_TRAS_X = BAU_TRAS_X + 0.04;
+const CHASSI_FRENTE_X = CABINE_FRENTE_X - 0.06;
+const CHASSI_COMPRIMENTO = CHASSI_FRENTE_X - CHASSI_TRAS_X;
+const CHASSI_X = (CHASSI_FRENTE_X + CHASSI_TRAS_X) / 2;
 
 /** Ponto-alvo dentro do baú (posição local do grupo raiz), perto do centro
  * e um pouco à frente da porta traseira. */
@@ -551,13 +565,18 @@ function Porta({ ref }: { ref?: Ref<Group> }) {
 	);
 }
 
-/** Chassi: longarina escura, tanque e degrau. */
+/** Chassi: longarina escura contida no corpo, para-choque traseiro e tanque. */
 function Chassi() {
 	return (
 		<group>
-			<mesh position={[0.05, CHASSI_Y, 0]}>
-				<boxGeometry args={[2.15, 0.09, BAU_LARGURA * 0.6]} />
+			<mesh position={[CHASSI_X, CHASSI_Y, 0]}>
+				<boxGeometry args={[CHASSI_COMPRIMENTO, 0.08, BAU_LARGURA * 0.6]} />
 				<meshStandardMaterial color="#13202d" roughness={0.6} />
+			</mesh>
+			{/* Para-choque traseiro: barra baixa sob a porta, na largura do baú */}
+			<mesh position={[BAU_TRAS_X + 0.02, CHASSI_Y - 0.06, 0]}>
+				<boxGeometry args={[0.04, 0.05, BAU_LARGURA * 0.9]} />
+				<meshStandardMaterial color="#c3ced6" roughness={0.45} />
 			</mesh>
 			<mesh
 				position={[BAU_FRENTE_X - 0.1, CHASSI_Y - 0.03, WHEEL_Z * 0.8]}

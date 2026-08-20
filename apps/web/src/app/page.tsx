@@ -219,10 +219,17 @@ function Chegada() {
 			    palco inteiro abaixo dos CTAs para a coreografia final. */}
 			<div
 				aria-hidden
-				className="relative mx-auto mt-16 h-36 w-full max-w-xl translate-y-14"
-				data-j-anchor="doca"
+				className="relative mx-auto mt-16 h-40 w-full max-w-xl"
 				data-s-anchor="caminhao-doca"
-			/>
+			>
+				{/* Marco da caixa separado da âncora do caminhão: a escala da
+				    caixa segue o tamanho do marco, e ela precisa chegar pequena
+				    (na traseira, à altura da porta) para caber no baú. */}
+				<div
+					className="absolute top-[30%] right-[12%] h-12 w-12"
+					data-j-anchor="doca"
+				/>
+			</div>
 			{/* Asfalto: o chão do caminhão e a divisa com o rodapé. */}
 			<div
 				aria-hidden

@@ -22,6 +22,7 @@ import {
 	smoothstep,
 } from "./scene-bits";
 import {
+	CAMINHAO_ALTURA,
 	Caminhao,
 	CaminhaoEntrega,
 	type CaminhaoParts,
@@ -77,7 +78,6 @@ const DOCK_HANDOFF_END = 0.985;
 const DOCK_SETTLE_START = 0.985;
 const DOCK_SETTLE_END = 1;
 
-const DOCK_UNIT_HEIGHT = 1.1; // altura real do caminhão (contrato: ~1.1)
 // Posição local de partida. O grupo da doca é girado 180° em Y (frente do
 // caminhão para a esquerda), então x local negativo = fora da tela à direita.
 const DOCK_TRUCK_ENTRY_X = -4;
@@ -86,7 +86,7 @@ const DOCK_DOOR_OPEN_ANGLE = 1.6;
 // aqui para converter deslocamento linear em giro angular da roda).
 const DOCK_WHEEL_RADIUS = 0.16;
 const DOCK_DRIVE_BOUNCE_AMPLITUDE = 0.035;
-const DOCK_IDLE_BOUNCE_AMPLITUDE = 0.012;
+const DOCK_IDLE_BOUNCE_AMPLITUDE = 0; // parado no asfalto: sem flutuar
 const DOCK_BOUNCE_FREQUENCY = 7;
 const DOCK_SETTLE_SQUASH_PEAK = 0.1;
 const DOCK_HEADLIGHT_FLASH_PEAK = 0.4; // emissiveIntensity 0.6 → 1 → 0.6
@@ -95,7 +95,7 @@ const DOCK_HEADLIGHT_HEX = "fff3d6"; // cor dos faróis em FrenteCaminhao
 // Handoff da caixa: o quanto ela desvia do pouso na âncora "doca" para
 // dentro do baú (dockCargoWorld), com um arco por cima e encolhendo ao
 // cruzar a porta.
-const DOCK_CARGO_SHRINK = 0.45;
+const DOCK_CARGO_SHRINK = 0.55;
 const DOCK_ARC_HEIGHT = 0.4;
 
 // Reação das bolhas de estação à passagem da caixa: tudo lido de
@@ -1055,7 +1055,8 @@ function computeDockBounceY(p: number, elapsed: number): number {
 	const amplitude =
 		DOCK_DRIVE_BOUNCE_AMPLITUDE * driveEnvelope +
 		DOCK_IDLE_BOUNCE_AMPLITUDE * idleEnvelope;
-	return Math.sin(elapsed * DOCK_BOUNCE_FREQUENCY) * amplitude;
+	// Só para cima (0..2×amplitude): com asfalto embaixo, a roda nunca afunda.
+	return (1 + Math.sin(elapsed * DOCK_BOUNCE_FREQUENCY)) * amplitude;
 }
 
 /** Pulso de squash-and-stretch (escala nos 3 eixos) no instante do
@@ -1160,9 +1161,11 @@ function DocaFinal() {
 	return (
 		<AnchoredGroup
 			selector='[data-s-anchor="caminhao-doca"]'
-			unitHeight={DOCK_UNIT_HEIGHT}
+			unitHeight={CAMINHAO_ALTURA}
 		>
-			<group rotation={[0, Math.PI, 0]}>
+			{/* Chão do modelo (y=0) na borda inferior da âncora: o asfalto do
+			    DOM começa exatamente aí, então as rodas tocam a pista. */}
+			<group position={[0, -CAMINHAO_ALTURA / 2, 0]} rotation={[0, Math.PI, 0]}>
 				<CaminhaoEntrega onParts={handleParts} />
 			</group>
 		</AnchoredGroup>
