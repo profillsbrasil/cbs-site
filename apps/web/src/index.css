@@ -98,3 +98,15 @@
 		opacity: 1;
 	}
 }
+
+/* Asfalto da doca: faixa navy com a linha tracejada central em aqua. */
+.road {
+	background:
+		repeating-linear-gradient(
+			90deg,
+			var(--color-brand-aqua) 0 2.5rem,
+			transparent 2.5rem 4.5rem
+		)
+		center / 100% 3px no-repeat,
+		var(--color-brand-navy);
+}

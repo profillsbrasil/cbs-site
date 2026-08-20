@@ -40,6 +40,7 @@ export const JOURNEY_ANCHORS = [
 ] as const;
 
 const FOCUS_LINE = 0.52;
+const CAMERA_Z = 8;
 const DROPLET_COUNT = 16;
 const POP_SCROLL_FRACTION = 0.45;
 const VIEW_MARGIN = 240;
@@ -77,7 +78,9 @@ const DOCK_SETTLE_START = 0.985;
 const DOCK_SETTLE_END = 1;
 
 const DOCK_UNIT_HEIGHT = 1.1; // altura real do caminhão (contrato: ~1.1)
-const DOCK_TRUCK_ENTRY_X = 4; // posição local de partida (fora da tela, à direita)
+// Posição local de partida. O grupo da doca é girado 180° em Y (frente do
+// caminhão para a esquerda), então x local negativo = fora da tela à direita.
+const DOCK_TRUCK_ENTRY_X = -4;
 const DOCK_DOOR_OPEN_ANGLE = 1.6;
 // Mesmo raio de RODA_RAIO em station-models.tsx (não exportado — só usado
 // aqui para converter deslocamento linear em giro angular da roda).
@@ -658,7 +661,7 @@ function JourneyBox({ journeyActive }: { journeyActive: boolean }) {
 	);
 }
 
-const MICRO_COUNT = 22;
+const MICRO_COUNT = 34;
 
 interface MicroBubble {
 	id: number;
@@ -692,13 +695,13 @@ function makeMicroBubbles(): MicroBubble[] {
  * Campo de microbolhas ambiente: sobem devagar pela tela inteira e
  * reaparecem embaixo — a textura de limpeza que tira o branco do vazio.
  */
-const MICRO_POP_RADIUS = 0.85;
-const MICRO_POP_SPEED = 3.2;
+const MICRO_POP_RADIUS = 1.05;
+const MICRO_POP_SPEED = 2.6;
 const MICRO_BASE_OPACITY = 0.35;
 
 interface PoppableMesh {
 	material: { opacity: number };
-	position: { x: number; y: number };
+	position: { x: number; y: number; z: number };
 	scale: { setScalar: (s: number) => void };
 }
 
@@ -720,13 +723,17 @@ function updateMicroPop(
 		if (!boxActive.current) {
 			return 0;
 		}
-		const dx = mesh.position.x - boxWorldPosition.x;
-		const dy = mesh.position.y - boxWorldPosition.y;
+		// As microbolhas vivem atrás do plano da caixa (z < 0): projeta a
+		// posição delas no plano z=0 pela câmera, senão a distância "de tela"
+		// compara coordenadas de planos diferentes e a caixa nunca acerta.
+		const depth = CAMERA_Z / (CAMERA_Z - mesh.position.z);
+		const dx = mesh.position.x * depth - boxWorldPosition.x;
+		const dy = mesh.position.y * depth - boxWorldPosition.y;
 		return Math.hypot(dx, dy) < MICRO_POP_RADIUS ? Number.EPSILON : 0;
 	}
 	// Estouro: incha rápido enquanto some, depois renasce embaixo
 	const next = Math.min(pop + delta * MICRO_POP_SPEED, 1);
-	mesh.scale.setScalar(data.r * (1 + next * 1.6));
+	mesh.scale.setScalar(data.r * (1 + next * 2.2));
 	mesh.material.opacity = MICRO_BASE_OPACITY * (1 - next);
 	if (next >= 1) {
 		mesh.position.y = -halfH;
@@ -1155,7 +1162,9 @@ function DocaFinal() {
 			selector='[data-s-anchor="caminhao-doca"]'
 			unitHeight={DOCK_UNIT_HEIGHT}
 		>
-			<CaminhaoEntrega onParts={handleParts} />
+			<group rotation={[0, Math.PI, 0]}>
+				<CaminhaoEntrega onParts={handleParts} />
+			</group>
 		</AnchoredGroup>
 	);
 }
@@ -1171,7 +1180,7 @@ export function Scene3D() {
 	return (
 		<div aria-hidden className="pointer-events-none fixed inset-0 z-10">
 			<Canvas
-				camera={{ fov: 35, position: [0, 0, 8] }}
+				camera={{ fov: 35, position: [0, 0, CAMERA_Z] }}
 				dpr={[1, 1.5]}
 				gl={{ alpha: true, antialias: true }}
 			>

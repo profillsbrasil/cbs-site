@@ -187,7 +187,7 @@ function Station({
 
 function Chegada() {
 	return (
-		<section className="relative mx-auto max-w-6xl px-6 pt-32 pb-16 text-center">
+		<section className="relative mx-auto max-w-6xl px-6 pt-32 text-center">
 			<div className="mist-final absolute inset-y-0 left-1/2 w-screen -translate-x-1/2" />
 			{/* Curva de chegada: rio e caixa descem pela margem direita e só
 			    então entram na doca — nunca por cima do título. */}
@@ -219,9 +219,14 @@ function Chegada() {
 			    palco inteiro abaixo dos CTAs para a coreografia final. */}
 			<div
 				aria-hidden
-				className="mx-auto mt-20 h-36 w-full max-w-xl"
+				className="relative mx-auto mt-16 h-36 w-full max-w-xl translate-y-14"
 				data-j-anchor="doca"
 				data-s-anchor="caminhao-doca"
+			/>
+			{/* Asfalto: o chão do caminhão e a divisa com o rodapé. */}
+			<div
+				aria-hidden
+				className="road relative left-1/2 z-20 h-12 w-screen -translate-x-1/2"
 			/>
 		</section>
 	);
@@ -229,7 +234,7 @@ function Chegada() {
 
 function Footer() {
 	return (
-		<footer className="relative z-20 border-brand-navy/8 border-t bg-white">
+		<footer className="relative z-20 bg-white">
 			<div className="mx-auto flex max-w-6xl flex-col items-center gap-6 px-6 py-12 text-center sm:flex-row sm:justify-between sm:text-left">
 				<div>
 					<p className="font-bold font-display text-brand-navy text-lg">
