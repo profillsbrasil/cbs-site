@@ -35,6 +35,7 @@ export const JOURNEY_ANCHORS = [
 	"modelo",
 	"qualidade",
 	"malha",
+	"chegada",
 	"doca",
 ] as const;
 
@@ -57,6 +58,9 @@ const BOX_ANGLE_SMOOTH_TIME = 0.3;
 const BOX_YAW_LIMIT = 0.6;
 const BOX_ROLL_FACTOR = 8;
 const BOX_ROLL_LIMIT = 0.35;
+// Arco da travessia: ganho sobre o x médio do trecho e amplitude máxima.
+const ARC_OUTWARD_GAIN = 0.35;
+const ARC_MAX = 0.75;
 
 // Coreografia final "caixa entra no caminhão", inteira dirigida por
 // journeyProgress (0-1) — cada fase é uma função pura de `p`, nunca um
@@ -424,6 +428,22 @@ function journeyFraction(
 	return (before + t * (weights[segment] ?? 0)) / total;
 }
 
+/**
+ * Quando a página não tem scroll suficiente para a doca alcançar a linha de
+ * foco, a jornada travaria antes de 1. Aqui a linha de foco desce na mesma
+ * medida em que o scroll restante some — no fim da página ela coincide com a
+ * doca e o progresso fecha em 1. Contínuo e reversível.
+ */
+function endOfScrollFocus(focusY: number, lastScreenY: number): number {
+	const remaining =
+		document.documentElement.scrollHeight - window.innerHeight - window.scrollY;
+	const gap = lastScreenY - focusY;
+	if (gap <= 0 || remaining >= gap) {
+		return focusY;
+	}
+	return focusY + (gap - Math.max(remaining, 0));
+}
+
 function resolveTarget(
 	samples: AnchorSample[],
 	focusY: number,
@@ -447,8 +467,12 @@ function resolveTarget(
 			const raw = (focusY - a.screenY) / (b.screenY - a.screenY);
 			const t = smoothstep(0.12, 0.88, raw);
 			out.lerpVectors(a.world, b.world, t);
-			// Leve arco lateral para a travessia não ser reta
-			out.x += Math.sin(t * Math.PI) * (i % 2 === 0 ? -0.75 : 0.75);
+			// Arco lateral sempre para FORA (lado oposto ao centro da página,
+			// onde moram as colunas de texto). Numa travessia de um lado ao
+			// outro o ponto médio fica perto do centro e o arco some sozinho.
+			const midX = (a.world.x + b.world.x) / 2;
+			const bulge = MathUtils.clamp(midX * ARC_OUTWARD_GAIN, -ARC_MAX, ARC_MAX);
+			out.x += Math.sin(t * Math.PI) * bulge;
 			return {
 				progress: journeyFraction(weights, i, t),
 				scale: a.scale + (b.scale - a.scale) * t,
@@ -553,7 +577,10 @@ function JourneyBox({ journeyActive }: { journeyActive: boolean }) {
 			return;
 		}
 
-		const focusY = size.height * FOCUS_LINE;
+		const focusY = endOfScrollFocus(
+			size.height * FOCUS_LINE,
+			(samples.at(-1) as AnchorSample).screenY
+		);
 		const result = resolveTarget(samples, focusY, target.current);
 		journeyProgress.set(result.progress);
 		const handoff = applyDockHandoff(
@@ -751,12 +778,16 @@ function MicroBubbles() {
 					position={[bubble.x, bubble.y * 3, bubble.z]}
 					scale={bubble.r}
 				>
-					<sphereGeometry args={[1, 12, 12]} />
+					<sphereGeometry args={[1, 16, 16]} />
 					<meshPhysicalMaterial
 						clearcoat={1}
-						color="#cdeef9"
-						opacity={0.35}
-						roughness={0.1}
+						clearcoatRoughness={0.05}
+						color="#ffffff"
+						ior={1.15}
+						opacity={MICRO_BASE_OPACITY}
+						roughness={0.02}
+						thickness={0.02}
+						transmission={1}
 						transparent
 					/>
 				</mesh>

@@ -66,9 +66,9 @@ function Navbar() {
 					<Image
 						alt="CBS — Companhia Brasileira de Saneantes"
 						className="h-12 w-auto"
-						height={63}
+						height={62}
 						priority
-						src="/cbs-logo.jpeg"
+						src="/cbs-logo.png"
 						width={128}
 					/>
 				</a>
@@ -94,27 +94,33 @@ function Hero() {
 		>
 			<div className="mist-hero absolute inset-y-0 left-1/2 w-screen -translate-x-1/2" />
 			<div className="relative z-20">
-				<Reveal>
-					<h1 className="max-w-xl font-bold font-display text-6xl text-brand-navy leading-[1.02] tracking-tight sm:text-7xl">
+				<div className="rise">
+					<h1 className="max-w-xl font-bold font-display text-5xl text-brand-navy leading-[1.02] tracking-tight sm:text-7xl">
 						Sua marca,
 						<br />
 						<span className="text-brand-blue">nossa fábrica.</span>
 					</h1>
-				</Reveal>
-				<Reveal delay={0.12}>
+				</div>
+				<div
+					className="rise"
+					style={{ "--rise-delay": "120ms" } as React.CSSProperties}
+				>
 					<p className="mt-7 max-w-lg text-brand-navy/75 text-xl leading-relaxed">
 						A CBS fabrica seus saneantes com autorização ANVISA e envia de
 						fábricas ao lado dos centros de distribuição do Mercado Livre. Você
 						vende; <strong className="text-brand-navy">o frete despenca</strong>
 						.
 					</p>
-				</Reveal>
-				<Reveal delay={0.22}>
+				</div>
+				<div
+					className="rise"
+					style={{ "--rise-delay": "220ms" } as React.CSSProperties}
+				>
 					<div className="mt-10 flex flex-wrap items-center gap-4">
 						<CtaWhatsApp label="Chamar no WhatsApp" />
 						<CtaEmail />
 					</div>
-				</Reveal>
+				</div>
 			</div>
 			<div
 				className="relative h-[420px] lg:h-[560px]"
@@ -163,18 +169,18 @@ function Station({
 			<div
 				className={`relative z-10 flex justify-center ${flip ? "lg:order-1" : ""}`}
 			>
-				<div
-					aria-hidden
-					className="h-72 w-72 sm:h-96 sm:w-96"
-					data-s-anchor={variant}
-				/>
+				<div aria-hidden className="relative h-72 w-72 sm:h-96 sm:w-96">
+					<div className="absolute inset-0" data-s-anchor={variant} />
+					{/* Parada da caixa: logo abaixo da bolha, na coluna dela — a
+					    travessia nunca atravessa a coluna de texto. */}
+					<div
+						className={`absolute top-full hidden h-24 w-24 -translate-y-1/2 lg:block ${
+							flip ? "-left-10" : "-right-10"
+						}`}
+						data-j-anchor={anchor}
+					/>
+				</div>
 			</div>
-			<div
-				className={`absolute top-1/2 hidden h-24 w-24 -translate-y-1/2 lg:block ${
-					flip ? "left-[44%]" : "left-[58%]"
-				}`}
-				data-j-anchor={anchor}
-			/>
 		</section>
 	);
 }
@@ -183,8 +189,15 @@ function Chegada() {
 	return (
 		<section className="relative mx-auto max-w-6xl px-6 pt-32 pb-16 text-center">
 			<div className="mist-final absolute inset-y-0 left-1/2 w-screen -translate-x-1/2" />
+			{/* Curva de chegada: rio e caixa descem pela margem direita e só
+			    então entram na doca — nunca por cima do título. */}
+			<div
+				aria-hidden
+				className="absolute right-[4%] bottom-44 hidden h-24 w-24 lg:block"
+				data-j-anchor="chegada"
+			/>
 			<Reveal>
-				<h2 className="relative z-20 mx-auto max-w-2xl font-bold font-display text-5xl text-brand-navy leading-tight tracking-tight sm:text-6xl">
+				<h2 className="relative z-20 mx-auto max-w-2xl font-bold font-display text-4xl text-brand-navy leading-tight tracking-tight sm:text-6xl">
 					Entregue no CD.
 					<br />
 					<span className="text-brand-blue">Pronto para vender.</span>
@@ -299,7 +312,7 @@ export default function Home() {
 					</Reveal>
 					<RevealList
 						className="mt-7 flex max-w-md flex-wrap gap-2"
-						itemClassName="rounded-full bg-brand-mist px-4 py-1.5 font-medium text-brand-navy text-sm"
+						itemClassName="rounded-full bg-brand-mist px-4 py-1.5 font-medium text-brand-navy text-sm transition-[transform,background-color,color] duration-200 hover:-translate-y-0.5 hover:bg-brand-blue hover:text-white motion-reduce:transition-none motion-reduce:hover:translate-y-0"
 						items={PRACAS}
 					/>
 				</Station>
