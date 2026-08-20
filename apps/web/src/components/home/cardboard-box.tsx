@@ -4,97 +4,205 @@
 "use no memo";
 // biome-ignore-end lint: diretiva do React Compiler
 
-import { useMemo } from "react";
+import { RoundedBox, useTexture } from "@react-three/drei";
+import { useEffect, useMemo } from "react";
 import {
 	CanvasTexture,
-	MeshStandardMaterial,
+	RepeatWrapping,
 	SRGBColorSpace,
 	type Texture,
 } from "three";
 
-const TEX_SIZE = 256;
-const KRAFT = "#c89b6a";
-const KRAFT_SHADE = "#b8895a";
 const TAPE = "#1d9dd8";
+const CREASE = "#b8895a";
 
-function paintKraft(ctx: CanvasRenderingContext2D) {
-	ctx.fillStyle = KRAFT;
-	ctx.fillRect(0, 0, TEX_SIZE, TEX_SIZE);
-	ctx.strokeStyle = KRAFT_SHADE;
-	ctx.lineWidth = 2;
-	for (let y = 24; y < TEX_SIZE; y += 48) {
-		ctx.beginPath();
-		ctx.moveTo(0, y);
-		ctx.lineTo(TEX_SIZE, y);
-		ctx.stroke();
-	}
-}
+// PBR ambientCG "Cardboard004" (CC0, 1K) — color/normal/roughness reais.
+const TEXTURE_URLS = {
+	map: "/textures/cardboard/color.webp",
+	normalMap: "/textures/cardboard/normal.webp",
+	roughnessMap: "/textures/cardboard/roughness.webp",
+};
+useTexture.preload(Object.values(TEXTURE_URLS));
 
-function paintTape(ctx: CanvasRenderingContext2D, vertical: boolean) {
-	const band = TEX_SIZE * 0.22;
-	const start = (TEX_SIZE - band) / 2;
-	ctx.fillStyle = TAPE;
-	if (vertical) {
-		ctx.fillRect(start, 0, band, TEX_SIZE);
-	} else {
-		ctx.fillRect(0, start, TEX_SIZE, band);
-	}
-	ctx.fillStyle = "#ffffff";
-	ctx.font = 'bold 26px Sora, "Sora Fallback", sans-serif';
-	ctx.textAlign = "center";
-	ctx.textBaseline = "middle";
-	if (vertical) {
-		ctx.save();
-		ctx.translate(TEX_SIZE / 2, TEX_SIZE / 2);
-		ctx.rotate(-Math.PI / 2);
-		ctx.fillText("CBS", 0, 0);
-		ctx.restore();
-	} else {
-		ctx.fillText("CBS", TEX_SIZE / 2, TEX_SIZE / 2);
-	}
-}
+const LABEL_W = 512;
+const LABEL_H = 128;
 
-function makeFaceTexture(kind: "plain" | "tape-v" | "tape-h"): Texture {
+/**
+ * Rótulo "CBS" branco impresso na fita. `vertical` gira o texto para as
+ * corridas de fita que descem pelas faces (lê de lado, como fita real).
+ */
+function makeTapeLabel(vertical: boolean): Texture {
 	const canvas = document.createElement("canvas");
-	canvas.width = TEX_SIZE;
-	canvas.height = TEX_SIZE;
+	canvas.width = vertical ? LABEL_H : LABEL_W;
+	canvas.height = vertical ? LABEL_W : LABEL_H;
 	const ctx = canvas.getContext("2d");
 	if (ctx) {
-		paintKraft(ctx);
-		if (kind !== "plain") {
-			paintTape(ctx, kind === "tape-v");
+		ctx.fillStyle = TAPE;
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+		ctx.fillStyle = "#ffffff";
+		ctx.font = 'bold 68px Sora, "Sora Fallback", sans-serif';
+		ctx.textAlign = "center";
+		ctx.textBaseline = "middle";
+		if (vertical) {
+			ctx.save();
+			ctx.translate(canvas.width / 2, canvas.height / 2);
+			ctx.rotate(-Math.PI / 2);
+			ctx.fillText("CBS", 0, 4);
+			ctx.restore();
+		} else {
+			ctx.fillText("CBS", canvas.width / 2, canvas.height / 2 + 4);
 		}
 	}
 	const texture = new CanvasTexture(canvas);
 	texture.colorSpace = SRGBColorSpace;
-	texture.anisotropy = 4;
 	return texture;
 }
 
+type TapeStripProps = Readonly<{
+	axis: "x" | "z";
+	width: number;
+	height: number;
+	depth: number;
+	size: number;
+	labelMap?: Texture;
+	sideLabelMap?: Texture;
+}>;
+
 /**
- * A caixa de papelão da CBS: kraft fosco com fita azul cruzando o topo e as
- * laterais, "CBS" impresso na fita — o pacote que viaja a página inteira.
+ * Uma faixa de fita: três caixas achatadas (topo + duas laterais opostas)
+ * que cruzam a quina viva do papelão, como fita de embalagem real — não
+ * é textura na caixa, é geometria própria por cima.
  */
-export function CardboardBox({ size = 1 }: { size?: number }) {
-	const materials = useMemo(() => {
-		const plain = makeFaceTexture("plain");
-		const tapeV = makeFaceTexture("tape-v");
-		const tapeH = makeFaceTexture("tape-h");
-		const common = { metalness: 0, roughness: 0.85 };
-		// Ordem das faces do BoxGeometry: +x, -x, +y, -y, +z, -z
-		return [
-			new MeshStandardMaterial({ ...common, map: tapeV }),
-			new MeshStandardMaterial({ ...common, map: tapeV }),
-			new MeshStandardMaterial({ ...common, map: tapeH }),
-			new MeshStandardMaterial({ ...common, map: plain }),
-			new MeshStandardMaterial({ ...common, map: tapeV }),
-			new MeshStandardMaterial({ ...common, map: tapeV }),
-		];
-	}, []);
+function TapeStrip({
+	axis,
+	width,
+	height,
+	depth,
+	size,
+	labelMap,
+	sideLabelMap,
+}: TapeStripProps) {
+	const thickness = 0.02 * size;
+	const lift = 0.004 * size;
+	const sideHeight = height * 0.96;
+	const along = (axis === "x" ? width : depth) * 0.98;
+	const band = (axis === "x" ? depth : width) * 0.22;
+	const sideOffset = (axis === "x" ? width : depth) / 2 + lift;
+
+	const topArgs: [number, number, number] =
+		axis === "x" ? [along, thickness, band] : [band, thickness, along];
+	const sideArgs: [number, number, number] =
+		axis === "x"
+			? [thickness, sideHeight, band]
+			: [band, sideHeight, thickness];
+	const sidePositionA: [number, number, number] =
+		axis === "x" ? [sideOffset, 0, 0] : [0, 0, sideOffset];
+	const sidePositionB: [number, number, number] =
+		axis === "x" ? [-sideOffset, 0, 0] : [0, 0, -sideOffset];
 
 	return (
-		<mesh castShadow material={materials} scale={size}>
-			<boxGeometry args={[1, 0.82, 1]} />
-		</mesh>
+		<group>
+			<mesh castShadow position={[0, height / 2 + lift, 0]}>
+				<boxGeometry args={topArgs} />
+				<meshPhysicalMaterial
+					clearcoat={0.4}
+					clearcoatRoughness={0.15}
+					color={labelMap ? "#ffffff" : TAPE}
+					map={labelMap}
+					roughness={0.3}
+				/>
+			</mesh>
+			<mesh castShadow position={sidePositionA}>
+				<boxGeometry args={sideArgs} />
+				<meshPhysicalMaterial
+					clearcoat={0.4}
+					clearcoatRoughness={0.15}
+					color={sideLabelMap ? "#ffffff" : TAPE}
+					map={sideLabelMap}
+					roughness={0.3}
+				/>
+			</mesh>
+			<mesh castShadow position={sidePositionB}>
+				<boxGeometry args={sideArgs} />
+				<meshPhysicalMaterial
+					clearcoat={0.4}
+					clearcoatRoughness={0.15}
+					color={sideLabelMap ? "#ffffff" : TAPE}
+					map={sideLabelMap}
+					roughness={0.3}
+				/>
+			</mesh>
+		</group>
+	);
+}
+
+/**
+ * A caixa de papelão da CBS: kraft PBR (color + normal + roughness reais)
+ * com aresta viva de RoundedBox, fita azul cruzando topo e laterais como
+ * geometria própria, "CBS" impresso na faixa horizontal — o pacote que
+ * viaja a página inteira.
+ */
+export function CardboardBox({ size = 1 }: { size?: number }) {
+	const { map, normalMap, roughnessMap } = useTexture(TEXTURE_URLS);
+
+	useEffect(() => {
+		for (const texture of [map, normalMap, roughnessMap]) {
+			texture.wrapS = RepeatWrapping;
+			texture.wrapT = RepeatWrapping;
+			texture.repeat.set(1.2, 1.2);
+			texture.anisotropy = 8;
+			texture.needsUpdate = true;
+		}
+		map.colorSpace = SRGBColorSpace;
+	}, [map, normalMap, roughnessMap]);
+
+	const tapeLabel = useMemo(() => makeTapeLabel(false), []);
+	const tapeSideLabel = useMemo(() => makeTapeLabel(true), []);
+
+	const width = 1.6 * size;
+	const height = 1.15 * size;
+	const depth = 1.25 * size;
+
+	return (
+		<group>
+			<RoundedBox
+				args={[width, height, depth]}
+				bevelSegments={4}
+				castShadow
+				creaseAngle={0.3}
+				radius={0.035 * size}
+				smoothness={4}
+			>
+				<meshStandardMaterial
+					map={map}
+					normalMap={normalMap}
+					normalScale={[0.7, 0.7]}
+					roughnessMap={roughnessMap}
+				/>
+			</RoundedBox>
+
+			{/* vinco: linha escura sutil onde as abas do topo se encontram */}
+			<mesh position={[0, height / 2 + 0.002 * size, 0]}>
+				<boxGeometry args={[0.012 * size, 0.003 * size, depth * 0.98]} />
+				<meshStandardMaterial color={CREASE} roughness={0.9} />
+			</mesh>
+
+			<TapeStrip
+				axis="x"
+				depth={depth}
+				height={height}
+				labelMap={tapeLabel}
+				size={size}
+				width={width}
+			/>
+			<TapeStrip
+				axis="z"
+				depth={depth}
+				height={height}
+				sideLabelMap={tapeSideLabel}
+				size={size}
+				width={width}
+			/>
+		</group>
 	);
 }

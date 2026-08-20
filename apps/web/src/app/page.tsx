@@ -92,7 +92,7 @@ function Hero() {
 			className="relative mx-auto grid min-h-[calc(100svh-73px)] max-w-6xl items-center gap-10 px-6 py-16 lg:grid-cols-[1.05fr_1fr]"
 			id="topo"
 		>
-			<div className="mist-hero absolute inset-0" />
+			<div className="mist-hero absolute inset-y-0 left-1/2 w-screen -translate-x-1/2" />
 			<div className="relative z-20">
 				<Reveal>
 					<h1 className="max-w-xl font-bold font-display text-6xl text-brand-navy leading-[1.02] tracking-tight sm:text-7xl">
@@ -149,7 +149,7 @@ function Station({
 	return (
 		<section className="relative mx-auto grid min-h-[80vh] max-w-6xl items-center gap-10 px-6 py-24 lg:grid-cols-2">
 			<div
-				className="mist-side absolute inset-0"
+				className="mist-side absolute inset-y-0 left-1/2 w-screen -translate-x-1/2"
 				style={{ "--mist-x": flip ? "18%" : "82%" } as React.CSSProperties}
 			/>
 			<div className={`relative z-20 ${flip ? "lg:order-2" : ""}`}>
@@ -181,11 +181,10 @@ function Station({
 
 function Chegada() {
 	return (
-		<section className="relative mx-auto max-w-6xl px-6 pt-40 pb-16 text-center">
-			<div className="mist-final absolute inset-0" />
-			<div className="mx-auto h-28 w-28" data-j-anchor="doca" />
+		<section className="relative mx-auto max-w-6xl px-6 pt-32 pb-16 text-center">
+			<div className="mist-final absolute inset-y-0 left-1/2 w-screen -translate-x-1/2" />
 			<Reveal>
-				<h2 className="relative z-20 mx-auto mt-16 max-w-2xl font-bold font-display text-5xl text-brand-navy leading-tight tracking-tight sm:text-6xl">
+				<h2 className="relative z-20 mx-auto max-w-2xl font-bold font-display text-5xl text-brand-navy leading-tight tracking-tight sm:text-6xl">
 					Entregue no CD.
 					<br />
 					<span className="text-brand-blue">Pronto para vender.</span>
@@ -203,6 +202,14 @@ function Chegada() {
 					<CtaEmail />
 				</div>
 			</Reveal>
+			{/* A doca: o rio deságua e o caminhão recebe a caixa aqui, com
+			    palco inteiro abaixo dos CTAs para a coreografia final. */}
+			<div
+				aria-hidden
+				className="mx-auto mt-20 h-36 w-full max-w-xl"
+				data-j-anchor="doca"
+				data-s-anchor="caminhao-doca"
+			/>
 		</section>
 	);
 }
