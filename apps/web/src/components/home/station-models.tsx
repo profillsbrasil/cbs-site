@@ -15,44 +15,77 @@ import {
 	Shape,
 	SRGBColorSpace,
 	type Texture,
+	Vector2,
 	Vector3,
 } from "three";
 
-const LABEL_W = 256;
-const LABEL_H = 192;
+const LABEL_W = 512;
+const LABEL_H = 320;
 
-/** Rótulo impresso do frasco: fundo aqua, marca e linhas greeked. */
+/**
+ * Rótulo do frasco, mesma assinatura do baú: branco, faixa diagonal
+ * azul→aqua na borda direita, logo oficial e linhas de texto greeked.
+ * A logo (PNG) chega assíncrona e a textura atualiza.
+ */
 function makeFrascoLabel(): Texture {
 	const canvas = document.createElement("canvas");
 	canvas.width = LABEL_W;
 	canvas.height = LABEL_H;
-	const ctx = canvas.getContext("2d");
-	if (ctx) {
-		ctx.fillStyle = "#dcf3fa";
-		ctx.fillRect(0, 0, LABEL_W, LABEL_H);
-		ctx.strokeStyle = "#1d9dd8";
-		ctx.lineWidth = 6;
-		ctx.strokeRect(8, 8, LABEL_W - 16, LABEL_H - 16);
-		// gota da marca
-		ctx.fillStyle = "#1d9dd8";
-		ctx.beginPath();
-		ctx.arc(LABEL_W / 2, 62, 26, 0, Math.PI * 2);
-		ctx.fill();
-		ctx.beginPath();
-		ctx.moveTo(LABEL_W / 2 - 18, 52);
-		ctx.lineTo(LABEL_W / 2, 16);
-		ctx.lineTo(LABEL_W / 2 + 18, 52);
-		ctx.closePath();
-		ctx.fill();
-		// linhas de texto greeked
-		ctx.fillStyle = "#0f1c2b";
-		ctx.fillRect(48, 110, LABEL_W - 96, 14);
-		ctx.fillStyle = "#5c7a8a";
-		ctx.fillRect(64, 138, LABEL_W - 128, 9);
-		ctx.fillRect(74, 156, LABEL_W - 148, 9);
-	}
 	const texture = new CanvasTexture(canvas);
 	texture.colorSpace = SRGBColorSpace;
+	texture.anisotropy = 4;
+	const ctx = canvas.getContext("2d");
+	if (!ctx) {
+		return texture;
+	}
+	const paint = (logo: HTMLImageElement | null) => {
+		ctx.fillStyle = "#ffffff";
+		ctx.fillRect(0, 0, LABEL_W, LABEL_H);
+		// Faixa diagonal na borda direita
+		const grad = ctx.createLinearGradient(0, 0, 0, LABEL_H);
+		grad.addColorStop(0, "#1d9dd8");
+		grad.addColorStop(1, "#a8e0f0");
+		ctx.fillStyle = grad;
+		ctx.beginPath();
+		ctx.moveTo(LABEL_W * 0.78, 0);
+		ctx.lineTo(LABEL_W, 0);
+		ctx.lineTo(LABEL_W, LABEL_H);
+		ctx.lineTo(LABEL_W * 0.64, LABEL_H);
+		ctx.closePath();
+		ctx.fill();
+		ctx.fillStyle = "#0f1c2b";
+		ctx.beginPath();
+		ctx.moveTo(LABEL_W * 0.74, 0);
+		ctx.lineTo(LABEL_W * 0.76, 0);
+		ctx.lineTo(LABEL_W * 0.62, LABEL_H);
+		ctx.lineTo(LABEL_W * 0.6, LABEL_H);
+		ctx.closePath();
+		ctx.fill();
+		// Logo
+		const logoW = LABEL_W * 0.42;
+		const logoX = LABEL_W * 0.08;
+		if (logo) {
+			const logoH = (logo.height / logo.width) * logoW;
+			ctx.drawImage(logo, logoX, LABEL_H * 0.14, logoW, logoH);
+		} else {
+			ctx.fillStyle = "#0f1c2b";
+			ctx.font = 'bold 72px Sora, "Sora Fallback", sans-serif';
+			ctx.textBaseline = "top";
+			ctx.fillText("CBS", logoX, LABEL_H * 0.16);
+		}
+		// Linhas greeked: nome do produto e texto legal
+		ctx.fillStyle = "#0f1c2b";
+		ctx.fillRect(logoX, LABEL_H * 0.62, LABEL_W * 0.34, 14);
+		ctx.fillStyle = "#5c7a8a";
+		ctx.fillRect(logoX, LABEL_H * 0.72, LABEL_W * 0.28, 8);
+		ctx.fillRect(logoX, LABEL_H * 0.78, LABEL_W * 0.3, 8);
+		ctx.fillRect(logoX, LABEL_H * 0.84, LABEL_W * 0.22, 8);
+		texture.needsUpdate = true;
+	};
+	paint(null);
+	const logoImage = new Image();
+	logoImage.onload = () => paint(logoImage);
+	logoImage.src = "/cbs-logo.png";
 	return texture;
 }
 
@@ -139,9 +172,9 @@ function makeBauSide(traseira: "direita" | "esquerda"): Texture {
 		texture.needsUpdate = true;
 	};
 	paint(null);
-	const logo = new Image();
-	logo.onload = () => paint(logo);
-	logo.src = "/cbs-logo.png";
+	const logoImage = new Image();
+	logoImage.onload = () => paint(logoImage);
+	logoImage.src = "/cbs-logo.png";
 	return texture;
 }
 
@@ -187,49 +220,75 @@ function makePortaTexture(): Texture {
 	return texture;
 }
 
-/** Frasco branco de saneante: tampa azul, rótulo impresso curvo. */
+// Perfil da garrafa (raio, altura), do fundo ao pescoço: base com pé
+// recuado, corpo reto, ombro arredondado, pescoço curto.
+const FRASCO_PERFIL: [number, number][] = [
+	[0, 0],
+	[0.36, 0],
+	[0.41, 0.03],
+	[0.43, 0.1],
+	[0.43, 0.78],
+	[0.41, 0.9],
+	[0.34, 1.0],
+	[0.24, 1.07],
+	[0.17, 1.12],
+	[0.17, 1.2],
+];
+const FRASCO_TOPO_Y = 1.2;
+const FRASCO_PLASTICO = {
+	clearcoat: 0.7,
+	clearcoatRoughness: 0.2,
+	color: "#ffffff",
+	roughness: 0.28,
+} as const;
+
+/** Garrafa de saneante (2L) com tampa flip-top azul e rótulo impresso. */
 export function Frasco() {
 	const label = useMemo(makeFrascoLabel, []);
+	const perfil = useMemo(
+		() => FRASCO_PERFIL.map(([r, y]) => new Vector2(r, y)),
+		[]
+	);
 	return (
-		<group position={[0, -0.25, 0]}>
-			<mesh>
-				<cylinderGeometry args={[0.42, 0.48, 1.1, 40]} />
-				<meshPhysicalMaterial
-					clearcoat={0.6}
-					clearcoatRoughness={0.25}
-					color="#ffffff"
-					roughness={0.3}
-				/>
+		<group position={[0, -0.72, 0]}>
+			<mesh castShadow>
+				<latheGeometry args={[perfil, 56]} />
+				<meshPhysicalMaterial {...FRASCO_PLASTICO} />
 			</mesh>
-			<mesh position={[0, 0.62, 0]}>
-				<sphereGeometry args={[0.42, 40, 20, 0, Math.PI * 2, 0, Math.PI / 2]} />
-				<meshPhysicalMaterial
-					clearcoat={0.6}
-					clearcoatRoughness={0.25}
-					color="#ffffff"
-					roughness={0.3}
-				/>
-			</mesh>
-			<mesh position={[0, 0.98, 0]}>
-				<cylinderGeometry args={[0.16, 0.16, 0.28, 24]} />
-				<meshPhysicalMaterial color="#ffffff" roughness={0.3} />
-			</mesh>
-			<mesh position={[0, 1.16, 0]}>
-				<cylinderGeometry args={[0.21, 0.21, 0.2, 28]} />
-				<meshPhysicalMaterial
-					clearcoat={0.5}
-					color="#1d9dd8"
-					roughness={0.35}
-				/>
-			</mesh>
-			<mesh position={[0, 1.245, 0]}>
-				<torusGeometry args={[0.21, 0.018, 12, 28]} />
-				<meshStandardMaterial color="#1479ad" roughness={0.4} />
-			</mesh>
-			{/* Rótulo curvo abraçando o corpo */}
-			<mesh position={[0, 0.02, 0]} rotation={[0, -0.95, 0]}>
-				<cylinderGeometry args={[0.455, 0.455, 0.72, 40, 1, true, 0, 1.9]} />
-				<meshStandardMaterial map={label} roughness={0.45} />
+			{/* Tampa flip-top: base azul, tampa rebaixada e o "bico" da dobradiça */}
+			<group position={[0, FRASCO_TOPO_Y, 0]}>
+				<mesh castShadow position={[0, 0.07, 0]}>
+					<cylinderGeometry args={[0.2, 0.2, 0.14, 32]} />
+					<meshPhysicalMaterial
+						clearcoat={0.5}
+						clearcoatRoughness={0.3}
+						color="#1d9dd8"
+						roughness={0.35}
+					/>
+				</mesh>
+				<mesh castShadow position={[0, 0.17, 0]}>
+					<cylinderGeometry args={[0.17, 0.2, 0.06, 32]} />
+					<meshPhysicalMaterial
+						clearcoat={0.5}
+						clearcoatRoughness={0.3}
+						color="#1479ad"
+						roughness={0.35}
+					/>
+				</mesh>
+				<mesh position={[0, 0.18, 0.17]}>
+					<boxGeometry args={[0.12, 0.04, 0.07]} />
+					<meshStandardMaterial color="#1479ad" roughness={0.4} />
+				</mesh>
+				{/* Filete de vedação navy entre tampa e pescoço */}
+				<mesh position={[0, 0.005, 0]}>
+					<cylinderGeometry args={[0.185, 0.185, 0.012, 32]} />
+					<meshStandardMaterial color="#0f1c2b" roughness={0.5} />
+				</mesh>
+			</group>
+			{/* Rótulo impresso: cilindro aberto colado ao corpo (raio +1mm) */}
+			<mesh position={[0, 0.44, 0]} rotation={[0, -1.1, 0]}>
+				<cylinderGeometry args={[0.432, 0.432, 0.56, 56, 1, true, 0, 2.2]} />
+				<meshStandardMaterial map={label} roughness={0.4} />
 			</mesh>
 		</group>
 	);
