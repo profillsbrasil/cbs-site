@@ -135,6 +135,14 @@ function makeStamp(): Texture {
 	return texture;
 }
 
+// Carimbo por face: normal (x/z), rotação do plano, deslocamento no plano e largura.
+const STAMP_FACES = [
+	{ dx: 0, dy: 0, dz: -0.3, key: "+x", rotY: Math.PI / 2, w: 0.5, x: 1, z: 0 },
+	{ dx: 0, dy: 0, dz: 0, key: "-x", rotY: -Math.PI / 2, w: 0.7, x: -1, z: 0 },
+	{ dx: -0.42, dy: 0, dz: 0, key: "+z", rotY: 0, w: 0.55, x: 0, z: 1 },
+	{ dx: 0.42, dy: 0, dz: 0, key: "-z", rotY: Math.PI, w: 0.55, x: 0, z: -1 },
+] as const;
+
 // Decalques colados às faces: polygonOffset evita z-fighting com o papelão
 // sem precisar "levantar" a geometria (o que gerava bordas flutuando).
 const DECAL = {
@@ -255,27 +263,35 @@ export function CardboardBox({ size = 1 }: { size?: number }) {
 				</mesh>
 			))}
 
-			{/* Etiqueta de envio na face +x, levemente descentrada */}
+			{/* Carimbo CBS nas quatro faces laterais. Nas faces ±z fica ao lado
+			    da fita; na face +x divide espaço com a etiqueta de envio. */}
+			{STAMP_FACES.map((face) => (
+				<mesh
+					key={face.key}
+					position={[
+						face.x * (width / 2 + 0.001 * size) + face.dx * size,
+						face.dy * size,
+						face.z * (depth / 2 + 0.001 * size) + face.dz * size,
+					]}
+					rotation={[0, face.rotY, 0]}
+				>
+					<planeGeometry args={[face.w * size, face.w * 0.5 * size]} />
+					<meshStandardMaterial
+						{...DECAL}
+						map={stamp}
+						roughness={0.9}
+						transparent
+					/>
+				</mesh>
+			))}
+
+			{/* Etiqueta de envio na face +x, ao lado do carimbo */}
 			<mesh
-				position={[width / 2 + 0.001 * size, -0.04 * size, 0.1 * size]}
+				position={[width / 2 + 0.001 * size, -0.12 * size, 0.3 * size]}
 				rotation={[0, Math.PI / 2, 0]}
 			>
-				<planeGeometry args={[depth * 0.56, depth * 0.42]} />
+				<planeGeometry args={[depth * 0.42, depth * 0.32]} />
 				<meshStandardMaterial {...DECAL} map={shippingLabel} roughness={0.5} />
-			</mesh>
-
-			{/* Carimbo CBS na face -x */}
-			<mesh
-				position={[-width / 2 - 0.001 * size, 0, 0]}
-				rotation={[0, -Math.PI / 2, 0]}
-			>
-				<planeGeometry args={[depth * 0.7, depth * 0.35]} />
-				<meshStandardMaterial
-					{...DECAL}
-					map={stamp}
-					roughness={0.9}
-					transparent
-				/>
 			</mesh>
 		</group>
 	);
