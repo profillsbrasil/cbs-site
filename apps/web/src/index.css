@@ -64,3 +64,49 @@
 		animation: none;
 	}
 }
+
+/* Entrada do hero em CSS puro: o HTML do servidor já chega visível para o
+   navegador e a animação roda antes da hidratação (a cena 3D é pesada). */
+@keyframes rise {
+	from {
+		opacity: 0;
+		transform: translateY(24px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.rise {
+	animation: rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+	animation-delay: var(--rise-delay, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.rise {
+		animation-name: rise-fade;
+		animation-duration: 0.15s;
+	}
+}
+
+@keyframes rise-fade {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+/* Asfalto da doca: faixa navy com a linha tracejada central em aqua. */
+.road {
+	background:
+		repeating-linear-gradient(
+			90deg,
+			var(--color-brand-aqua) 0 2.5rem,
+			transparent 2.5rem 4.5rem
+		)
+		center / 100% 3px no-repeat,
+		var(--color-brand-navy);
+}

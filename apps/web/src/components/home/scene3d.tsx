@@ -22,6 +22,7 @@ import {
 	smoothstep,
 } from "./scene-bits";
 import {
+	CAMINHAO_ALTURA,
 	Caminhao,
 	CaminhaoEntrega,
 	type CaminhaoParts,
@@ -35,10 +36,12 @@ export const JOURNEY_ANCHORS = [
 	"modelo",
 	"qualidade",
 	"malha",
+	"chegada",
 	"doca",
 ] as const;
 
 const FOCUS_LINE = 0.52;
+const CAMERA_Z = 8;
 const DROPLET_COUNT = 16;
 const POP_SCROLL_FRACTION = 0.45;
 const VIEW_MARGIN = 240;
@@ -57,6 +60,9 @@ const BOX_ANGLE_SMOOTH_TIME = 0.3;
 const BOX_YAW_LIMIT = 0.6;
 const BOX_ROLL_FACTOR = 8;
 const BOX_ROLL_LIMIT = 0.35;
+// Arco da travessia: ganho sobre o x médio do trecho e amplitude máxima.
+const ARC_OUTWARD_GAIN = 0.35;
+const ARC_MAX = 0.75;
 
 // Coreografia final "caixa entra no caminhão", inteira dirigida por
 // journeyProgress (0-1) — cada fase é uma função pura de `p`, nunca um
@@ -72,14 +78,15 @@ const DOCK_HANDOFF_END = 0.985;
 const DOCK_SETTLE_START = 0.985;
 const DOCK_SETTLE_END = 1;
 
-const DOCK_UNIT_HEIGHT = 1.1; // altura real do caminhão (contrato: ~1.1)
-const DOCK_TRUCK_ENTRY_X = 4; // posição local de partida (fora da tela, à direita)
+// Posição local de partida. O grupo da doca é girado 180° em Y (frente do
+// caminhão para a esquerda), então x local negativo = fora da tela à direita.
+const DOCK_TRUCK_ENTRY_X = -4;
 const DOCK_DOOR_OPEN_ANGLE = 1.6;
 // Mesmo raio de RODA_RAIO em station-models.tsx (não exportado — só usado
 // aqui para converter deslocamento linear em giro angular da roda).
 const DOCK_WHEEL_RADIUS = 0.16;
 const DOCK_DRIVE_BOUNCE_AMPLITUDE = 0.035;
-const DOCK_IDLE_BOUNCE_AMPLITUDE = 0.012;
+const DOCK_IDLE_BOUNCE_AMPLITUDE = 0; // parado no asfalto: sem flutuar
 const DOCK_BOUNCE_FREQUENCY = 7;
 const DOCK_SETTLE_SQUASH_PEAK = 0.1;
 const DOCK_HEADLIGHT_FLASH_PEAK = 0.4; // emissiveIntensity 0.6 → 1 → 0.6
@@ -88,7 +95,7 @@ const DOCK_HEADLIGHT_HEX = "fff3d6"; // cor dos faróis em FrenteCaminhao
 // Handoff da caixa: o quanto ela desvia do pouso na âncora "doca" para
 // dentro do baú (dockCargoWorld), com um arco por cima e encolhendo ao
 // cruzar a porta.
-const DOCK_CARGO_SHRINK = 0.45;
+const DOCK_CARGO_SHRINK = 0.55;
 const DOCK_ARC_HEIGHT = 0.4;
 
 // Reação das bolhas de estação à passagem da caixa: tudo lido de
@@ -424,6 +431,22 @@ function journeyFraction(
 	return (before + t * (weights[segment] ?? 0)) / total;
 }
 
+/**
+ * Quando a página não tem scroll suficiente para a doca alcançar a linha de
+ * foco, a jornada travaria antes de 1. Aqui a linha de foco desce na mesma
+ * medida em que o scroll restante some — no fim da página ela coincide com a
+ * doca e o progresso fecha em 1. Contínuo e reversível.
+ */
+function endOfScrollFocus(focusY: number, lastScreenY: number): number {
+	const remaining =
+		document.documentElement.scrollHeight - window.innerHeight - window.scrollY;
+	const gap = lastScreenY - focusY;
+	if (gap <= 0 || remaining >= gap) {
+		return focusY;
+	}
+	return focusY + (gap - Math.max(remaining, 0));
+}
+
 function resolveTarget(
 	samples: AnchorSample[],
 	focusY: number,
@@ -447,8 +470,12 @@ function resolveTarget(
 			const raw = (focusY - a.screenY) / (b.screenY - a.screenY);
 			const t = smoothstep(0.12, 0.88, raw);
 			out.lerpVectors(a.world, b.world, t);
-			// Leve arco lateral para a travessia não ser reta
-			out.x += Math.sin(t * Math.PI) * (i % 2 === 0 ? -0.75 : 0.75);
+			// Arco lateral sempre para FORA (lado oposto ao centro da página,
+			// onde moram as colunas de texto). Numa travessia de um lado ao
+			// outro o ponto médio fica perto do centro e o arco some sozinho.
+			const midX = (a.world.x + b.world.x) / 2;
+			const bulge = MathUtils.clamp(midX * ARC_OUTWARD_GAIN, -ARC_MAX, ARC_MAX);
+			out.x += Math.sin(t * Math.PI) * bulge;
 			return {
 				progress: journeyFraction(weights, i, t),
 				scale: a.scale + (b.scale - a.scale) * t,
@@ -553,7 +580,10 @@ function JourneyBox({ journeyActive }: { journeyActive: boolean }) {
 			return;
 		}
 
-		const focusY = size.height * FOCUS_LINE;
+		const focusY = endOfScrollFocus(
+			size.height * FOCUS_LINE,
+			(samples.at(-1) as AnchorSample).screenY
+		);
 		const result = resolveTarget(samples, focusY, target.current);
 		journeyProgress.set(result.progress);
 		const handoff = applyDockHandoff(
@@ -631,7 +661,7 @@ function JourneyBox({ journeyActive }: { journeyActive: boolean }) {
 	);
 }
 
-const MICRO_COUNT = 22;
+const MICRO_COUNT = 34;
 
 interface MicroBubble {
 	id: number;
@@ -665,13 +695,13 @@ function makeMicroBubbles(): MicroBubble[] {
  * Campo de microbolhas ambiente: sobem devagar pela tela inteira e
  * reaparecem embaixo — a textura de limpeza que tira o branco do vazio.
  */
-const MICRO_POP_RADIUS = 0.85;
-const MICRO_POP_SPEED = 3.2;
+const MICRO_POP_RADIUS = 1.05;
+const MICRO_POP_SPEED = 2.6;
 const MICRO_BASE_OPACITY = 0.35;
 
 interface PoppableMesh {
 	material: { opacity: number };
-	position: { x: number; y: number };
+	position: { x: number; y: number; z: number };
 	scale: { setScalar: (s: number) => void };
 }
 
@@ -693,13 +723,17 @@ function updateMicroPop(
 		if (!boxActive.current) {
 			return 0;
 		}
-		const dx = mesh.position.x - boxWorldPosition.x;
-		const dy = mesh.position.y - boxWorldPosition.y;
+		// As microbolhas vivem atrás do plano da caixa (z < 0): projeta a
+		// posição delas no plano z=0 pela câmera, senão a distância "de tela"
+		// compara coordenadas de planos diferentes e a caixa nunca acerta.
+		const depth = CAMERA_Z / (CAMERA_Z - mesh.position.z);
+		const dx = mesh.position.x * depth - boxWorldPosition.x;
+		const dy = mesh.position.y * depth - boxWorldPosition.y;
 		return Math.hypot(dx, dy) < MICRO_POP_RADIUS ? Number.EPSILON : 0;
 	}
 	// Estouro: incha rápido enquanto some, depois renasce embaixo
 	const next = Math.min(pop + delta * MICRO_POP_SPEED, 1);
-	mesh.scale.setScalar(data.r * (1 + next * 1.6));
+	mesh.scale.setScalar(data.r * (1 + next * 2.2));
 	mesh.material.opacity = MICRO_BASE_OPACITY * (1 - next);
 	if (next >= 1) {
 		mesh.position.y = -halfH;
@@ -751,12 +785,16 @@ function MicroBubbles() {
 					position={[bubble.x, bubble.y * 3, bubble.z]}
 					scale={bubble.r}
 				>
-					<sphereGeometry args={[1, 12, 12]} />
+					<sphereGeometry args={[1, 16, 16]} />
 					<meshPhysicalMaterial
 						clearcoat={1}
-						color="#cdeef9"
-						opacity={0.35}
-						roughness={0.1}
+						clearcoatRoughness={0.05}
+						color="#ffffff"
+						ior={1.15}
+						opacity={MICRO_BASE_OPACITY}
+						roughness={0.02}
+						thickness={0.02}
+						transmission={1}
 						transparent
 					/>
 				</mesh>
@@ -1017,7 +1055,8 @@ function computeDockBounceY(p: number, elapsed: number): number {
 	const amplitude =
 		DOCK_DRIVE_BOUNCE_AMPLITUDE * driveEnvelope +
 		DOCK_IDLE_BOUNCE_AMPLITUDE * idleEnvelope;
-	return Math.sin(elapsed * DOCK_BOUNCE_FREQUENCY) * amplitude;
+	// Só para cima (0..2×amplitude): com asfalto embaixo, a roda nunca afunda.
+	return (1 + Math.sin(elapsed * DOCK_BOUNCE_FREQUENCY)) * amplitude;
 }
 
 /** Pulso de squash-and-stretch (escala nos 3 eixos) no instante do
@@ -1122,9 +1161,13 @@ function DocaFinal() {
 	return (
 		<AnchoredGroup
 			selector='[data-s-anchor="caminhao-doca"]'
-			unitHeight={DOCK_UNIT_HEIGHT}
+			unitHeight={CAMINHAO_ALTURA}
 		>
-			<CaminhaoEntrega onParts={handleParts} />
+			{/* Chão do modelo (y=0) na borda inferior da âncora: o asfalto do
+			    DOM começa exatamente aí, então as rodas tocam a pista. */}
+			<group position={[0, -CAMINHAO_ALTURA / 2, 0]} rotation={[0, Math.PI, 0]}>
+				<CaminhaoEntrega onParts={handleParts} />
+			</group>
 		</AnchoredGroup>
 	);
 }
@@ -1140,7 +1183,7 @@ export function Scene3D() {
 	return (
 		<div aria-hidden className="pointer-events-none fixed inset-0 z-10">
 			<Canvas
-				camera={{ fov: 35, position: [0, 0, 8] }}
+				camera={{ fov: 35, position: [0, 0, CAMERA_Z] }}
 				dpr={[1, 1.5]}
 				gl={{ alpha: true, antialias: true }}
 			>

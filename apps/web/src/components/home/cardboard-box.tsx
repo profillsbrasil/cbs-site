@@ -14,7 +14,7 @@ import {
 } from "three";
 
 const TAPE = "#1d9dd8";
-const CREASE = "#b8895a";
+const NAVY = "#0f1c2b";
 
 // PBR ambientCG "Cardboard004" (CC0, 1K) — color/normal/roughness reais.
 const TEXTURE_URLS = {
@@ -24,123 +24,138 @@ const TEXTURE_URLS = {
 };
 useTexture.preload(Object.values(TEXTURE_URLS));
 
-const LABEL_W = 512;
-const LABEL_H = 128;
-
 /**
- * Rótulo "CBS" branco impresso na fita. `vertical` gira o texto para as
- * corridas de fita que descem pelas faces (lê de lado, como fita real).
+ * Fita personalizada: azul com "CBS" repetido em branco. A fita corre ao
+ * longo de z e, na face de cima do boxGeometry, v acompanha z — por isso o
+ * texto é pintado em pé (64×256) e repete em v.
  */
-function makeTapeLabel(vertical: boolean): Texture {
+function makeTapeTexture(): Texture {
 	const canvas = document.createElement("canvas");
-	canvas.width = vertical ? LABEL_H : LABEL_W;
-	canvas.height = vertical ? LABEL_W : LABEL_H;
+	canvas.width = 64;
+	canvas.height = 256;
 	const ctx = canvas.getContext("2d");
 	if (ctx) {
 		ctx.fillStyle = TAPE;
-		ctx.fillRect(0, 0, canvas.width, canvas.height);
+		ctx.fillRect(0, 0, 64, 256);
 		ctx.fillStyle = "#ffffff";
-		ctx.font = 'bold 68px Sora, "Sora Fallback", sans-serif';
+		ctx.font = 'bold 34px Sora, "Sora Fallback", sans-serif';
 		ctx.textAlign = "center";
 		ctx.textBaseline = "middle";
-		if (vertical) {
-			ctx.save();
-			ctx.translate(canvas.width / 2, canvas.height / 2);
-			ctx.rotate(-Math.PI / 2);
-			ctx.fillText("CBS", 0, 4);
-			ctx.restore();
-		} else {
-			ctx.fillText("CBS", canvas.width / 2, canvas.height / 2 + 4);
-		}
+		ctx.translate(32, 128);
+		ctx.rotate(-Math.PI / 2);
+		ctx.fillText("CBS", 0, 2);
 	}
 	const texture = new CanvasTexture(canvas);
 	texture.colorSpace = SRGBColorSpace;
+	texture.wrapS = RepeatWrapping;
+	texture.wrapT = RepeatWrapping;
+	texture.anisotropy = 4;
 	return texture;
 }
 
-type TapeStripProps = Readonly<{
-	axis: "x" | "z";
-	width: number;
-	height: number;
-	depth: number;
-	size: number;
-	labelMap?: Texture;
-	sideLabelMap?: Texture;
-}>;
-
-/**
- * Uma faixa de fita: três caixas achatadas (topo + duas laterais opostas)
- * que cruzam a quina viva do papelão, como fita de embalagem real — não
- * é textura na caixa, é geometria própria por cima.
- */
-function TapeStrip({
-	axis,
-	width,
-	height,
-	depth,
-	size,
-	labelMap,
-	sideLabelMap,
-}: TapeStripProps) {
-	const thickness = 0.02 * size;
-	const lift = 0.004 * size;
-	const sideHeight = height * 0.96;
-	const along = (axis === "x" ? width : depth) * 0.98;
-	const band = (axis === "x" ? depth : width) * 0.22;
-	const sideOffset = (axis === "x" ? width : depth) / 2 + lift;
-
-	const topArgs: [number, number, number] =
-		axis === "x" ? [along, thickness, band] : [band, thickness, along];
-	const sideArgs: [number, number, number] =
-		axis === "x"
-			? [thickness, sideHeight, band]
-			: [band, sideHeight, thickness];
-	const sidePositionA: [number, number, number] =
-		axis === "x" ? [sideOffset, 0, 0] : [0, 0, sideOffset];
-	const sidePositionB: [number, number, number] =
-		axis === "x" ? [-sideOffset, 0, 0] : [0, 0, -sideOffset];
-
-	return (
-		<group>
-			<mesh castShadow position={[0, height / 2 + lift, 0]}>
-				<boxGeometry args={topArgs} />
-				<meshPhysicalMaterial
-					clearcoat={0.4}
-					clearcoatRoughness={0.15}
-					color={labelMap ? "#ffffff" : TAPE}
-					map={labelMap}
-					roughness={0.3}
-				/>
-			</mesh>
-			<mesh castShadow position={sidePositionA}>
-				<boxGeometry args={sideArgs} />
-				<meshPhysicalMaterial
-					clearcoat={0.4}
-					clearcoatRoughness={0.15}
-					color={sideLabelMap ? "#ffffff" : TAPE}
-					map={sideLabelMap}
-					roughness={0.3}
-				/>
-			</mesh>
-			<mesh castShadow position={sidePositionB}>
-				<boxGeometry args={sideArgs} />
-				<meshPhysicalMaterial
-					clearcoat={0.4}
-					clearcoatRoughness={0.15}
-					color={sideLabelMap ? "#ffffff" : TAPE}
-					map={sideLabelMap}
-					roughness={0.3}
-				/>
-			</mesh>
-		</group>
-	);
+/** Etiqueta de envio: branca, cabeçalho navy, linhas greeked e código de barras. */
+function makeShippingLabel(): Texture {
+	const w = 256;
+	const h = 192;
+	const canvas = document.createElement("canvas");
+	canvas.width = w;
+	canvas.height = h;
+	const ctx = canvas.getContext("2d");
+	if (ctx) {
+		ctx.fillStyle = "#ffffff";
+		ctx.fillRect(0, 0, w, h);
+		ctx.fillStyle = NAVY;
+		ctx.fillRect(0, 0, w, 34);
+		ctx.fillStyle = "#ffffff";
+		ctx.font = 'bold 20px Sora, "Sora Fallback", sans-serif';
+		ctx.textBaseline = "middle";
+		ctx.fillText("CBS", 14, 18);
+		ctx.font = '600 11px Sora, "Sora Fallback", sans-serif';
+		ctx.textAlign = "right";
+		ctx.fillText("EXPRESSO", w - 14, 18);
+		ctx.textAlign = "left";
+		// destinatário greeked
+		ctx.fillStyle = NAVY;
+		ctx.fillRect(14, 50, 120, 9);
+		ctx.fillStyle = "#5c7a8a";
+		ctx.fillRect(14, 66, 160, 6);
+		ctx.fillRect(14, 78, 132, 6);
+		ctx.fillRect(14, 90, 96, 6);
+		// código de barras
+		let x = 14;
+		ctx.fillStyle = NAVY;
+		for (let i = 0; i < 46; i += 1) {
+			const bar = 2 + ((i * 7) % 4);
+			if (i % 3 !== 1) {
+				ctx.fillRect(x, 116, bar, 52);
+			}
+			x += bar + 2;
+		}
+		// selo "frágil" (taça) no canto
+		ctx.strokeStyle = NAVY;
+		ctx.lineWidth = 3;
+		ctx.beginPath();
+		ctx.moveTo(208, 120);
+		ctx.lineTo(236, 120);
+		ctx.lineTo(222, 146);
+		ctx.closePath();
+		ctx.moveTo(222, 146);
+		ctx.lineTo(222, 160);
+		ctx.moveTo(212, 160);
+		ctx.lineTo(232, 160);
+		ctx.stroke();
+	}
+	const texture = new CanvasTexture(canvas);
+	texture.colorSpace = SRGBColorSpace;
+	texture.anisotropy = 4;
+	return texture;
 }
 
+/** Carimbo "CBS" impresso direto no kraft (alfa fora das letras). */
+function makeStamp(): Texture {
+	const w = 256;
+	const h = 128;
+	const canvas = document.createElement("canvas");
+	canvas.width = w;
+	canvas.height = h;
+	const ctx = canvas.getContext("2d");
+	if (ctx) {
+		ctx.clearRect(0, 0, w, h);
+		ctx.fillStyle = NAVY;
+		ctx.font = 'bold 84px Sora, "Sora Fallback", sans-serif';
+		ctx.textAlign = "center";
+		ctx.textBaseline = "middle";
+		ctx.fillText("CBS", w / 2, 52);
+		ctx.fillStyle = TAPE;
+		ctx.fillRect(44, 100, 168, 9);
+	}
+	const texture = new CanvasTexture(canvas);
+	texture.colorSpace = SRGBColorSpace;
+	texture.anisotropy = 4;
+	return texture;
+}
+
+// Carimbo por face: normal (x/z), rotação do plano, deslocamento no plano e largura.
+const STAMP_FACES = [
+	{ dx: 0, dy: 0, dz: -0.3, key: "+x", rotY: Math.PI / 2, w: 0.5, x: 1, z: 0 },
+	{ dx: 0, dy: 0, dz: 0, key: "-x", rotY: -Math.PI / 2, w: 0.7, x: -1, z: 0 },
+	{ dx: -0.42, dy: 0, dz: 0, key: "+z", rotY: 0, w: 0.55, x: 0, z: 1 },
+	{ dx: 0.42, dy: 0, dz: 0, key: "-z", rotY: Math.PI, w: 0.55, x: 0, z: -1 },
+] as const;
+
+// Decalques colados às faces: polygonOffset evita z-fighting com o papelão
+// sem precisar "levantar" a geometria (o que gerava bordas flutuando).
+const DECAL = {
+	polygonOffset: true,
+	polygonOffsetFactor: -2,
+	polygonOffsetUnits: -2,
+} as const;
+
 /**
- * A caixa de papelão da CBS: kraft PBR (color + normal + roughness reais)
- * com aresta viva de RoundedBox, fita azul cruzando topo e laterais como
- * geometria própria, "CBS" impresso na faixa horizontal — o pacote que
- * viaja a página inteira.
+ * A caixa de papelão da CBS, como caixa de e-commerce de verdade: corpo
+ * kraft PBR, duas abas no topo com junta central, UMA fita azul fina e
+ * personalizada cobrindo a junta e descendo as duas faces, etiqueta de envio
+ * numa lateral e carimbo CBS na outra.
  */
 export function CardboardBox({ size = 1 }: { size?: number }) {
 	const { map, normalMap, roughnessMap } = useTexture(TEXTURE_URLS);
@@ -156,53 +171,128 @@ export function CardboardBox({ size = 1 }: { size?: number }) {
 		map.colorSpace = SRGBColorSpace;
 	}, [map, normalMap, roughnessMap]);
 
-	const tapeLabel = useMemo(() => makeTapeLabel(false), []);
-	const tapeSideLabel = useMemo(() => makeTapeLabel(true), []);
+	const tape = useMemo(makeTapeTexture, []);
+	const shippingLabel = useMemo(makeShippingLabel, []);
+	const stamp = useMemo(makeStamp, []);
 
 	const width = 1.6 * size;
 	const height = 1.15 * size;
 	const depth = 1.25 * size;
+	const flapT = 0.05 * size; // espessura do papelão das abas
+	const gap = 0.012 * size; // junta entre as abas
+	const bodyH = height - flapT;
+	const tapeW = 0.13 * size;
+	const tapeT = 0.004 * size;
+	const radius = 0.03 * size;
+
+	const kraft = (
+		<meshStandardMaterial
+			map={map}
+			normalMap={normalMap}
+			normalScale={[0.7, 0.7]}
+			roughnessMap={roughnessMap}
+		/>
+	);
+
+	useEffect(() => {
+		// A fita repete "CBS" a cada ~0.45 unidades de comprimento
+		tape.repeat.set(1, Math.max(1, Math.round(depth / (0.45 * size))));
+		tape.needsUpdate = true;
+	}, [tape, depth, size]);
+
+	const flapW = (width - gap) / 2;
+	const flapY = bodyH / 2 + flapT / 2 - 0.001 * size;
+	const topY = bodyH / 2 + flapT;
 
 	return (
 		<group>
+			{/* Corpo */}
 			<RoundedBox
-				args={[width, height, depth]}
-				bevelSegments={4}
+				args={[width, bodyH, depth]}
 				castShadow
-				creaseAngle={0.3}
-				radius={0.035 * size}
-				smoothness={4}
+				position={[0, 0, 0]}
+				radius={radius}
+				smoothness={3}
 			>
-				<meshStandardMaterial
-					map={map}
-					normalMap={normalMap}
-					normalScale={[0.7, 0.7]}
-					roughnessMap={roughnessMap}
-				/>
+				{kraft}
 			</RoundedBox>
 
-			{/* vinco: linha escura sutil onde as abas do topo se encontram */}
-			<mesh position={[0, height / 2 + 0.002 * size, 0]}>
-				<boxGeometry args={[0.012 * size, 0.003 * size, depth * 0.98]} />
-				<meshStandardMaterial color={CREASE} roughness={0.9} />
+			{/* Abas do topo, dobradas para dentro com junta ao centro (eixo z) */}
+			{[1, -1].map((side) => (
+				<RoundedBox
+					args={[flapW, flapT, depth]}
+					castShadow
+					key={side}
+					position={[(side * (flapW + gap)) / 2, flapY, 0]}
+					radius={0.012 * size}
+					smoothness={2}
+				>
+					{kraft}
+				</RoundedBox>
+			))}
+			{/* Sombra da junta */}
+			<mesh position={[0, flapY, 0]}>
+				<boxGeometry args={[gap, flapT * 0.9, depth * 0.96]} />
+				<meshStandardMaterial color="#5a3f24" roughness={1} />
 			</mesh>
 
-			<TapeStrip
-				axis="x"
-				depth={depth}
-				height={height}
-				labelMap={tapeLabel}
-				size={size}
-				width={width}
-			/>
-			<TapeStrip
-				axis="z"
-				depth={depth}
-				height={height}
-				sideLabelMap={tapeSideLabel}
-				size={size}
-				width={width}
-			/>
+			{/* Fita personalizada: topo sobre a junta + descendo as faces ±z */}
+			<mesh castShadow position={[0, topY + tapeT / 2, 0]}>
+				<boxGeometry args={[tapeW, tapeT, depth + 2 * tapeT]} />
+				<meshPhysicalMaterial
+					{...DECAL}
+					clearcoat={0.5}
+					clearcoatRoughness={0.15}
+					map={tape}
+					roughness={0.3}
+				/>
+			</mesh>
+			{[1, -1].map((side) => (
+				<mesh
+					key={side}
+					position={[0, height * 0.22, side * (depth / 2 + tapeT / 2)]}
+				>
+					<boxGeometry args={[tapeW, height * 0.56 + flapT, tapeT]} />
+					<meshPhysicalMaterial
+						{...DECAL}
+						clearcoat={0.5}
+						clearcoatRoughness={0.15}
+						color={TAPE}
+						roughness={0.3}
+					/>
+				</mesh>
+			))}
+
+			{/* Carimbo CBS nas quatro faces laterais. Nas faces ±z fica ao lado
+			    da fita; na face +x divide espaço com a etiqueta de envio. */}
+			{STAMP_FACES.map((face) => (
+				<mesh
+					key={face.key}
+					position={[
+						face.x * (width / 2 + 0.001 * size) + face.dx * size,
+						face.dy * size,
+						face.z * (depth / 2 + 0.001 * size) + face.dz * size,
+					]}
+					rotation={[0, face.rotY, 0]}
+				>
+					<planeGeometry args={[face.w * size, face.w * 0.5 * size]} />
+					<meshStandardMaterial
+						{...DECAL}
+						map={stamp}
+						roughness={0.9}
+						transparent
+					/>
+				</mesh>
+			))}
+
+			{/* Etiqueta de envio na face +x, ao lado do carimbo */}
+			<mesh
+				position={[width / 2 + 0.001 * size, -0.12 * size, 0.3 * size]}
+				rotation={[0, Math.PI / 2, 0]}
+			>
+				<planeGeometry args={[depth * 0.42, depth * 0.32]} />
+				<meshStandardMaterial {...DECAL} map={shippingLabel} roughness={0.5} />
+			</mesh>
 		</group>
 	);
 }

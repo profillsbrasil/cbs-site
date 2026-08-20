@@ -45,9 +45,7 @@ interface FoamDot {
 interface Geometry {
 	centerlineD: string;
 	foam: FoamDot[];
-	fozFoam: FozDot[];
 	height: number;
-	puddle: Point | null;
 	reflectionD: string;
 	ribbonD: string;
 }
@@ -55,9 +53,7 @@ interface Geometry {
 const EMPTY_GEOMETRY: Geometry = {
 	centerlineD: "",
 	foam: [],
-	fozFoam: [],
 	height: 0,
-	puddle: null,
 	reflectionD: "",
 	ribbonD: "",
 };
@@ -86,40 +82,46 @@ function pseudoRandom(seed: number): number {
 }
 
 /**
- * Mesma curva do traço original: uma bezier cúbica por par de âncoras, com
- * pontos de controle na metade do Y (escorrido vertical suave).
+ * Catmull-Rom (tensão 0.5) convertido em cúbicas de Bézier: a tangente em
+ * cada marco segue a direção dos vizinhos, então trechos quase horizontais
+ * (a curva de chegada) viram uma curva contínua em vez de um cotovelo com
+ * tangentes verticais forçadas.
  */
-function buildPath(points: Point[]): string {
-	if (points.length < 2) {
-		return "";
-	}
-	const [start, ...rest] = points as [Point, ...Point[]];
-	let d = `M ${start.x} ${start.y}`;
-	let previous = start;
-	for (const point of rest) {
-		const midY = (previous.y + point.y) / 2;
-		d += ` C ${previous.x} ${midY}, ${point.x} ${midY}, ${point.x} ${point.y}`;
-		previous = point;
-	}
-	return d;
-}
+const CATMULL_TENSION = 6;
 
 function buildSegments(points: Point[]): Segment[] {
 	const segments: Segment[] = [];
-	let previous: Point | undefined = points[0];
-	for (const point of points.slice(1)) {
-		if (previous) {
-			const midY = (previous.y + point.y) / 2;
-			segments.push({
-				p0: previous,
-				p1: { x: previous.x, y: midY },
-				p2: { x: point.x, y: midY },
-				p3: point,
-			});
-		}
-		previous = point;
+	for (let i = 0; i < points.length - 1; i += 1) {
+		const prev = points[i - 1] ?? (points[i] as Point);
+		const a = points[i] as Point;
+		const b = points[i + 1] as Point;
+		const next = points[i + 2] ?? b;
+		segments.push({
+			p0: a,
+			p1: {
+				x: a.x + (b.x - prev.x) / CATMULL_TENSION,
+				y: a.y + (b.y - prev.y) / CATMULL_TENSION,
+			},
+			p2: {
+				x: b.x - (next.x - a.x) / CATMULL_TENSION,
+				y: b.y - (next.y - a.y) / CATMULL_TENSION,
+			},
+			p3: b,
+		});
 	}
 	return segments;
+}
+
+function buildPath(points: Point[]): string {
+	if (points.length === 0) {
+		return "";
+	}
+	const [start] = points as [Point];
+	let d = `M ${start.x} ${start.y}`;
+	for (const { p1, p2, p3 } of buildSegments(points)) {
+		d += ` C ${p1.x} ${p1.y}, ${p2.x} ${p2.y}, ${p3.x} ${p3.y}`;
+	}
+	return d;
 }
 
 function cubicPoint(segment: Segment, t: number): Point {
@@ -384,82 +386,6 @@ function FoamBubble({ dot, progress, reduced }: FoamBubbleProps) {
 	);
 }
 
-const FOZ_FOAM_COUNT = 18;
-const FOZ_RX = 150;
-const FOZ_RY = 30;
-const PUDDLE_OFFSET_Y = 86;
-
-interface FozDot {
-	delay: number;
-	duration: number;
-	peakOpacity: number;
-	r: number;
-	rise: number;
-	x: number;
-	y: number;
-}
-
-/** Espuma da foz: cluster elíptico sobre a poça, cada bolha com fase própria. */
-function buildFozFoam(puddle: Point): FozDot[] {
-	return Array.from({ length: FOZ_FOAM_COUNT }, (_, i) => {
-		const angle = pseudoRandom(i + 900) * Math.PI * 2;
-		const radial = Math.sqrt(pseudoRandom(i + 950));
-		return {
-			delay: pseudoRandom(i + 1100) * 2.4,
-			duration: 1.8 + pseudoRandom(i + 1050) * 1.8,
-			peakOpacity: 0.55 + pseudoRandom(i + 1200) * 0.4,
-			r: 2.5 + pseudoRandom(i + 1000) * 4.5,
-			rise: 6 + pseudoRandom(i + 1150) * 10,
-			x: puddle.x + Math.cos(angle) * FOZ_RX * radial,
-			y: puddle.y + PUDDLE_OFFSET_Y + Math.sin(angle) * FOZ_RY * radial,
-		};
-	});
-}
-
-/**
- * Uma bolha da foz: nasce, sobe um pouco, "estoura" (some) e renasce em
- * loop dessincronizado — a espuma viva onde o rio deságua.
- */
-function FozBubble({ dot, reduced }: { dot: FozDot; reduced: boolean }) {
-	if (reduced) {
-		return (
-			<circle
-				cx={dot.x}
-				cy={dot.y}
-				fill="#ffffff"
-				opacity={dot.peakOpacity * 0.6}
-				r={dot.r}
-			/>
-		);
-	}
-	return (
-		<motion.circle
-			animate={{
-				cy: [dot.y, dot.y - dot.rise, dot.y - dot.rise * 1.3],
-				opacity: [0, dot.peakOpacity, 0],
-				scale: [0.6, 1, 1.35],
-			}}
-			cx={dot.x}
-			cy={dot.y}
-			fill="#ffffff"
-			r={dot.r}
-			style={{ transformOrigin: `${dot.x}px ${dot.y}px` }}
-			transition={{
-				delay: dot.delay,
-				duration: dot.duration,
-				ease: "easeOut",
-				repeat: Number.POSITIVE_INFINITY,
-			}}
-		/>
-	);
-}
-
-/**
- * O caminho líquido: um rio de espuma que escorre da bolha do hero até a
- * doca, revelado conforme o scroll avança, com a fita preenchida (sem
- * stroke fino nem blur), espuma nas bordas e um reflexo interno. Termina
- * numa poça sob a caixa.
- */
 export function LiquidPath() {
 	const active = useJourneyActive();
 	const reduced = useReducedMotion();
@@ -472,8 +398,6 @@ export function LiquidPath() {
 	// dasharray "0px" (progresso 0) e linecap round — some com o grupo
 	// mascarado até o progresso realmente começar.
 	const riverOpacity = useTransform(progress, [0, 0.008], [0, 1]);
-	// A espuma da foz só "ferve" quando o rio de fato chega na doca.
-	const fozOpacity = useTransform(progress, [0.86, 0.97], [0, 1]);
 
 	useEffect(() => {
 		if (!active) {
@@ -503,15 +427,12 @@ export function LiquidPath() {
 			const samples = sampleCenterline(points);
 			const normals = computeNormals(samples);
 			const widths = computeWidths(samples);
-			const puddle = points.at(-1) ?? null;
 			setGeometry({
 				centerlineD: buildPath(points),
 				foam: buildFoam(samples, normals, widths),
-				fozFoam: puddle ? buildFozFoam(puddle) : [],
 				// Preso à altura do main: um svg mais alto que o conteúdo
 				// vaza por baixo e estica o documento em loop.
 				height: main.offsetHeight,
-				puddle,
 				reflectionD: buildReflectionPath(samples, normals),
 				ribbonD: buildRibbonPath(samples, normals, widths),
 			});
@@ -557,11 +478,6 @@ export function LiquidPath() {
 						/>
 					)}
 				</linearGradient>
-				<radialGradient id="puddle-fill">
-					<stop offset="0" stopColor="#a8e0f0" stopOpacity="0.85" />
-					<stop offset="0.7" stopColor="#dcf3fa" stopOpacity="0.7" />
-					<stop offset="1" stopColor="#dcf3fa" stopOpacity="0" />
-				</radialGradient>
 				{/* Fade das pontas: a nascente e a foz nunca mostram corte, mesmo
 				    já reveladas — o alfa mora no gradiente do stroke do mask. */}
 				<linearGradient id="river-fade" x1="0" x2="0" y1="0" y2="1">
@@ -582,38 +498,6 @@ export function LiquidPath() {
 					/>
 				</mask>
 			</defs>
-			{geometry.puddle ? (
-				<g>
-					<motion.ellipse
-						animate={reduced ? undefined : { scale: [1, 1.05, 1] }}
-						cx={geometry.puddle.x}
-						cy={geometry.puddle.y + 86}
-						fill="url(#puddle-fill)"
-						rx={210}
-						ry={38}
-						style={{
-							opacity: progress,
-							transformOrigin: `${geometry.puddle.x}px ${geometry.puddle.y + 86}px`,
-						}}
-						transition={{
-							duration: 3.2,
-							ease: "easeInOut",
-							repeat: Number.POSITIVE_INFINITY,
-						}}
-					/>
-					<motion.ellipse
-						cx={geometry.puddle.x}
-						cy={geometry.puddle.y + 86}
-						fill="none"
-						rx={150}
-						ry={26}
-						stroke="#a8e0f0"
-						strokeOpacity={0.5}
-						strokeWidth={2}
-						style={{ opacity: progress }}
-					/>
-				</g>
-			) : null}
 			<motion.g mask="url(#liquid-reveal)" style={{ opacity: riverOpacity }}>
 				{/* A fita: um rio preenchido, sem stroke fino nem blur. */}
 				<path d={geometry.ribbonD} fill="url(#liquid)" />
@@ -652,17 +536,6 @@ export function LiquidPath() {
 					reduced={Boolean(reduced)}
 				/>
 			))}
-			{/* Foz borbulhante: espuma viva onde o rio deságua na doca. */}
-			<motion.g style={{ opacity: fozOpacity }}>
-				{geometry.fozFoam.map((dot, index) => (
-					<FozBubble
-						dot={dot}
-						// biome-ignore lint/suspicious/noArrayIndexKey: lista de tamanho fixo (FOZ_FOAM_COUNT), o índice É a identidade determinística da bolha
-						key={index}
-						reduced={Boolean(reduced)}
-					/>
-				))}
-			</motion.g>
 		</svg>
 	);
 }

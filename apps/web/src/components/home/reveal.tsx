@@ -22,8 +22,8 @@ export function Reveal({
 		<motion.div
 			className={className}
 			initial={{ opacity: 0, y: reduced ? 0 : 24 }}
-			transition={{ delay, duration: 0.55, ease: EASE_OUT }}
-			viewport={{ margin: "-80px", once: true }}
+			transition={{ delay, duration: 0.45, ease: EASE_OUT }}
+			viewport={{ margin: "-40px", once: true }}
 			whileInView={{ opacity: 1, y: 0 }}
 		>
 			{children}
@@ -50,7 +50,7 @@ export function RevealList({
 			className={className}
 			initial="hidden"
 			transition={{ staggerChildren: 0.06 }}
-			viewport={{ margin: "-80px", once: true }}
+			viewport={{ margin: "-40px", once: true }}
 			whileInView="shown"
 		>
 			{items.map((item) => (
