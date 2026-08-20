@@ -56,32 +56,92 @@ function makeFrascoLabel(): Texture {
 	return texture;
 }
 
-/** Lateral do baú: marca "CBS" + friso aqua + frisos verticais sutis. */
-function makeBauSide(): Texture {
+const BAU_TEX_W = 512;
+const BAU_TEX_H = 320;
+
+/**
+ * Lateral do baú, pintura de frota: logo oficial da CBS à frente e uma faixa
+ * diagonal azul→aqua na traseira, com um filete navy. `traseira` diz em que
+ * borda da textura fica a faixa — cada lado do baú recebe a sua, para a logo
+ * nunca sair espelhada. A logo (PNG) carrega assíncrona: a textura atualiza
+ * quando a imagem chega.
+ */
+function makeBauSide(traseira: "direita" | "esquerda"): Texture {
 	const canvas = document.createElement("canvas");
-	canvas.width = 256;
-	canvas.height = 160;
+	canvas.width = BAU_TEX_W;
+	canvas.height = BAU_TEX_H;
+	const texture = new CanvasTexture(canvas);
+	texture.colorSpace = SRGBColorSpace;
+	texture.anisotropy = 4;
 	const ctx = canvas.getContext("2d");
-	if (ctx) {
+	if (!ctx) {
+		return texture;
+	}
+	const paint = (logo: HTMLImageElement | null) => {
+		ctx.setTransform(1, 0, 0, 1, 0, 0);
 		// Fundo branco opaco: clearRect deixaria alfa zero, que vira preto
 		// num material sem transparent.
 		ctx.fillStyle = "#ffffff";
-		ctx.fillRect(0, 0, 256, 160);
-		ctx.fillStyle = "#0f1c2b";
-		ctx.font = 'bold 46px Sora, "Sora Fallback", sans-serif';
-		ctx.textAlign = "center";
-		ctx.textBaseline = "middle";
-		ctx.fillText("CBS", 128, 60);
-		ctx.fillStyle = "#1d9dd8";
-		ctx.fillRect(58, 92, 140, 8);
-		// frisos verticais sutis, atrás da marca
-		ctx.fillStyle = "rgba(15,28,43,0.08)";
-		for (let i = 1; i < 8; i += 1) {
-			ctx.fillRect(i * 32 - 1, 118, 2, 34);
+		ctx.fillRect(0, 0, BAU_TEX_W, BAU_TEX_H);
+		// Faixa e filete espelhados em X quando a traseira é à esquerda; a
+		// logo é pintada depois, fora da transformação, sempre legível.
+		if (traseira === "esquerda") {
+			ctx.setTransform(-1, 0, 0, 1, BAU_TEX_W, 0);
 		}
-	}
-	const texture = new CanvasTexture(canvas);
-	texture.colorSpace = SRGBColorSpace;
+		// Frisos verticais sutis (chapa do baú)
+		ctx.fillStyle = "rgba(15,28,43,0.06)";
+		for (let i = 1; i < 12; i += 1) {
+			ctx.fillRect(i * 44 - 1, 0, 2, BAU_TEX_H);
+		}
+		// Faixa diagonal na traseira: azul CBS → aqua, inclinada ~18°
+		const skew = 0.32 * BAU_TEX_H;
+		const bandX = BAU_TEX_W * 0.66;
+		const bandW = BAU_TEX_W * 0.2;
+		const grad = ctx.createLinearGradient(0, 0, 0, BAU_TEX_H);
+		grad.addColorStop(0, "#1d9dd8");
+		grad.addColorStop(1, "#a8e0f0");
+		ctx.fillStyle = grad;
+		ctx.beginPath();
+		ctx.moveTo(bandX + skew, 0);
+		ctx.lineTo(bandX + skew + bandW, 0);
+		ctx.lineTo(bandX + bandW, BAU_TEX_H);
+		ctx.lineTo(bandX, BAU_TEX_H);
+		ctx.closePath();
+		ctx.fill();
+		// Filete navy paralelo, à frente da faixa
+		const stripeX = bandX - BAU_TEX_W * 0.06;
+		const stripeW = BAU_TEX_W * 0.022;
+		ctx.fillStyle = "#0f1c2b";
+		ctx.beginPath();
+		ctx.moveTo(stripeX + skew, 0);
+		ctx.lineTo(stripeX + skew + stripeW, 0);
+		ctx.lineTo(stripeX + stripeW, BAU_TEX_H);
+		ctx.lineTo(stripeX, BAU_TEX_H);
+		ctx.closePath();
+		ctx.fill();
+		ctx.setTransform(1, 0, 0, 1, 0, 0);
+		// Logo oficial à frente (ou wordmark de fallback enquanto carrega)
+		const logoW = BAU_TEX_W * 0.42;
+		const logoX =
+			traseira === "direita"
+				? BAU_TEX_W * 0.07
+				: BAU_TEX_W - BAU_TEX_W * 0.07 - logoW;
+		if (logo) {
+			const logoH = (logo.height / logo.width) * logoW;
+			ctx.drawImage(logo, logoX, (BAU_TEX_H - logoH) / 2, logoW, logoH);
+		} else {
+			ctx.fillStyle = "#0f1c2b";
+			ctx.font = 'bold 84px Sora, "Sora Fallback", sans-serif';
+			ctx.textAlign = "left";
+			ctx.textBaseline = "middle";
+			ctx.fillText("CBS", logoX, BAU_TEX_H / 2);
+		}
+		texture.needsUpdate = true;
+	};
+	paint(null);
+	const logo = new Image();
+	logo.onload = () => paint(logo);
+	logo.src = "/cbs-logo.png";
 	return texture;
 }
 
@@ -489,7 +549,10 @@ function FrenteCaminhao() {
 
 /** Baú branco com marca CBS nas laterais, faixa azul e luzes traseiras. */
 function Bau() {
-	const lateral = useMemo(makeBauSide, []);
+	// Lado +z (rotação 0): u cresce para +X = frente, traseira à esquerda.
+	// Lado -z (rotação π): u cresce para -X = traseira à direita.
+	const lateralZ = useMemo(() => makeBauSide("esquerda"), []);
+	const lateralMenosZ = useMemo(() => makeBauSide("direita"), []);
 	return (
 		<group>
 			<RoundedBox
@@ -513,8 +576,11 @@ function Bau() {
 					position={[BAU_X, BAU_Y + 0.06, (lado * (BAU_LARGURA + 0.006)) / 2]}
 					rotation={[0, lado === 1 ? 0 : Math.PI, 0]}
 				>
-					<planeGeometry args={[BAU_COMPRIMENTO * 0.82, BAU_ALTURA * 0.62]} />
-					<meshStandardMaterial map={lateral} roughness={0.4} transparent />
+					<planeGeometry args={[BAU_COMPRIMENTO * 0.94, BAU_ALTURA * 0.74]} />
+					<meshStandardMaterial
+						map={lado === 1 ? lateralZ : lateralMenosZ}
+						roughness={0.4}
+					/>
 				</mesh>
 			))}
 			{/* Faixa azul na base do baú */}
