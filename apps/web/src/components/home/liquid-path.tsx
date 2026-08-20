@@ -82,40 +82,46 @@ function pseudoRandom(seed: number): number {
 }
 
 /**
- * Mesma curva do traço original: uma bezier cúbica por par de âncoras, com
- * pontos de controle na metade do Y (escorrido vertical suave).
+ * Catmull-Rom (tensão 0.5) convertido em cúbicas de Bézier: a tangente em
+ * cada marco segue a direção dos vizinhos, então trechos quase horizontais
+ * (a curva de chegada) viram uma curva contínua em vez de um cotovelo com
+ * tangentes verticais forçadas.
  */
-function buildPath(points: Point[]): string {
-	if (points.length < 2) {
-		return "";
-	}
-	const [start, ...rest] = points as [Point, ...Point[]];
-	let d = `M ${start.x} ${start.y}`;
-	let previous = start;
-	for (const point of rest) {
-		const midY = (previous.y + point.y) / 2;
-		d += ` C ${previous.x} ${midY}, ${point.x} ${midY}, ${point.x} ${point.y}`;
-		previous = point;
-	}
-	return d;
-}
+const CATMULL_TENSION = 6;
 
 function buildSegments(points: Point[]): Segment[] {
 	const segments: Segment[] = [];
-	let previous: Point | undefined = points[0];
-	for (const point of points.slice(1)) {
-		if (previous) {
-			const midY = (previous.y + point.y) / 2;
-			segments.push({
-				p0: previous,
-				p1: { x: previous.x, y: midY },
-				p2: { x: point.x, y: midY },
-				p3: point,
-			});
-		}
-		previous = point;
+	for (let i = 0; i < points.length - 1; i += 1) {
+		const prev = points[i - 1] ?? (points[i] as Point);
+		const a = points[i] as Point;
+		const b = points[i + 1] as Point;
+		const next = points[i + 2] ?? b;
+		segments.push({
+			p0: a,
+			p1: {
+				x: a.x + (b.x - prev.x) / CATMULL_TENSION,
+				y: a.y + (b.y - prev.y) / CATMULL_TENSION,
+			},
+			p2: {
+				x: b.x - (next.x - a.x) / CATMULL_TENSION,
+				y: b.y - (next.y - a.y) / CATMULL_TENSION,
+			},
+			p3: b,
+		});
 	}
 	return segments;
+}
+
+function buildPath(points: Point[]): string {
+	if (points.length === 0) {
+		return "";
+	}
+	const [start] = points as [Point];
+	let d = `M ${start.x} ${start.y}`;
+	for (const { p1, p2, p3 } of buildSegments(points)) {
+		d += ` C ${p1.x} ${p1.y}, ${p2.x} ${p2.y}, ${p3.x} ${p3.y}`;
+	}
+	return d;
 }
 
 function cubicPoint(segment: Segment, t: number): Point {
