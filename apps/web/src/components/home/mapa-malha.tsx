@@ -112,6 +112,10 @@ export function MapaMalha() {
 		>
 			<MapaMalhaPlaceholder className="malha-map-fallback absolute inset-0" />
 			{shouldMount ? (
+				/* loading={false} não suprime o DefaultLoader do mapcn (ele
+				   renderiza enquanto !isLoaded); é o cross-fade via
+				   data-map-ready que o mantém invisível — não remover o
+				   cross-fade sem tratar isso. */
 				<MapLibreMap
 					attributionControl={false}
 					blank

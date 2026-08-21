@@ -237,6 +237,14 @@ html[data-scene-ready] .hero-placeholder {
 	transform: scale(1.15);
 }
 
+@media (prefers-reduced-motion: reduce) {
+	.malha-map .maplibregl-marker .praca-dot {
+		opacity: 1;
+		transform: none;
+		transition: none;
+	}
+}
+
 /* Asfalto da doca: faixa navy com a linha tracejada central em aqua. */
 .road {
 	background:
