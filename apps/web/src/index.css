@@ -155,6 +155,56 @@ html[data-scene-ready] .hero-placeholder {
 	}
 }
 
+/* Mapa da malha: o Brasil é tinta sobre o papel — estados quase brancos,
+   divisas brancas, contorno aqua. Os pontos das praças nascem apagados e
+   acendem (`data-lit`) quando a caixa chega à estação. */
+.malha-svg-states path {
+	fill: #f0f9fc;
+	stroke: #ffffff;
+	stroke-width: 1.2;
+	stroke-linejoin: round;
+	paint-order: stroke;
+}
+
+.malha-svg-states {
+	filter: drop-shadow(0 0 0.8px var(--color-brand-aqua));
+}
+
+.praca-dot-core {
+	fill: var(--color-brand-blue);
+	stroke: #ffffff;
+	stroke-width: 2.5;
+}
+
+.praca-dot-halo {
+	opacity: 0.45;
+	fill: none;
+	stroke: var(--color-brand-blue);
+	stroke-width: 1.2;
+}
+
+.praca-dot {
+	opacity: 0.35;
+	transform-origin: center;
+	transform-box: fill-box;
+	transition:
+		opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+		transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+	transition-delay: calc(var(--praca-index, 0) * 60ms);
+}
+
+[data-lit] .praca-dot {
+	opacity: 1;
+	transform: scale(1.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.praca-dot {
+		opacity: 1;
+		transition: none;
+	}
+}
+
 /* Asfalto da doca: faixa navy com a linha tracejada central em aqua. */
 .road {
 	background:
