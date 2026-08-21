@@ -2,6 +2,7 @@ import { ArrowDown, Mail } from "lucide-react";
 import Image from "next/image";
 
 import { LiquidPath } from "@/components/home/liquid-path";
+import { MapaMalhaLazy } from "@/components/home/mapa-malha-lazy";
 import { pracasPorRegiao } from "@/components/home/pracas";
 import { Reveal, RevealGroups } from "@/components/home/reveal";
 import { Scene3D } from "@/components/home/scene3d";
@@ -172,23 +173,29 @@ function Hero() {
 
 function Station({
 	anchor,
+	backdrop,
 	children,
 	flip = false,
 	title,
 	variant,
 }: {
 	anchor: string;
+	/** Camada atrás do objeto 3D (ex.: o mapa da malha). Substitui a névoa. */
+	backdrop?: React.ReactNode;
 	children: React.ReactNode;
 	flip?: boolean;
 	title: string;
 	variant: "caminhao" | "frasco" | "selo";
 }) {
+	const hasBackdrop = Boolean(backdrop);
 	return (
 		<section className="relative mx-auto grid min-h-[80vh] max-w-6xl items-center gap-10 px-6 py-24 lg:grid-cols-2">
-			<div
-				className="mist-side absolute inset-y-0 left-1/2 w-screen -translate-x-1/2"
-				style={{ "--mist-x": flip ? "18%" : "82%" } as React.CSSProperties}
-			/>
+			{hasBackdrop ? null : (
+				<div
+					className="mist-side absolute inset-y-0 left-1/2 w-screen -translate-x-1/2"
+					style={{ "--mist-x": flip ? "18%" : "82%" } as React.CSSProperties}
+				/>
+			)}
 			<div className={`relative z-20 ${flip ? "lg:order-2" : ""}`}>
 				<Reveal>
 					<h2 className="max-w-md font-bold font-display text-4xl text-brand-navy leading-tight tracking-tight sm:text-5xl">
@@ -197,21 +204,41 @@ function Station({
 				</Reveal>
 				{children}
 			</div>
-			<div
-				className={`relative z-10 flex justify-center ${flip ? "lg:order-1" : ""}`}
-			>
-				<div aria-hidden className="relative h-72 w-72 sm:h-96 sm:w-96">
-					<div className="absolute inset-0" data-s-anchor={variant} />
-					{/* Parada da caixa: logo abaixo da bolha, na coluna dela — a
-					    travessia nunca atravessa a coluna de texto. */}
+			{hasBackdrop ? (
+				/* Composição D2: mapa no alto-direita, bolha em baixo-esquerda —
+				   a diagonal do rio líquido. Abaixo de lg empilha. */
+				<div className="relative z-10 flex min-h-[520px] flex-col items-center gap-6 lg:block">
+					<div className="relative h-72 w-72 lg:absolute lg:top-0 lg:right-0 lg:h-[380px] lg:w-[380px]">
+						{backdrop}
+					</div>
 					<div
-						className={`absolute top-full hidden h-24 w-24 -translate-y-1/2 lg:block ${
-							flip ? "-left-10" : "-right-10"
-						}`}
-						data-j-anchor={anchor}
-					/>
+						aria-hidden
+						className="relative h-72 w-72 lg:absolute lg:bottom-0 lg:left-0 lg:h-80 lg:w-80"
+					>
+						<div className="absolute inset-0" data-s-anchor={variant} />
+						<div
+							className="absolute top-full -right-10 hidden h-24 w-24 -translate-y-1/2 lg:block"
+							data-j-anchor={anchor}
+						/>
+					</div>
 				</div>
-			</div>
+			) : (
+				<div
+					className={`relative z-10 flex justify-center ${flip ? "lg:order-1" : ""}`}
+				>
+					<div aria-hidden className="relative h-72 w-72 sm:h-96 sm:w-96">
+						<div className="absolute inset-0" data-s-anchor={variant} />
+						{/* Parada da caixa: logo abaixo da bolha, na coluna dela — a
+						    travessia nunca atravessa a coluna de texto. */}
+						<div
+							className={`absolute top-full hidden h-24 w-24 -translate-y-1/2 lg:block ${
+								flip ? "-left-10" : "-right-10"
+							}`}
+							data-j-anchor={anchor}
+						/>
+					</div>
+				</div>
+			)}
 		</section>
 	);
 }
@@ -344,6 +371,7 @@ export default function Home() {
 
 				<Station
 					anchor="malha"
+					backdrop={<MapaMalhaLazy />}
 					title="Fábricas onde o frete nasce menor."
 					variant="caminhao"
 				>

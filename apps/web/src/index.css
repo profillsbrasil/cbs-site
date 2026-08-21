@@ -160,7 +160,7 @@ html[data-scene-ready] .hero-placeholder {
    acendem (`data-lit`) quando a caixa chega à estação. */
 .malha-svg-states path {
 	fill: #f0f9fc;
-	stroke: #ffffff;
+	stroke: rgb(168 224 240 / 0.6);
 	stroke-width: 1.2;
 	stroke-linejoin: round;
 	paint-order: stroke;

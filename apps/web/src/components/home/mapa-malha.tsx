@@ -130,7 +130,11 @@ export function MapaMalha() {
 					<MapGeoJSON
 						data={GEOJSON_URL}
 						fillPaint={{ "fill-color": "#f0f9fc" }}
-						linePaint={{ "line-color": "#ffffff", "line-width": 1.2 }}
+						linePaint={{
+							"line-color": "#a8e0f0",
+							"line-opacity": 0.6,
+							"line-width": 1,
+						}}
 					/>
 					{PRACAS.map(({ nome, lngLat }, index) => (
 						<MapMarker key={nome} latitude={lngLat[1]} longitude={lngLat[0]}>
