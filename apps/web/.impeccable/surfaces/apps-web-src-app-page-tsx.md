@@ -24,6 +24,7 @@ Direção escolhida: Bolha-Pacote (comp aprovado `.impeccable/mocks/comp-bolha-p
 | Headline display | Sora (Google Fonts, self-host via next/font) |
 | CTA primário | HTML/CSS no vocabulário do mundo (pílula azul #1D9DD8) |
 | Greeked bars do comp | substituídos por copy real PT (proposta, refino com cliente) |
+| Mapa da malha (Brasil + 7 praças, fundo da estação 3, composição D2) | mapcn `Map blank` + GeoJSON local + `MapMarker`; SVG placeholder/fallback |
 
 Não literalizar: as barras cinzas do comp, a posição exata das bolhas, o "SBS" garbled da fita (usar CBS correto).
 
@@ -32,3 +33,8 @@ Pendências: copy final com Gulberto; logo vetorial.
 ## Desfecho (2026-08-19)
 
 Revisão de acabamento independente: **ship** após 2 rodadas. Resolvidos: materiais das estações (frasco com rótulo curvo, selo frontal com visto e fitas, caminhão com marca no baú), fita líquida em camadas, lettering Sora nas texturas, cobertura de screenshot completa. Preservar sempre: o vidro das bolhas do hero e a coreografia estoura→viaja (momento autoral da página).
+
+## Mapa da malha (2026-08-21)
+
+Decisões com o usuário via visual companion: dados = só as 7 praças; posição = D (fundo da estação 3); composição = D2. Comps: `.superpowers/brainstorm/662928-1787323468/content/layout-v4.html` e `d-composition.html`. ADR-0001.
+Worker do MapLibre self-hosted (ADR-0001).

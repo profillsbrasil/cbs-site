@@ -156,7 +156,7 @@ html[data-scene-ready] .hero-placeholder {
 }
 
 /* Mapa da malha: o Brasil é tinta sobre o papel — estados quase brancos,
-   divisas brancas, contorno aqua. Os pontos das praças nascem apagados e
+   divisas em aqua a 60%, contorno aqua. Os pontos das praças nascem apagados e
    acendem (`data-lit`) quando a caixa chega à estação. */
 .malha-svg-states path {
 	fill: #f0f9fc;
