@@ -35,8 +35,7 @@ export function MapaMalhaPlaceholder({ className }: { className?: string }) {
 							key={nome}
 							style={{ "--praca-index": index } as CSSProperties}
 						>
-							<circle className="praca-dot-halo" cx={x} cy={y} r={14} />
-							<circle className="praca-dot-core" cx={x} cy={y} r={6} />
+							<circle className="praca-dot-core" cx={x} cy={y} r={7} />
 						</g>
 					);
 				})}

@@ -156,31 +156,24 @@ html[data-scene-ready] .hero-placeholder {
 }
 
 /* Mapa da malha: o Brasil é tinta sobre o papel — estados quase brancos,
-   divisas em aqua a 60%, contorno aqua. Os pontos das praças nascem apagados e
-   acendem (`data-lit`) quando a caixa chega à estação. */
+   divisas em navy a 25%, contorno em navy a 60%. Os pontos das praças nascem
+   apagados e acendem (`data-lit`) quando a caixa chega à estação. */
 .malha-svg-states path {
 	fill: #f0f9fc;
-	stroke: rgb(168 224 240 / 0.6);
-	stroke-width: 1.2;
+	stroke: rgb(15 28 43 / 0.25);
+	stroke-width: 1;
 	stroke-linejoin: round;
 	paint-order: stroke;
 }
 
 .malha-svg-states {
-	filter: drop-shadow(0 0 0.8px var(--color-brand-aqua));
+	filter: drop-shadow(0 0 1.5px rgb(15 28 43 / 0.6));
 }
 
 .praca-dot-core {
 	fill: var(--color-brand-blue);
 	stroke: #ffffff;
-	stroke-width: 2.5;
-}
-
-.praca-dot-halo {
-	opacity: 0.45;
-	fill: none;
-	stroke: var(--color-brand-blue);
-	stroke-width: 1.2;
+	stroke-width: 3;
 }
 
 .praca-dot {
@@ -223,7 +216,6 @@ html[data-scene-ready] .hero-placeholder {
 
 /* Marcadores DOM do MapLibre: mesmo acendimento dos pontos do SVG. */
 .malha-map .maplibregl-marker .praca-dot {
-	box-shadow: 0 0 0 6px rgb(29 157 216 / 0.18);
 	opacity: 0.35;
 	transform: scale(1);
 	transition:

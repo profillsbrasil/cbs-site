@@ -23,6 +23,10 @@ import { useAnchorFraction } from "./use-anchor-fraction";
 import { useJourneyActive } from "./use-journey-active";
 
 const GEOJSON_URL = "/geo/brasil-estados.json";
+const PAIS_GEOJSON_URL = "/geo/brasil-pais.json";
+// Paint do MapLibre não lê custom properties do CSS: mesmo valor de
+// --color-brand-navy, repetido aqui como literal.
+const brandNavy = "#0f1c2b";
 // A caixa "chegou" um pouco antes de parar exatamente sobre a âncora.
 const LIT_LEAD = 0.02;
 // Só montar o MapLibre quando a estação estiver a essa distância do viewport.
@@ -131,16 +135,25 @@ export function MapaMalha() {
 						data={GEOJSON_URL}
 						fillPaint={{ "fill-color": "#f0f9fc" }}
 						linePaint={{
-							"line-color": "#a8e0f0",
-							"line-opacity": 0.6,
+							"line-color": brandNavy,
+							"line-opacity": 0.25,
 							"line-width": 1,
+						}}
+					/>
+					<MapGeoJSON
+						data={PAIS_GEOJSON_URL}
+						fillPaint={false}
+						linePaint={{
+							"line-color": brandNavy,
+							"line-opacity": 0.6,
+							"line-width": 1.5,
 						}}
 					/>
 					{PRACAS.map(({ nome, lngLat }, index) => (
 						<MapMarker key={nome} latitude={lngLat[1]} longitude={lngLat[0]}>
 							<MarkerContent>
 								<span
-									className="praca-dot block size-3 rounded-full bg-brand-blue ring-2 ring-white"
+									className="praca-dot block size-3.5 rounded-full bg-brand-blue ring-[3px] ring-white"
 									style={{ "--praca-index": index } as React.CSSProperties}
 								/>
 							</MarkerContent>

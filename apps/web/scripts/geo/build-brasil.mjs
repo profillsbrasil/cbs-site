@@ -1,18 +1,23 @@
 // Gera os dados do mapa da malha a partir do Natural Earth (domínio público):
 //   public/geo/brasil-estados.json      -> GeoJSON dos 27 estados (MapGeoJSON)
+//   public/geo/brasil-pais.json         -> GeoJSON do contorno do país (MapGeoJSON, V3)
 //   src/components/home/brasil-outline.ts -> paths SVG + projeção (placeholder)
-// Fonte: natural-earth-vector v5.1.2, ne_50m_admin_1_states_provinces.
+// Fonte: natural-earth-vector v5.1.2, ne_50m_admin_1_states_provinces e
+// ne_50m_admin_0_countries.
 // Rodar uma vez: `bun scripts/geo/build-brasil.mjs` (saída é commitada).
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const SOURCE =
 	"https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@v5.1.2/geojson/ne_50m_admin_1_states_provinces.geojson";
+const COUNTRIES_SOURCE =
+	"https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@v5.1.2/geojson/ne_50m_admin_0_countries.geojson";
 const SVG_WIDTH = 600;
 const DECIMALS = 1;
 
 const root = path.resolve(import.meta.dirname, "../..");
 const geoOut = path.join(root, "public/geo/brasil-estados.json");
+const paisOut = path.join(root, "public/geo/brasil-pais.json");
 const tsOut = path.join(root, "src/components/home/brasil-outline.ts");
 
 const all = await (await fetch(SOURCE)).json();
@@ -20,6 +25,24 @@ const states = all.features.filter((f) => f.properties.adm0_a3 === "BRA");
 if (states.length !== 27) {
 	throw new Error(`esperava 27 estados, veio ${states.length}`);
 }
+
+const allCountries = await (await fetch(COUNTRIES_SOURCE)).json();
+const brasilPais = allCountries.features.find(
+	(f) => f.properties.ADM0_A3 === "BRA"
+);
+if (!brasilPais) {
+	throw new Error("não encontrei o Brasil em ne_50m_admin_0_countries");
+}
+const paisGeojson = {
+	features: [
+		{
+			geometry: brasilPais.geometry,
+			properties: { name: "Brasil" },
+			type: "Feature",
+		},
+	],
+	type: "FeatureCollection",
+};
 
 const rings = (geometry) =>
 	geometry.type === "MultiPolygon"
@@ -103,6 +126,7 @@ export const BRASIL_STATE_PATHS: readonly string[] = ${JSON.stringify(paths, nul
 
 await mkdir(path.dirname(geoOut), { recursive: true });
 await writeFile(geoOut, JSON.stringify(geojson));
+await writeFile(paisOut, JSON.stringify(paisGeojson));
 await writeFile(tsOut, ts);
 console.log(
 	`ok: ${states.length} estados, viewBox ${SVG_WIDTH}x${height.toFixed(1)}`
