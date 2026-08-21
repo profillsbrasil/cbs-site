@@ -2,21 +2,13 @@ import { ArrowDown, Mail } from "lucide-react";
 import Image from "next/image";
 
 import { LiquidPath } from "@/components/home/liquid-path";
+import { pracasPorRegiao } from "@/components/home/pracas";
 import { Reveal, RevealGroups } from "@/components/home/reveal";
 import { Scene3D } from "@/components/home/scene3d";
 
 const WHATSAPP_NUMBER = "+55 19 99689-4236";
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, "")}`;
 const EMAIL_URL = "mailto:othavioquiliao@gmail.com";
-
-// Praças da malha, agrupadas por região: 7 chips num bloco só viram lista;
-// por região, o leitor enxerga a cobertura do país de uma vez.
-const PRACAS = [
-	{ items: ["São Paulo", "Minas Gerais"], label: "Sudeste" },
-	{ items: ["Curitiba", "Rio Grande do Sul"], label: "Sul" },
-	{ items: ["Pernambuco", "Bahia"], label: "Nordeste" },
-	{ items: ["Centro do Brasil"], label: "Centro-Oeste" },
-];
 
 function WhatsAppIcon({ className }: { className?: string }) {
 	return (
@@ -364,7 +356,7 @@ export default function Home() {
 					</Reveal>
 					<RevealGroups
 						className="mt-7 flex max-w-md flex-col gap-3"
-						groups={PRACAS}
+						groups={pracasPorRegiao()}
 						itemClassName="rounded-full bg-brand-mist px-4 py-1.5 font-medium text-brand-navy text-sm transition-[transform,background-color,color] duration-200 hover:-translate-y-0.5 hover:bg-brand-ink hover:text-white motion-reduce:transition-none motion-reduce:hover:translate-y-0"
 						labelClassName="w-24 shrink-0 text-brand-navy/60 text-sm"
 					/>
