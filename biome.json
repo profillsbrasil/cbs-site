@@ -27,7 +27,8 @@
       "!**/.source",
       "!**/convex/_generated",
       "!**/.superpowers",
-      "!**/.impeccable"
+      "!**/.impeccable",
+      "!apps/web/public/geo"
     ]
   },
   "formatter": {
