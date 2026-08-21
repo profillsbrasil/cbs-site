@@ -1,4 +1,5 @@
 import { cn } from "@cbs-site/ui/lib/utils";
+import type { CSSProperties } from "react";
 
 import {
 	BRASIL_STATE_PATHS,
@@ -26,10 +27,14 @@ export function MapaMalhaPlaceholder({ className }: { className?: string }) {
 				))}
 			</g>
 			<g className="malha-svg-pracas">
-				{PRACAS.map(({ nome, lngLat }) => {
+				{PRACAS.map(({ nome, lngLat }, index) => {
 					const [x, y] = projectLngLat(lngLat[0], lngLat[1]);
 					return (
-						<g className="praca-dot" key={nome}>
+						<g
+							className="praca-dot"
+							key={nome}
+							style={{ "--praca-index": index } as CSSProperties}
+						>
 							<circle className="praca-dot-halo" cx={x} cy={y} r={14} />
 							<circle className="praca-dot-core" cx={x} cy={y} r={6} />
 						</g>
