@@ -4,6 +4,7 @@ description: Sistema visual da home Bolha-Pacote — bolhas de vidro, caixa viaj
 colors:
   brand-navy: "#0f1c2b"
   brand-blue: "#1d9dd8"
+  brand-ink: "#1579b0"
   brand-aqua: "#a8e0f0"
   brand-mist: "#dcf3fa"
   brand-paper: "#fafbfc"
@@ -77,7 +78,8 @@ Paleta de marca restrita a cinco tokens, com o branco puro como sexto papel func
 - **Navy** (`#0f1c2b`): a tinta dominante — todo texto de título e corpo, o preenchimento em repouso do CTA primário, o aro do selo 3D, o chassi do caminhão.
 
 ### Secondary
-- **Azul CBS** (`#1d9dd8`): o acento de "ativação" — a palavra destacada no headline ("nossa fábrica"), o CTA primário no hover, a fita azul da caixa/rótulos 3D, links no hover.
+- **Azul CBS** (`#1d9dd8`): o acento gráfico — a fita azul da caixa/rótulos 3D, ícones, anel de foco, névoas. Não é usado como texto nem como fundo de hover: sobre o papel mede 2.95:1 e com texto branco 3.06:1, abaixo de AA.
+- **Azul-tinta** (`#1579b0`): o mesmo matiz escurecido até passar AA (4.6:1 sobre o papel, 4.8:1 com branco) — a palavra destacada nos headlines ("nossa fábrica", "Pronto para vender"), o CTA primário e os chips no hover, links no hover.
 
 ### Tertiary
 - **Aqua** (`#a8e0f0`): o tom intermediário do vidro e do líquido — meio-tom do gradiente do `LiquidPath`, tracejado do asfalto da doca, tonalidade das bolhas de sabão e microbolhas ambiente.

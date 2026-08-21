@@ -2,20 +2,20 @@ import { ArrowDown, Mail } from "lucide-react";
 import Image from "next/image";
 
 import { LiquidPath } from "@/components/home/liquid-path";
-import { Reveal, RevealList } from "@/components/home/reveal";
+import { Reveal, RevealGroups } from "@/components/home/reveal";
 import { Scene3D } from "@/components/home/scene3d";
 
-const WHATSAPP_URL = "https://wa.me/5519996894236";
+const WHATSAPP_NUMBER = "+55 19 99689-4236";
+const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, "")}`;
 const EMAIL_URL = "mailto:othavioquiliao@gmail.com";
 
+// Praças da malha, agrupadas por região: 7 chips num bloco só viram lista;
+// por região, o leitor enxerga a cobertura do país de uma vez.
 const PRACAS = [
-	"São Paulo",
-	"Minas Gerais",
-	"Curitiba",
-	"Pernambuco",
-	"Bahia",
-	"Rio Grande do Sul",
-	"Centro do Brasil",
+	{ items: ["São Paulo", "Minas Gerais"], label: "Sudeste" },
+	{ items: ["Curitiba", "Rio Grande do Sul"], label: "Sul" },
+	{ items: ["Pernambuco", "Bahia"], label: "Nordeste" },
+	{ items: ["Centro do Brasil"], label: "Centro-Oeste" },
 ];
 
 function WhatsAppIcon({ className }: { className?: string }) {
@@ -35,21 +35,35 @@ function WhatsAppIcon({ className }: { className?: string }) {
 function CtaWhatsApp({ label }: { label: string }) {
 	return (
 		<a
-			className="group inline-flex items-center gap-3 rounded-full bg-brand-navy px-8 py-4 font-semibold text-base text-white shadow-brand-navy/25 shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand-blue hover:shadow-brand-blue/30 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2"
+			className="group inline-flex items-center gap-3 rounded-full bg-brand-navy px-8 py-4 font-semibold text-base text-white shadow-brand-navy/25 shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand-ink hover:shadow-brand-ink/30 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2"
 			href={WHATSAPP_URL}
 			rel="noopener"
 			target="_blank"
 		>
 			<WhatsAppIcon className="size-5 transition-transform duration-200 group-hover:scale-110" />
 			{label}
+			<span className="sr-only"> (abre em nova aba)</span>
 		</a>
+	);
+}
+
+/**
+ * Linha de reasseguramento sob o par de CTAs: o site não tem formulário nem
+ * cadastro, e o clique leva a uma conversa — é o que o visitante precisa
+ * saber antes de sair da página.
+ */
+function CtaReassurance({ className = "" }: { className?: string }) {
+	return (
+		<p className={`text-brand-navy/70 text-sm ${className}`}>
+			Conversa direta, sem formulário nem cadastro.
+		</p>
 	);
 }
 
 function CtaEmail() {
 	return (
 		<a
-			className="inline-flex items-center gap-3 rounded-full border border-brand-navy/15 bg-white/60 px-8 py-4 font-semibold text-base text-brand-navy transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-blue hover:text-brand-blue focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2"
+			className="inline-flex items-center gap-3 rounded-full border border-brand-navy/15 bg-white/60 px-8 py-4 font-semibold text-base text-brand-navy transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-ink hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2"
 			href={EMAIL_URL}
 		>
 			<Mail aria-hidden className="size-5" />
@@ -73,16 +87,39 @@ function Navbar() {
 					/>
 				</a>
 				<a
-					className="inline-flex items-center gap-2 rounded-full bg-brand-navy px-5 py-2.5 font-semibold text-sm text-white transition-colors hover:bg-brand-blue focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2"
+					className="inline-flex items-center gap-2 rounded-full bg-brand-navy px-5 py-2.5 font-semibold text-sm text-white transition-colors hover:bg-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2"
 					href={WHATSAPP_URL}
 					rel="noopener"
 					target="_blank"
 				>
 					<WhatsAppIcon className="size-4" />
 					WhatsApp
+					<span className="sr-only"> (abre em nova aba)</span>
 				</a>
 			</div>
 		</header>
+	);
+}
+
+/**
+ * Silhueta CSS do aglomerado de bolhas, na mesma geometria da cena 3D
+ * (bolha principal com 74% da altura, três satélites). Ocupa o lugar do
+ * vidro enquanto o WebGL carrega e some via `html[data-scene-ready]`; se o
+ * WebGL nunca montar, fica como versão estática em vez de um vazio.
+ */
+function HeroPlaceholder() {
+	return (
+		<div
+			aria-hidden
+			className="hero-placeholder pointer-events-none absolute inset-0 flex items-center justify-center"
+		>
+			<div className="relative aspect-square h-full">
+				<div className="bubble-ghost absolute top-[11%] left-[13%] size-[74%]" />
+				<div className="bubble-ghost absolute top-[19%] left-[-3%] size-[10%]" />
+				<div className="bubble-ghost absolute top-[61%] left-[69%] size-[7%]" />
+				<div className="bubble-ghost absolute top-[59%] left-[29%] size-[4.5%]" />
+			</div>
+		</div>
 	);
 }
 
@@ -98,7 +135,7 @@ function Hero() {
 					<h1 className="max-w-xl font-bold font-display text-5xl text-brand-navy leading-[1.02] tracking-tight sm:text-7xl">
 						Sua marca,
 						<br />
-						<span className="text-brand-blue">nossa fábrica.</span>
+						<span className="text-brand-ink">nossa fábrica.</span>
 					</h1>
 				</div>
 				<div
@@ -120,18 +157,20 @@ function Hero() {
 						<CtaWhatsApp label="Chamar no WhatsApp" />
 						<CtaEmail />
 					</div>
+					<CtaReassurance className="mt-4" />
 				</div>
 			</div>
 			<div
 				className="relative h-[420px] lg:h-[560px]"
 				data-s-anchor="hero-cluster"
 			>
+				<HeroPlaceholder />
 				<div
 					className="absolute top-1/2 left-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2"
 					data-j-anchor="hero"
 				/>
 			</div>
-			<div className="absolute bottom-8 left-1/2 hidden translate-x-[-50%] items-center gap-2 text-brand-navy/50 text-sm lg:flex">
+			<div className="absolute bottom-8 left-1/2 hidden translate-x-[-50%] items-center gap-2 text-brand-navy/70 text-sm lg:flex">
 				<ArrowDown aria-hidden className="scroll-hint-arrow size-4" />
 				Role para acompanhar a entrega
 			</div>
@@ -200,7 +239,7 @@ function Chegada() {
 				<h2 className="relative z-20 mx-auto max-w-2xl font-bold font-display text-4xl text-brand-navy leading-tight tracking-tight sm:text-6xl">
 					Entregue no CD.
 					<br />
-					<span className="text-brand-blue">Pronto para vender.</span>
+					<span className="text-brand-ink">Pronto para vender.</span>
 				</h2>
 			</Reveal>
 			<Reveal delay={0.12}>
@@ -214,6 +253,7 @@ function Chegada() {
 					<CtaWhatsApp label="Falar com a CBS" />
 					<CtaEmail />
 				</div>
+				<CtaReassurance className="relative z-20 mt-4" />
 			</Reveal>
 			{/* A doca: o rio deságua e o caminhão recebe a caixa aqui, com
 			    palco inteiro abaixo dos CTAs para a coreografia final. */}
@@ -253,15 +293,15 @@ function Footer() {
 				</div>
 				<div className="flex flex-col gap-1 text-sm">
 					<a
-						className="text-brand-navy/80 transition-colors hover:text-brand-blue"
+						className="text-brand-navy/80 transition-colors hover:text-brand-ink"
 						href={WHATSAPP_URL}
 						rel="noopener"
 						target="_blank"
 					>
-						WhatsApp: +55 19 99689-4236
+						WhatsApp: {WHATSAPP_NUMBER}
 					</a>
 					<a
-						className="text-brand-navy/80 transition-colors hover:text-brand-blue"
+						className="text-brand-navy/80 transition-colors hover:text-brand-ink"
 						href={EMAIL_URL}
 					>
 						othavioquiliao@gmail.com
@@ -322,10 +362,11 @@ export default function Home() {
 							de quem vende no ML.
 						</p>
 					</Reveal>
-					<RevealList
-						className="mt-7 flex max-w-md flex-wrap gap-2"
-						itemClassName="rounded-full bg-brand-mist px-4 py-1.5 font-medium text-brand-navy text-sm transition-[transform,background-color,color] duration-200 hover:-translate-y-0.5 hover:bg-brand-blue hover:text-white motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-						items={PRACAS}
+					<RevealGroups
+						className="mt-7 flex max-w-md flex-col gap-3"
+						groups={PRACAS}
+						itemClassName="rounded-full bg-brand-mist px-4 py-1.5 font-medium text-brand-navy text-sm transition-[transform,background-color,color] duration-200 hover:-translate-y-0.5 hover:bg-brand-ink hover:text-white motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+						labelClassName="w-24 shrink-0 text-brand-navy/60 text-sm"
 					/>
 				</Station>
 

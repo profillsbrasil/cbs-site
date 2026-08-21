@@ -3,6 +3,10 @@
 @theme {
 	--color-brand-navy: #0f1c2b;
 	--color-brand-blue: #1d9dd8;
+	/* Azul de tinta: o mesmo matiz, escurecido até passar AA como texto
+	   sobre o papel (4.6:1) e como fundo de hover com texto branco (4.8:1).
+	   #1d9dd8 continua em fita, ícones e acentos gráficos. */
+	--color-brand-ink: #1579b0;
 	--color-brand-aqua: #a8e0f0;
 	--color-brand-mist: #dcf3fa;
 	--color-brand-paper: #fafbfc;
@@ -96,6 +100,58 @@
 	}
 	to {
 		opacity: 1;
+	}
+}
+
+/* Placeholder do hero: bolhas-fantasma em CSS no lugar do vidro WebGL
+   enquanto a cena carrega. Some em cross-fade quando Scene3D marca
+   `data-scene-ready` no <html>. */
+.hero-placeholder {
+	opacity: 1;
+	transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html[data-scene-ready] .hero-placeholder {
+	opacity: 0;
+}
+
+.bubble-ghost {
+	background:
+		radial-gradient(circle at 32% 28%, rgb(255 255 255 / 0.95), transparent 38%),
+		radial-gradient(
+			circle at 50% 50%,
+			rgb(255 255 255 / 0.1) 55%,
+			rgb(168 224 240 / 0.35) 84%,
+			rgb(29 157 216 / 0.28) 100%
+		);
+	border: 1px solid rgb(168 224 240 / 0.75);
+	border-radius: 9999px;
+	animation: bubble-breathe 3.2s ease-in-out infinite;
+}
+
+.bubble-ghost:nth-child(2) {
+	animation-delay: -1.1s;
+}
+.bubble-ghost:nth-child(3) {
+	animation-delay: -2.2s;
+}
+.bubble-ghost:nth-child(4) {
+	animation-delay: -0.6s;
+}
+
+@keyframes bubble-breathe {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-0.5rem);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.bubble-ghost {
+		animation: none;
 	}
 }
 

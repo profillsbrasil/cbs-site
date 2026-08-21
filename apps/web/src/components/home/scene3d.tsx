@@ -697,7 +697,7 @@ function makeMicroBubbles(): MicroBubble[] {
  */
 const MICRO_POP_RADIUS = 1.05;
 const MICRO_POP_SPEED = 2.6;
-const MICRO_BASE_OPACITY = 0.35;
+const MICRO_BASE_OPACITY = 0.3;
 
 interface PoppableMesh {
 	material: { opacity: number };
@@ -786,15 +786,18 @@ function MicroBubbles() {
 					scale={bubble.r}
 				>
 					<sphereGeometry args={[1, 16, 16]} />
+					{/* Sem transmission: numa esfera desse tamanho ela só devolve o
+					    lado sombreado em cinza. O filme é branco emissivo em aqua,
+					    com brilho de clearcoat — lê como bolha, não como poeira. */}
 					<meshPhysicalMaterial
 						clearcoat={1}
 						clearcoatRoughness={0.05}
 						color="#ffffff"
-						ior={1.15}
+						depthWrite={false}
+						emissive="#dcf3fa"
+						emissiveIntensity={0.9}
 						opacity={MICRO_BASE_OPACITY}
-						roughness={0.02}
-						thickness={0.02}
-						transmission={1}
+						roughness={0.12}
 						transparent
 					/>
 				</mesh>
@@ -1173,6 +1176,23 @@ function DocaFinal() {
 }
 
 /**
+ * Sinal de "cena pronta" para o DOM: no primeiro frame desenhado (o que só
+ * acontece depois das texturas resolverem o Suspense da cena), marca o
+ * <html> e o placeholder CSS do hero faz cross-fade para o vidro real.
+ */
+function SceneReady() {
+	const done = useRef(false);
+	useFrame(() => {
+		if (done.current) {
+			return;
+		}
+		done.current = true;
+		document.documentElement.dataset.sceneReady = "";
+	});
+	return null;
+}
+
+/**
  * O único canvas 3D da página (um contexto WebGL para tudo): bolhas do
  * hero, a caixa viajante (única) e vinhetas das seções, cada grupo ancorado
  * ao elemento do DOM que marca seu lugar.
@@ -1208,6 +1228,7 @@ export function Scene3D() {
 				<StationVignette variant="frasco" />
 				<StationVignette variant="selo" />
 				<StationVignette variant="caminhao" />
+				<SceneReady />
 			</Canvas>
 		</div>
 	);
