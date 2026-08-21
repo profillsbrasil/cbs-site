@@ -29,6 +29,7 @@
       "!**/.superpowers",
       "!**/.impeccable",
       "!apps/web/public/geo",
+      "!apps/web/public/vendor",
       "!packages/ui/src/components/map.tsx"
     ]
   },
