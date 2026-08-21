@@ -13,6 +13,7 @@ import { type Group, MathUtils, Vector3 } from "three";
 import { boxActive, boxWorldPosition } from "./box-position";
 import { CardboardBox } from "./cardboard-box";
 import { dockCargoWorld, dockReady } from "./dock-state";
+import { journeyFraction, segmentWeights } from "./journey-math";
 import { journeyProgress } from "./journey-progress";
 import {
 	BUBBLE_BASE_OPACITY,
@@ -408,29 +409,6 @@ interface TargetResult {
 	scale: number;
 }
 
-function segmentWeights(samples: AnchorSample[]): number[] {
-	const weights: number[] = [];
-	for (let i = 0; i < samples.length - 1; i += 1) {
-		const a = samples[i] as AnchorSample;
-		const b = samples[i + 1] as AnchorSample;
-		weights.push(Math.max(Math.abs(b.screenY - a.screenY), 1));
-	}
-	return weights;
-}
-
-function journeyFraction(
-	weights: number[],
-	segment: number,
-	t: number
-): number {
-	const total = weights.reduce((sum, w) => sum + w, 0);
-	let before = 0;
-	for (let i = 0; i < segment; i += 1) {
-		before += weights[i] ?? 0;
-	}
-	return (before + t * (weights[segment] ?? 0)) / total;
-}
-
 /**
  * Quando a página não tem scroll suficiente para a doca alcançar a linha de
  * foco, a jornada travaria antes de 1. Aqui a linha de foco desce na mesma
@@ -454,7 +432,7 @@ function resolveTarget(
 ): TargetResult {
 	const first = samples[0] as AnchorSample;
 	const last = samples.at(-1) as AnchorSample;
-	const weights = segmentWeights(samples);
+	const weights = segmentWeights(samples.map((s) => s.screenY));
 	out.copy(first.world);
 	if (focusY >= last.screenY) {
 		out.copy(last.world);
