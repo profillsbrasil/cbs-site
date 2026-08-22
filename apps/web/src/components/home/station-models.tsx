@@ -787,12 +787,3 @@ export function CaminhaoEntrega({
 		</group>
 	);
 }
-
-/** Vinheta parada (bolha da estação malha): o mesmo caminhão, sem partes. */
-export function Caminhao() {
-	return (
-		<group position={[0, -0.55, 0]} rotation={[0.1, -0.5, 0]} scale={0.82}>
-			<CaminhaoEntrega />
-		</group>
-	);
-}

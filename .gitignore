@@ -64,3 +64,6 @@ temp
 !.impeccable/mocks/comp-bolha-pacote.png
 !.impeccable/mocks/comp-bolha-pacote.json
 .impeccable/questions/
+
+# Assets vendorizados em build (gerados por scripts/vendor-*.mjs)
+apps/web/public/vendor/

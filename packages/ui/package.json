@@ -19,6 +19,7 @@
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.6.0",
     "lucide-react": "catalog:",
+    "maplibre-gl": "^6",
     "next-themes": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
@@ -30,6 +31,7 @@
   "devDependencies": {
     "@cbs-site/config": "workspace:*",
     "@tailwindcss/postcss": "catalog:",
+    "@types/geojson": "^7946.0.16",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "tailwindcss": "catalog:",
