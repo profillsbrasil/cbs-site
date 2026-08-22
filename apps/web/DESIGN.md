@@ -65,7 +65,7 @@ O mundo é implementado, não só desenhado: um `Scene3D` fixo de tela cheia ren
 **Key Characteristics:**
 - Superfície branca dominante (#FAFBFC/#FFFFFF); navy e azul são tinta de acento, nunca fundo de seção inteira.
 - Um único canvas WebGL fixo por trás de toda a página, ancorado a marcadores DOM (`data-s-anchor`/`data-j-anchor`).
-- Todo objeto 3D de estação vive dentro de uma bolha de vidro — nunca aparece nu.
+- Todo objeto 3D de estação vive dentro de uma bolha de vidro — nunca aparece nu; modelos novos seguem a linguagem "Maquete de arquiteto" (Regra do Nanquim).
 - Raio binário: pílula (`rounded-full`) ou nenhum raio; sem meio-termo.
 - Sem `box-shadow` em contêineres de conteúdo; profundidade vem do vidro WebGL e de névoas aqua radiais.
 - Título sempre em Sora (`.font-display`); corpo de texto sempre no sans herdado do pacote `@cbs-site/ui`.
@@ -168,9 +168,21 @@ Na camada 3D, o motivo de forma é a esfera de vidro: todo objeto de estação (
 - **Content:** logo (`public/cbs-logo.jpeg`) à esquerda, um único CTA de WhatsApp compacto à direita — sem menu de links, sem hambúrguer; a navegação da home é toda por scroll.
 
 ### Mapa da malha
-O Brasil como tinta atrás da estação "Fábricas onde o frete nasce menor.": `Map blank` do mapcn (MapLibre, sem tiles, sem controles, `interactive={false}`, `pointer-events-none`) com o GeoJSON local dos estados (`#f0f9fc`, divisas em aqua a 60% (1.2px no SVG, 1px no GL), contorno aqua) e um marcador por praça (`brand-blue` com anel branco e halo aqua). Composição D2: mapa de 380px no alto-direita da coluna visual, bolha do caminhão (320px) em baixo-esquerda — a diagonal do rio líquido. Abaixo de `lg`, mapa (288px) acima da bolha. Os pontos nascem a 35% e acendem em sequência de 60ms quando a caixa chega à estação (`journeyProgress` ≥ fração da âncora "malha"); com `prefers-reduced-motion` ou abaixo de 1024px já nascem acesos. Um SVG com a mesma geometria (`MapaMalhaPlaceholder`) ocupa o lugar até o MapLibre desenhar e permanece se não houver WebGL.
+O Brasil como tinta atrás da estação "Fábricas onde o frete nasce menor.": `Map blank` do mapcn (MapLibre, sem tiles, sem controles, `interactive={false}`, `pointer-events-none`) com o GeoJSON local dos estados (`#f0f9fc`, divisas navy a 25% de 1px) e o contorno do país em navy a 60% de 1.5px (`brasil-pais.json` no GL; `drop-shadow` navy no SVG) — a variante "Linha navy" escolhida em 21/08/2026: peso de linha sem escurecer o papel. Um marcador por praça: `brand-blue` r=7 com anel branco de 3px, sem halo. Composição D2: mapa de 380px no alto-direita da coluna visual, bolha da fábrica (320px) em baixo-esquerda — a diagonal do rio líquido. Abaixo de `lg`, mapa (288px) acima da bolha. Os pontos nascem a 35% e acendem em sequência de 60ms quando a caixa chega à estação (`journeyProgress` ≥ fração da âncora "malha"); com `prefers-reduced-motion` ou abaixo de 1024px já nascem acesos. Um SVG com a mesma geometria (`MapaMalhaPlaceholder`) ocupa o lugar até o MapLibre desenhar e permanece se não houver WebGL.
 
 **A Regra do Mapa-Tinta.** O mapa nunca é interface: sem zoom, pan, tooltip, popup, rótulo ou controle; os chips da estação continuam sendo a legenda. Só as 7 praças do cliente aparecem — nada de CDs, rotas ou endereços.
+
+### Linguagem dos modelos 3D — "Maquete de arquiteto"
+Estilo escolhido em 21/08/2026 (entre "maquete de arquiteto", "brinquedo industrial" e "planta técnica") e aplicado primeiro à `Fabrica` (`fabrica.tsx`), que substituiu o caminhão na estação "Fábricas onde o frete nasce menor.". É o alvo para migrar frasco, selo, caixa e o caminhão da doca — hoje ainda no estilo anterior (low-poly com clearcoat, sem arestas).
+
+1. **Volume:** toda massa é uma caixa de cantos suavizados (bevel/raio 0.016–0.022, ~1% da menor dimensão); nada de quina viva, nada de esfera solta.
+2. **Nanquim:** cada volume ganha `EdgesGeometry` da caixa reta equivalente, `LineBasicMaterial` navy `#0f1c2b` a 35%, `depthWrite: false` — desenho, não z-fight. Peça fina (<15 mm: corrimão, montante, tubo) não leva linha.
+3. **Material:** `meshStandardMaterial` fosco, roughness 0.7–0.9, metalness 0 (0.15 só em ferragem). Sem clearcoat, sem transmission — a maquete é gesso, não plástico.
+4. **Paleta:** 85% da área em branco/cinza (`#ffffff`, `#d3dde4`, `#c3ced6`); navy `#16232f` só em ferragem fina; azul `#1d9dd8` + aqua `#a8e0f0` somam menos de 10% (faixa "CBS", portas de doca, tampas, claraboias, tubulação).
+5. **Proporção:** cabe num cubo de ~2.4 sobre um plinto de 60 mm (a borda da maquete); grupo ancorado em `y = -altura/2` para centrar na bolha.
+6. **Detalhe:** três escalas — volume (galpão, ala, laje), sub-volume (marquise, unidade de telhado, tanque) e ferragem (guarda-corpo, degrau, tubo). Só primitivas (Box, Cylinder, Extrude, Lathe, Torus, Edges); nenhum modelo externo; nenhuma textura de imagem além do lettering em `CanvasTexture`.
+
+**A Regra do Nanquim.** Todo objeto 3D novo nasce neste estilo; um objeto no estilo anterior é débito a migrar, não uma segunda linguagem.
 
 ### Bolha-Pacote (Signature Component)
 O motor visual da página: um `Scene3D` (`<Canvas>` do react-three-fiber, único por página, `position: fixed inset-0 z-10`) por trás de todo o conteúdo HTML. Cada grupo 3D é uma `AnchoredGroup` que lê a posição/tamanho de um elemento DOM marcado (`data-s-anchor="frasco|selo|caminhao|hero-cluster"`) a cada frame e posiciona a cena ali — a 3D nunca define seu próprio layout. Paralelamente, `LiquidPath` desenha um rio de espuma SVG (ribbon preenchido + espuma + reflexo, revelado por mask com `pathLength`) conectando os marcadores `data-j-anchor="hero|modelo|qualidade|malha|chegada|doca"`; na chegada o rio desce pela margem direita e deságua na traseira do caminhão, que está parado sobre uma faixa de asfalto (navy, tracejado aqua) que também é a divisa com o rodapé. Os dois sistemas (caixa 3D viajante e traço SVG) são sincronizados por um único `motionValue` compartilhado (`journeyProgress`, em `journey-progress.ts`) — a caixa escreve o progresso, o traço o lê como `pathLength`.
