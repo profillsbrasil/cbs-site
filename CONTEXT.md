@@ -32,6 +32,10 @@ _Avoid_: planta, unidade fabril, filial
 Centro de distribuição do Mercado Livre. A posição dos CDs é o que determina onde cada fábrica da CBS fica.
 _Avoid_: hub, armazém, galpão
 
+**Praça**:
+A cidade ou estado de referência de cada fábrica da malha, como o cliente informou (São Paulo, Minas Gerais, Curitiba, Pernambuco, Bahia, Rio Grande do Sul, Centro do Brasil). É o que aparece nos chips e nos pontos do mapa da home; não é endereço.
+_Avoid_: endereço, unidade, localização da fábrica
+
 **Ganho de frete**:
 A economia que a proximidade entre fábrica e CD gera para o contratante, comparada ao custo de despachar tudo de uma fábrica só. É a razão de ser da malha e o argumento central do site.
 _Avoid_: logística, economia de custos

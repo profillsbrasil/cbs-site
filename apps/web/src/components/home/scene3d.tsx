@@ -13,6 +13,8 @@ import { type Group, MathUtils, Vector3 } from "three";
 import { boxActive, boxWorldPosition } from "./box-position";
 import { CardboardBox } from "./cardboard-box";
 import { dockCargoWorld, dockReady } from "./dock-state";
+import { Fabrica } from "./fabrica";
+import { journeyFraction, segmentWeights } from "./journey-math";
 import { journeyProgress } from "./journey-progress";
 import {
 	BUBBLE_BASE_OPACITY,
@@ -23,7 +25,6 @@ import {
 } from "./scene-bits";
 import {
 	CAMINHAO_ALTURA,
-	Caminhao,
 	CaminhaoEntrega,
 	type CaminhaoParts,
 	Frasco,
@@ -408,29 +409,6 @@ interface TargetResult {
 	scale: number;
 }
 
-function segmentWeights(samples: AnchorSample[]): number[] {
-	const weights: number[] = [];
-	for (let i = 0; i < samples.length - 1; i += 1) {
-		const a = samples[i] as AnchorSample;
-		const b = samples[i + 1] as AnchorSample;
-		weights.push(Math.max(Math.abs(b.screenY - a.screenY), 1));
-	}
-	return weights;
-}
-
-function journeyFraction(
-	weights: number[],
-	segment: number,
-	t: number
-): number {
-	const total = weights.reduce((sum, w) => sum + w, 0);
-	let before = 0;
-	for (let i = 0; i < segment; i += 1) {
-		before += weights[i] ?? 0;
-	}
-	return (before + t * (weights[segment] ?? 0)) / total;
-}
-
 /**
  * Quando a página não tem scroll suficiente para a doca alcançar a linha de
  * foco, a jornada travaria antes de 1. Aqui a linha de foco desce na mesma
@@ -454,7 +432,7 @@ function resolveTarget(
 ): TargetResult {
 	const first = samples[0] as AnchorSample;
 	const last = samples.at(-1) as AnchorSample;
-	const weights = segmentWeights(samples);
+	const weights = segmentWeights(samples.map((s) => s.screenY));
 	out.copy(first.world);
 	if (focusY >= last.screenY) {
 		out.copy(last.world);
@@ -697,7 +675,7 @@ function makeMicroBubbles(): MicroBubble[] {
  */
 const MICRO_POP_RADIUS = 1.05;
 const MICRO_POP_SPEED = 2.6;
-const MICRO_BASE_OPACITY = 0.35;
+const MICRO_BASE_OPACITY = 0.3;
 
 interface PoppableMesh {
 	material: { opacity: number };
@@ -786,15 +764,18 @@ function MicroBubbles() {
 					scale={bubble.r}
 				>
 					<sphereGeometry args={[1, 16, 16]} />
+					{/* Sem transmission: numa esfera desse tamanho ela só devolve o
+					    lado sombreado em cinza. O filme é branco emissivo em aqua,
+					    com brilho de clearcoat — lê como bolha, não como poeira. */}
 					<meshPhysicalMaterial
 						clearcoat={1}
 						clearcoatRoughness={0.05}
 						color="#ffffff"
-						ior={1.15}
+						depthWrite={false}
+						emissive="#dcf3fa"
+						emissiveIntensity={0.9}
 						opacity={MICRO_BASE_OPACITY}
-						roughness={0.02}
-						thickness={0.02}
-						transmission={1}
+						roughness={0.12}
 						transparent
 					/>
 				</mesh>
@@ -804,7 +785,7 @@ function MicroBubbles() {
 }
 
 const STATION_MODELS = {
-	caminhao: Caminhao,
+	fabrica: Fabrica,
 	frasco: Frasco,
 	selo: Selo,
 } as const;
@@ -1173,6 +1154,23 @@ function DocaFinal() {
 }
 
 /**
+ * Sinal de "cena pronta" para o DOM: no primeiro frame desenhado (o que só
+ * acontece depois das texturas resolverem o Suspense da cena), marca o
+ * <html> e o placeholder CSS do hero faz cross-fade para o vidro real.
+ */
+function SceneReady() {
+	const done = useRef(false);
+	useFrame(() => {
+		if (done.current) {
+			return;
+		}
+		done.current = true;
+		document.documentElement.dataset.sceneReady = "";
+	});
+	return null;
+}
+
+/**
  * O único canvas 3D da página (um contexto WebGL para tudo): bolhas do
  * hero, a caixa viajante (única) e vinhetas das seções, cada grupo ancorado
  * ao elemento do DOM que marca seu lugar.
@@ -1207,7 +1205,8 @@ export function Scene3D() {
 				<JourneyBox journeyActive={journeyActive} />
 				<StationVignette variant="frasco" />
 				<StationVignette variant="selo" />
-				<StationVignette variant="caminhao" />
+				<StationVignette variant="fabrica" />
+				<SceneReady />
 			</Canvas>
 		</div>
 	);

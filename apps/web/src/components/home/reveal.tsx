@@ -31,41 +31,62 @@ export function Reveal({
 	);
 }
 
+export interface RevealGroup {
+	items: string[];
+	label: string;
+}
+
 /**
- * Lista com stagger: cada item entra 60ms depois do anterior. Para os
- * chips das praças e afins.
+ * Lista agrupada com rótulo por linha (as praças por região): o stagger
+ * corre por toda a sequência de chips, grupo a grupo.
  */
-export function RevealList({
+export function RevealGroups({
 	className,
+	groups,
 	itemClassName,
-	items,
+	labelClassName,
 }: {
 	className?: string;
+	groups: RevealGroup[];
 	itemClassName?: string;
-	items: string[];
+	labelClassName?: string;
 }) {
 	const reduced = useReducedMotion();
 	return (
-		<motion.ul
+		<motion.dl
 			className={className}
 			initial="hidden"
 			transition={{ staggerChildren: 0.06 }}
 			viewport={{ margin: "-40px", once: true }}
 			whileInView="shown"
 		>
-			{items.map((item) => (
-				<motion.li
-					className={itemClassName}
-					key={item}
-					transition={{ duration: 0.45, ease: EASE_OUT }}
-					variants={{
-						hidden: { opacity: 0, y: reduced ? 0 : 14 },
-						shown: { opacity: 1, y: 0 },
-					}}
-				>
-					{item}
-				</motion.li>
+			{groups.map((group) => (
+				<div className="flex flex-wrap items-center gap-2" key={group.label}>
+					<motion.dt
+						className={labelClassName}
+						transition={{ duration: 0.45, ease: EASE_OUT }}
+						variants={{
+							hidden: { opacity: 0 },
+							shown: { opacity: 1 },
+						}}
+					>
+						{group.label}
+					</motion.dt>
+					{group.items.map((item) => (
+						<motion.dd
+							className={itemClassName}
+							key={item}
+							transition={{ duration: 0.45, ease: EASE_OUT }}
+							variants={{
+								hidden: { opacity: 0, y: reduced ? 0 : 14 },
+								shown: { opacity: 1, y: 0 },
+							}}
+						>
+							{item}
+						</motion.dd>
+					))}
+				</div>
 			))}
-		</motion.ul>
+		</motion.dl>
 	);
 }
