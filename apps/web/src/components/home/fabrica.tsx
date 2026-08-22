@@ -43,10 +43,8 @@ import {
 
 // ── Paleta (só tokens de marca + cinzas já usados nos modelos) ─────────────
 const GESSO = "#ffffff"; // volumes principais
-const GESSO_2 = "#d3dde4"; // volumes secundários / anexos
-const CINZA = "#d3dde4"; // lajes técnicas, paletes
-const CINZA_ESC = "#c3ced6"; // marquise, plataformas
-const PLINTO_COR = "#c3ced6"; // base da maquete
+const CINZA = "#d3dde4"; // anexos, lajes técnicas, paletes
+const CINZA_ESC = "#c3ced6"; // plinto, marquise, plataformas
 const NAVY = "#16232f"; // guarda-corpo, montantes, ferragem
 const NAVY_ESC = "#0f1c2b"; // linhas de aresta
 const AZUL = "#1d9dd8"; // acento de marca
@@ -105,6 +103,22 @@ const DOCA_P = 0.3;
 const DOCA_TOPO = SOLO + DOCA_H; // 0.22
 const DOCA_Z = GAL_FACHADA_Z + DOCA_P / 2; // 0.6
 
+// Faixa "CBS" na fachada do galpão. A pilha vertical da fachada é, de baixo
+// para cima: portas de doca (topo 0.47) → marquise (0.4875–0.5225) → faixa
+// (0.545–0.715) → beiral do shed (0.72). O olho da pose está 24° acima do
+// horizonte, então o que está abaixo da faixa nunca a encobre.
+const FAIXA_L = 0.9;
+const FAIXA_H = 0.17;
+const FAIXA_Y = 0.63;
+/** 16 mm à frente do reboco: acima dos 14 mm que separam aplique de sólido. */
+const FAIXA_SALIENCIA = 0.016;
+
+const PORTA_DOCA_H = 0.26; // moldura; topo em 0.47, abaixo da marquise
+const PORTA_DOCA_Y = DOCA_TOPO + 0.12; // 0.34
+
+const MARQUISE_Y = 0.505; // eixo da laje; 0.035 de espessura
+const MARQUISE_BALANCO = 0.16; // saliência à frente da fachada (era 0.28)
+
 const TUBO_Z = -0.13; // eixo do rack de tubulação
 const TUBO_Y1 = 0.6;
 const TUBO_Y2 = 0.545;
@@ -131,7 +145,7 @@ type Vec3 = [number, number, number];
 
 // ── Textura canvas da faixa "CBS" ──────────────────────────────────────────
 const FAIXA_TEX_W = 1024;
-const FAIXA_TEX_H = 160;
+const FAIXA_TEX_H = 192; // 1024/192 = 5.33, a razão do plano 0.90 × 0.17
 
 function makeFaixaTexture(): Texture {
 	const canvas = document.createElement("canvas");
@@ -150,26 +164,37 @@ function makeFaixaTexture(): Texture {
 		ctx.fillRect(0, 0, FAIXA_TEX_W, FAIXA_TEX_H);
 		// Filete navy rente à borda inferior.
 		ctx.fillStyle = NAVY_ESC;
-		ctx.fillRect(0, FAIXA_TEX_H - 11, FAIXA_TEX_W, 11);
+		ctx.fillRect(0, FAIXA_TEX_H - 13, FAIXA_TEX_W, 13);
 		ctx.fillStyle = "#ffffff";
-		ctx.font = 'bold 118px Sora, "Sora Fallback", sans-serif';
+		ctx.font = 'bold 184px Sora, "Sora Fallback", sans-serif';
 		ctx.textAlign = "center";
 		ctx.textBaseline = "middle";
-		ctx.letterSpacing = "10px";
-		ctx.fillText("CBS", FAIXA_TEX_W / 2, FAIXA_TEX_H / 2 - 6);
+		ctx.letterSpacing = "14px";
+		ctx.fillText("CBS", FAIXA_TEX_W / 2, FAIXA_TEX_H / 2 - 7);
 		// Traços brancos flanqueando a marca (ritmo de fachada).
 		ctx.fillStyle = "rgba(255,255,255,0.5)";
-		ctx.fillRect(FAIXA_TEX_W * 0.07, FAIXA_TEX_H / 2 - 4, FAIXA_TEX_W * 0.2, 8);
-		ctx.fillRect(FAIXA_TEX_W * 0.73, FAIXA_TEX_H / 2 - 4, FAIXA_TEX_W * 0.2, 8);
+		ctx.fillRect(
+			FAIXA_TEX_W * 0.06,
+			FAIXA_TEX_H / 2 - 5,
+			FAIXA_TEX_W * 0.16,
+			10
+		);
+		ctx.fillRect(
+			FAIXA_TEX_W * 0.78,
+			FAIXA_TEX_H / 2 - 5,
+			FAIXA_TEX_W * 0.16,
+			10
+		);
 		texture.needsUpdate = true;
 	};
 	paint();
 	// Sora chega assíncrona: repinta quando a fonte carregar.
-	document.fonts?.load('bold 88px "Sora"').then(paint).catch(paint);
+	document.fonts?.load('bold 184px "Sora"').then(paint).catch(paint);
 	return texture;
 }
 
 // ── Materiais foscos (roughness 0.7–0.9, sem clearcoat) ────────────────────
+/** Um material por cor de fato: cores iguais compartilham a mesma instância. */
 interface Mats {
 	aqua: MeshStandardMaterial;
 	azul: MeshStandardMaterial;
@@ -177,10 +202,8 @@ interface Mats {
 	cinzaEsc: MeshStandardMaterial;
 	faixa: MeshStandardMaterial;
 	gesso: MeshStandardMaterial;
-	gesso2: MeshStandardMaterial;
 	linha: LineBasicMaterial;
 	navy: MeshStandardMaterial;
-	plinto: MeshStandardMaterial;
 }
 
 function criarMateriais(): Mats {
@@ -197,7 +220,6 @@ function criarMateriais(): Mats {
 			roughness: 0.7,
 		}),
 		gesso: fosco(GESSO, 0.8),
-		gesso2: fosco(GESSO_2, 0.85),
 		// Nanquim: uma linha fina por aresta, navy a 35%.
 		linha: new LineBasicMaterial({
 			color: NAVY_ESC,
@@ -206,7 +228,6 @@ function criarMateriais(): Mats {
 			transparent: true,
 		}),
 		navy: fosco(NAVY, 0.75),
-		plinto: fosco(PLINTO_COR, 0.9),
 	};
 }
 
@@ -375,7 +396,10 @@ function criarBuilder(root: Group, mats: Mats) {
 				);
 			}
 			const total = Math.max(2, Math.round(comprimento / passo));
-			for (let k = 0; k <= total; k += 1) {
+			// O extremo inicial só é gerado no primeiro segmento: nos cantos ele
+			// coincide com o extremo final do segmento anterior e os dois montantes
+			// brigavam por z-fight.
+			for (let k = i === 0 ? 0 : 1; k <= total; k += 1) {
 				const t = k / total;
 				caixa(`${nome}-montante`, [0.013, altura, 0.013], mats.navy, [
 					x0 + dx * t,
@@ -431,7 +455,7 @@ function montarPlinto(b: Builder, m: Mats) {
 	b.volume(
 		"plinto-base",
 		[PLINTO_L, PLINTO_H, PLINTO_P],
-		m.plinto,
+		m.cinzaEsc,
 		[0, PLINTO_H / 2, 0],
 		null,
 		{ raio: 0.03 }
@@ -459,7 +483,7 @@ function montarGalpao(b: Builder, m: Mats) {
 		GAL_Z,
 	]);
 	// Casa de máquinas encostada nos fundos (-Z).
-	b.volume("casa-de-maquinas", [0.5, 0.22, 0.22], m.gesso2, [
+	b.volume("casa-de-maquinas", [0.5, 0.22, 0.22], m.cinza, [
 		-0.85,
 		SOLO + 0.11,
 		GAL_Z - GAL_P / 2 - 0.1,
@@ -484,6 +508,15 @@ function montarGalpao(b: Builder, m: Mats) {
 	b.malha("telhado-shed", shed, m.gesso, shedPos);
 	b.arestas(shed, shedPos, null, 20);
 
+	// Faixa "CBS": a única superfície grande com a marca, na fachada do galpão
+	// (a maior da maquete). Fica na faixa livre entre a marquise da doca e o
+	// beiral do shed, 16 mm à frente do reboco.
+	b.malha("faixa-cbs", new PlaneGeometry(FAIXA_L, FAIXA_H), m.faixa, [
+		GAL_X,
+		FAIXA_Y,
+		GAL_FACHADA_Z + FAIXA_SALIENCIA,
+	]);
+
 	// Claraboias nas faces verticais + montantes navy.
 	const claraboiaH = DENTE_H - 0.05;
 	for (let i = 0; i < DENTES; i += 1) {
@@ -505,6 +538,28 @@ function montarGalpao(b: Builder, m: Mats) {
 }
 
 // ── 3. Doca de carga ───────────────────────────────────────────────────────
+/** Mão-francesa: da ponta da marquise de volta ao reboco, por baixo da laje. */
+function montarMaosFrancesas(b: Builder, m: Mats) {
+	const pontaY = MARQUISE_Y - 0.0175;
+	const pontaZ = GAL_FACHADA_Z + MARQUISE_BALANCO - 0.005;
+	const paredeY = 0.395;
+	const paredeZ = GAL_FACHADA_Z + 0.005;
+	const dy = paredeY - pontaY;
+	const dz = paredeZ - pontaZ;
+	// O eixo longo da caixa é o +Y local: girar em X por atan2(dz, dy) o deita
+	// exatamente sobre a diagonal ponta → parede.
+	const angulo = Math.atan2(dz, dy);
+	for (const maoX of [-1.02, -0.22]) {
+		b.caixa(
+			"mao-francesa-marquise",
+			[0.014, Math.hypot(dy, dz), 0.014],
+			m.navy,
+			[maoX, (pontaY + paredeY) / 2, (pontaZ + paredeZ) / 2],
+			[angulo, 0, 0]
+		);
+	}
+}
+
 function montarDoca(b: Builder, m: Mats) {
 	b.volume("plataforma-doca", [DOCA_L, DOCA_H, DOCA_P], m.cinzaEsc, [
 		DOCA_X,
@@ -512,35 +567,31 @@ function montarDoca(b: Builder, m: Mats) {
 		DOCA_Z,
 	]);
 	for (const portaX of [-0.82, -0.42]) {
-		b.caixa("porta-doca-moldura", [0.3, 0.36, 0.016], m.navy, [
+		b.caixa("porta-doca-moldura", [0.3, PORTA_DOCA_H, 0.016], m.navy, [
 			portaX,
-			DOCA_TOPO + 0.17,
+			PORTA_DOCA_Y,
 			GAL_FACHADA_Z + 0.008,
 		]);
-		b.caixa("porta-doca", [0.24, 0.3, 0.016], m.azul, [
+		b.caixa("porta-doca", [0.24, PORTA_DOCA_H - 0.06, 0.016], m.azul, [
 			portaX,
-			DOCA_TOPO + 0.17,
+			PORTA_DOCA_Y,
 			GAL_FACHADA_Z + 0.018,
 		]);
 	}
-	// Marquise em balanço + dois tirantes navy.
+	// Marquise em balanço: encurtada de 0.28 para 0.16 de saliência e baixada
+	// para o topo das portas, liberando a faixa da marca acima dela.
 	b.volume(
 		"marquise-doca",
-		[0.98, 0.035, 0.3],
+		[0.98, 0.035, MARQUISE_BALANCO + 0.02],
 		m.cinzaEsc,
-		[DOCA_X, 0.615, GAL_FACHADA_Z + 0.13],
+		[DOCA_X, MARQUISE_Y, GAL_FACHADA_Z + MARQUISE_BALANCO / 2],
 		null,
 		{ raio: 0.012 }
 	);
-	for (const tiranteX of [-1.02, -0.22]) {
-		b.caixa(
-			"tirante-marquise",
-			[0.014, 0.286, 0.014],
-			m.navy,
-			[tiranteX, 0.66, GAL_FACHADA_Z + 0.14],
-			[2.0, 0, 0]
-		);
-	}
+	// Mãos-francesas navy: da ponta da marquise de volta ao reboco, por baixo
+	// da laje (o tirante anterior, quase deitado, não escorava nada). Ficam nos
+	// dois pilares laterais, fora do vão das portas e abaixo da faixa.
+	montarMaosFrancesas(b, m);
 	// Balizadores no limite do pátio.
 	for (let i = 0; i < 3; i += 1) {
 		b.cilindro(
@@ -581,7 +632,7 @@ function montarDoca(b: Builder, m: Mats) {
 
 // ── 4. Ala de envase + unidades de telhado ─────────────────────────────────
 function montarEnvase(b: Builder, m: Mats) {
-	b.volume("ala-envase", [ENV_L, ENV_H, ENV_P], m.gesso2, [
+	b.volume("ala-envase", [ENV_L, ENV_H, ENV_P], m.cinza, [
 		ENV_X,
 		SOLO + ENV_H / 2,
 		ENV_Z,
@@ -604,15 +655,6 @@ function montarEnvase(b: Builder, m: Mats) {
 			ENV_Z + ENV_P / 2 + 0.011,
 		]);
 	}
-	// Faixa "CBS": única superfície grande com a marca. O protótipo a punha na
-	// fachada do galpão (y=0.61), onde a marquise da doca a esconde por
-	// inteiro na vista 3/4 — aqui ela vai para a fita livre da ala de envase,
-	// acima da janela, a única fachada desimpedida nessa pose.
-	b.malha("faixa-cbs", new PlaneGeometry(0.66, 0.1), m.faixa, [
-		ENV_X,
-		SOLO + 0.322,
-		ENV_Z + ENV_P / 2 + 0.006,
-	]);
 	b.caixa("porta-pessoal", [0.09, 0.16, 0.016], m.azul, [
 		ENV_X + 0.28,
 		SOLO + 0.08,
@@ -906,6 +948,12 @@ export function Fabrica() {
 	const modelo = useMemo(montarFabrica, []);
 	return (
 		<group rotation={FABRICA_ROT} scale={FABRICA_ESCALA}>
+			{/* O R3F não descarta objetos entregues por `primitive`: geometrias,
+			    materiais e a textura da faixa vazam a cada remontagem (HMR e o
+			    double-mount do StrictMode). Aqui é inócuo porque `Scene3D` monta
+			    uma vez e nunca desmonta; se a fábrica virar um `dynamic()` ou
+			    ganhar uma segunda rota, o unmount passa a exigir dispose manual
+			    do grupo (traverse + dispose de geometry/material/map). */}
 			<primitive object={modelo} />
 		</group>
 	);
