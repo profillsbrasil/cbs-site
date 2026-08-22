@@ -4,7 +4,7 @@
       {
         "hooks": [
           {
-            "command": "bun run fix --skip=correctness/noUnusedImports",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && bun run fix --skip=correctness/noUnusedImports",
             "type": "command"
           }
         ],
