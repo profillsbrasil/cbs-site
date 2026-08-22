@@ -9,7 +9,7 @@ O argumento-mestre do site é o ganho de frete pela malha de fábricas junto aos
 ## Decisão
 
 - Mapa do Brasil com as 7 praças na estação 3, composição D2 (mapa no alto-direita, bolha do caminhão em baixo-esquerda), como fundo — não como UI.
-- Biblioteca: mapcn (`@mapcn/map`, MapLibre GL v6) instalado em `packages/ui` pelo CLI do shadcn. Uso restrito a `Map blank` + `MapGeoJSON` + `MapMarker`; sem controles, tiles, interação ou popups.
+- Biblioteca: mapcn (`@mapcn/map`, MapLibre GL v6) instalado em `packages/ui` pelo CLI do shadcn. Uso restrito a `Map blank` + `MapGeoJSON` + `MapMarker`/`MarkerContent`; sem controles, tiles, interação ou popups.
 - Dados locais: `apps/web/public/geo/brasil-estados.json` (Natural Earth v5.1.2, 50m, 27 estados, domínio público), gerado por `apps/web/scripts/geo/build-brasil.mjs`. Nenhuma chamada externa em runtime.
 - Praças em `src/components/home/pracas.ts`; coordenadas são a capital/cidade de referência, não endereço de fábrica. Só as praças: CDs do ML e rotas ficaram fora por não serem autorizados/verdadeiros.
 - Placeholder e fallback: SVG estático com a mesma geometria (`brasil-outline.ts`), usado enquanto o MapLibre carrega e sozinho quando não há WebGL.
