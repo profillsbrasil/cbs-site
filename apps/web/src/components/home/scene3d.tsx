@@ -13,6 +13,7 @@ import { type Group, MathUtils, Vector3 } from "three";
 import { boxActive, boxWorldPosition } from "./box-position";
 import { CardboardBox } from "./cardboard-box";
 import { dockCargoWorld, dockReady } from "./dock-state";
+import { Fabrica } from "./fabrica";
 import { journeyFraction, segmentWeights } from "./journey-math";
 import { journeyProgress } from "./journey-progress";
 import {
@@ -24,7 +25,6 @@ import {
 } from "./scene-bits";
 import {
 	CAMINHAO_ALTURA,
-	Caminhao,
 	CaminhaoEntrega,
 	type CaminhaoParts,
 	Frasco,
@@ -785,7 +785,7 @@ function MicroBubbles() {
 }
 
 const STATION_MODELS = {
-	caminhao: Caminhao,
+	fabrica: Fabrica,
 	frasco: Frasco,
 	selo: Selo,
 } as const;
@@ -1205,7 +1205,7 @@ export function Scene3D() {
 				<JourneyBox journeyActive={journeyActive} />
 				<StationVignette variant="frasco" />
 				<StationVignette variant="selo" />
-				<StationVignette variant="caminhao" />
+				<StationVignette variant="fabrica" />
 				<SceneReady />
 			</Canvas>
 		</div>

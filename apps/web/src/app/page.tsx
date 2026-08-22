@@ -185,7 +185,7 @@ function Station({
 	children: React.ReactNode;
 	flip?: boolean;
 	title: string;
-	variant: "caminhao" | "frasco" | "selo";
+	variant: "fabrica" | "frasco" | "selo";
 }) {
 	const hasBackdrop = Boolean(backdrop);
 	return (
@@ -373,7 +373,7 @@ export default function Home() {
 					anchor="malha"
 					backdrop={<MapaMalhaLazy />}
 					title="Fábricas onde o frete nasce menor."
-					variant="caminhao"
+					variant="fabrica"
 				>
 					<Reveal delay={0.1}>
 						<p className="mt-6 max-w-md text-brand-navy/75 text-lg leading-relaxed">
