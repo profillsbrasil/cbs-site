@@ -188,6 +188,9 @@ function Station({
 	);
 }
 
+/** O que a CBS devolve na primeira resposta, na ordem do fluxo. */
+const RESPOSTA = ["produto", "rótulo", "produção", "envio"] as const;
+
 function Chegada() {
 	return (
 		<section className="relative mx-auto max-w-6xl px-6 pt-32 text-center">
@@ -208,9 +211,18 @@ function Chegada() {
 			</Reveal>
 			<Reveal delay={0.12}>
 				<p className="relative z-20 mx-auto mt-7 max-w-xl text-brand-navy/75 text-xl leading-relaxed">
-					Diga o que você quer vender e em qual volume. A CBS responde com
-					produto, rótulo, produção e envio.
+					Diga o que você quer vender e em qual volume. A CBS responde com:
 				</p>
+				<ul className="relative z-20 mt-5 flex flex-wrap items-center justify-center gap-2">
+					{RESPOSTA.map((item) => (
+						<li
+							className="rounded-full bg-brand-mist px-4 py-1.5 font-medium text-brand-navy text-sm"
+							key={item}
+						>
+							{item}
+						</li>
+					))}
+				</ul>
 			</Reveal>
 			<Reveal delay={0.22}>
 				<div className="relative z-20 mt-11 flex flex-wrap items-center justify-center gap-4">
@@ -262,10 +274,23 @@ export default function Home() {
 				>
 					<Reveal delay={0.1}>
 						<p className="mt-6 max-w-md text-brand-navy/75 text-lg leading-relaxed">
-							Terceirização completa de produção: a CBS produz o saneante,
-							rotula com a sua marca e despacha direto para o centro de
-							distribuição. Você cuida do anúncio e da venda. A marca no rótulo
-							é sua; a CBS não assina o produto final.
+							Terceirização completa de produção, dividida em duas partes.
+						</p>
+						<dl className="mt-5 grid max-w-md grid-cols-[auto_1fr] gap-x-5 gap-y-3 text-lg leading-relaxed">
+							<dt className="font-semibold text-brand-navy">Você</dt>
+							<dd className="text-brand-navy/75">
+								anuncia, precifica e vende.
+							</dd>
+							<dt className="font-semibold text-brand-navy">A CBS</dt>
+							<dd className="text-brand-navy/75">
+								produz o saneante, aplica o seu rótulo e despacha para o CD.
+							</dd>
+						</dl>
+						<p className="mt-5 max-w-md text-brand-navy/75 text-lg leading-relaxed">
+							A marca no rótulo é sua.{" "}
+							<strong className="text-brand-navy">
+								A CBS não assina o produto final.
+							</strong>
 						</p>
 					</Reveal>
 				</Station>
@@ -278,9 +303,12 @@ export default function Home() {
 				>
 					<Reveal delay={0.1}>
 						<p className="mt-6 max-w-md text-brand-navy/75 text-lg leading-relaxed">
-							A CBS tem autorização da ANVISA para fabricar saneantes e segue o
-							mesmo padrão de qualidade da formulação ao lacre da caixa. O
-							rótulo é seu; a autorização de fabricação é da CBS.
+							A CBS tem{" "}
+							<strong className="text-brand-navy">
+								autorização da ANVISA para fabricar saneantes
+							</strong>{" "}
+							e produz com o mesmo padrão em cada lote. O rótulo é seu; a
+							autorização de fabricação é da CBS.
 						</p>
 					</Reveal>
 				</Station>
@@ -288,15 +316,16 @@ export default function Home() {
 				<Station
 					anchor="malha"
 					backdrop={<MapaMalhaLazy />}
-					title="Fábrica ao lado do CD, remessa curta."
+					title="6 a 7 fábricas, uma por CD."
 					variant="fabrica"
 				>
 					<Reveal delay={0.1}>
 						<p className="mt-6 max-w-md text-brand-navy/75 text-lg leading-relaxed">
-							São 6 a 7 fábricas junto aos centros de distribuição do Mercado
-							Livre. Quem vende no Full paga o transporte da remessa até o CD.
+							<strong className="text-brand-navy">
+								Quem vende no Full paga a remessa até o CD do Mercado Livre.
+							</strong>{" "}
 							Saneante é pesado e barato por unidade, então esse trecho pesa na
-							margem, e é ele que a malha encurta.
+							margem, e é ele que a fábrica ao lado encurta.
 						</p>
 					</Reveal>
 					<RevealGroups

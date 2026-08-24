@@ -9,7 +9,7 @@ import { WHATSAPP_URL, WhatsAppIcon } from "@/components/contact";
 const SECTIONS = [
 	{ id: "modelo", label: "Modelo" },
 	{ id: "qualidade", label: "Qualidade" },
-	{ id: "malha", label: "Malha" },
+	{ id: "malha", label: "Fábricas" },
 ] as const;
 
 /** Rolagem a partir da qual a barra condensa em cápsula. */
