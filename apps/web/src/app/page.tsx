@@ -289,10 +289,13 @@ function Chegada() {
 					data-j-anchor="doca"
 				/>
 			</div>
-			{/* Asfalto: o chão do caminhão e a divisa com o rodapé. */}
+			{/* Asfalto: o chão do caminhão e a divisa com o rodapé. Fica ABAIXO
+			    do canvas (z-0 < z-10) e sobe 1rem sob a âncora, para as rodas
+			    afundarem na pista em vez de encostarem na borda — sem isso a
+			    estrada pintava por cima das rodas. */}
 			<div
 				aria-hidden
-				className="road relative left-1/2 z-20 h-12 w-screen -translate-x-1/2"
+				className="road relative left-1/2 z-0 -mt-4 h-16 w-screen -translate-x-1/2"
 			/>
 		</section>
 	);
