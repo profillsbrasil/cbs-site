@@ -74,7 +74,8 @@ const DOCK_TRUCK_ENTER_END = 0.92;
 const DOCK_DOOR_OPEN_START = 0.9;
 const DOCK_DOOR_OPEN_END = 0.94;
 const DOCK_HANDOFF_START = 0.94;
-const DOCK_HANDOFF_END = 0.985;
+/** Fim da entrega: a caixa está dentro do baú. O título da Chegada lê isto. */
+export const DOCK_HANDOFF_END = 0.985;
 const DOCK_SETTLE_START = 0.985;
 const DOCK_SETTLE_END = 1;
 
@@ -1217,7 +1218,10 @@ export function Scene3D() {
 	const journeyActive = useJourneyActive();
 
 	return (
-		<div aria-hidden className="pointer-events-none fixed inset-0 z-10">
+		<div
+			aria-hidden
+			className="scene-canvas pointer-events-none fixed inset-0 z-10"
+		>
 			<Canvas
 				camera={{ fov: 35, position: [0, 0, CAMERA_Z] }}
 				dpr={[1, 1.5]}

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import { WHATSAPP_URL, WhatsAppIcon } from "@/components/contact";
+import { BRAND_EASE } from "@/components/home/motion-tokens";
 
 const SECTIONS = [
 	{ id: "modelo", label: "Modelo" },
@@ -14,7 +15,6 @@ const SECTIONS = [
 
 /** Rolagem a partir da qual a barra condensa em cápsula. */
 const SCROLL_THRESHOLD = 32;
-const CAPSULE_EASE = [0.16, 1, 0.3, 1] as const;
 
 /**
  * Navbar-cápsula: no topo é uma barra transparente fundida ao hero; ao
@@ -28,7 +28,16 @@ export function Navbar() {
 	const reduced = useReducedMotion();
 
 	useEffect(() => {
-		const onScroll = () => setScrolled(window.scrollY > SCROLL_THRESHOLD);
+		const onScroll = () => {
+			const past = window.scrollY > SCROLL_THRESHOLD;
+			setScrolled(past);
+			// Sinal para o CSS (o aceno de scroll do hero lê `html[data-scrolled]`).
+			if (past) {
+				document.documentElement.dataset.scrolled = "";
+			} else {
+				delete document.documentElement.dataset.scrolled;
+			}
+		};
 		onScroll();
 		window.addEventListener("scroll", onScroll, { passive: true });
 		return () => window.removeEventListener("scroll", onScroll);
@@ -43,10 +52,10 @@ export function Navbar() {
 			(entries) => {
 				for (const entry of entries) {
 					const { id } = entry.target;
+					// A gota só troca de link, nunca some: entre duas seções o
+					// último link ativo continua aceso em vez de piscar.
 					if (entry.isIntersecting) {
 						setActive(id);
-					} else {
-						setActive((prev) => (prev === id ? null : prev));
 					}
 				}
 			},
@@ -60,7 +69,7 @@ export function Navbar() {
 
 	const layoutTransition = reduced
 		? { duration: 0 }
-		: { duration: 0.5, ease: CAPSULE_EASE };
+		: { duration: 0.35, ease: BRAND_EASE };
 	const gotaTransition = reduced
 		? { duration: 0 }
 		: { bounce: 0.2, duration: 0.5, type: "spring" as const };
@@ -70,8 +79,10 @@ export function Navbar() {
 			<motion.header
 				className={
 					scrolled
-						? "pointer-events-auto relative mt-3 flex items-center gap-6 overflow-hidden rounded-full border border-brand-blue/25 bg-white/65 py-2 pr-2.5 pl-5 shadow-[0_12px_30px_rgb(15_28_43/0.10),inset_0_1px_0_rgb(255_255_255/0.95),inset_0_-8px_16px_rgb(168_224_240/0.28)] backdrop-blur-md"
-						: "pointer-events-auto relative flex w-full max-w-6xl items-center justify-between px-6 py-3"
+						? "pointer-events-auto relative mt-3 flex items-center gap-6 overflow-hidden rounded-full border border-brand-blue/25 bg-white/65 py-2 pr-2.5 pl-5 shadow-[0_12px_30px_rgb(15_28_43/0.10),inset_0_1px_0_rgb(255_255_255/0.95),inset_0_-8px_16px_rgb(168_224_240/0.28)] backdrop-blur-md transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300 ease-brand"
+						: /* Mesmas propriedades de vidro zeradas: o fundo, a borda e o
+						     blur condensam junto com a forma em vez de saltar. */
+							"pointer-events-auto relative flex w-full max-w-6xl items-center justify-between border border-transparent bg-white/0 px-6 py-3 shadow-[0_0_0_rgb(15_28_43/0),inset_0_0_0_rgb(255_255_255/0),inset_0_0_0_rgb(168_224_240/0)] backdrop-blur-none transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300 ease-brand"
 				}
 				layout
 				transition={layoutTransition}
@@ -100,7 +111,7 @@ export function Navbar() {
 				>
 					{SECTIONS.map((section) => (
 						<a
-							className="relative rounded-full px-4 py-1.5 font-semibold text-brand-navy/70 text-sm transition-colors hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2"
+							className="relative rounded-full px-4 py-1.5 font-semibold text-brand-navy/70 text-sm transition-[color,transform] duration-150 ease-brand hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2 active:scale-95"
 							href={`#${section.id}`}
 							key={section.id}
 						>
@@ -117,7 +128,7 @@ export function Navbar() {
 					))}
 				</motion.nav>
 				<motion.a
-					className="inline-flex items-center gap-2 rounded-full bg-brand-navy px-5 py-2.5 font-semibold text-sm text-white transition-colors hover:bg-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2"
+					className="inline-flex items-center gap-2 rounded-full bg-brand-navy px-5 py-2.5 font-semibold text-sm text-white transition-[background-color,transform] duration-150 ease-brand hover:bg-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2 active:scale-[0.97]"
 					href={WHATSAPP_URL}
 					layout
 					rel="noopener"

@@ -2,6 +2,7 @@ import { ArrowDown } from "lucide-react";
 
 import { CtaEmail, CtaReassurance, CtaWhatsApp } from "@/components/cta";
 import { Footer } from "@/components/footer";
+import { EntregaTitulo } from "@/components/home/entrega-titulo";
 import { LiquidPath } from "@/components/home/liquid-path";
 import { MapaMalhaLazy } from "@/components/home/mapa-malha-lazy";
 import { pracasPorRegiao } from "@/components/home/pracas";
@@ -78,7 +79,7 @@ function Hero() {
 					data-j-anchor="hero"
 				/>
 			</div>
-			<div className="absolute bottom-8 left-1/2 hidden translate-x-[-50%] items-center gap-2 text-brand-navy/70 text-sm lg:flex">
+			<div className="scroll-hint absolute bottom-8 left-1/2 hidden translate-x-[-50%] items-center gap-2 text-brand-navy/70 text-sm lg:flex">
 				<ArrowDown aria-hidden className="scroll-hint-arrow size-4" />
 				Role para acompanhar a entrega
 			</div>
@@ -197,11 +198,7 @@ function Chegada() {
 				data-j-anchor="chegada"
 			/>
 			<Reveal>
-				<h2 className="relative z-20 mx-auto max-w-2xl font-bold font-display text-4xl text-brand-navy leading-tight tracking-tight sm:text-6xl">
-					Entregue no CD.
-					<br />
-					<span className="text-brand-ink">Pronto para vender.</span>
-				</h2>
+				<EntregaTitulo />
 			</Reveal>
 			<Reveal delay={0.12}>
 				<p className="relative z-20 mx-auto mt-7 max-w-xl text-brand-navy/75 text-xl leading-relaxed">

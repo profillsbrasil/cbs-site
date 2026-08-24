@@ -342,18 +342,19 @@ function buildFoam(
 interface FoamBubbleProps {
 	dot: FoamDot;
 	progress: MotionValue<number>;
-	reduced: boolean;
 }
 
 /**
  * Uma bolha por componente para poder chamar useTransform (opacidade
  * amarrada ao t dela) sem depender de hooks em loop no componente pai.
  *
- * Além da opacidade, a bolha deriva devagar na direção da tangente local
- * (a corrente do rio) — bolhas com bob somam um leve balanço vertical à
- * mesma animação, em vez de disputar a prop `animate` com um segundo motion.
+ * O drift ao longo da tangente (a corrente do rio) e o balanço vertical das
+ * bolhas com bob são um keyframe CSS em `transform` (`.foam-drift`): roda
+ * fora da main thread, que já pertence ao Canvas 3D. Animar `cx`/`cy` por
+ * rAF era um repaint por frame por bolha. As variáveis ficam na própria
+ * bolha, não num pai, para não recalcular estilo em cascata.
  */
-function FoamBubble({ dot, progress, reduced }: FoamBubbleProps) {
+function FoamBubble({ dot, progress }: FoamBubbleProps) {
 	const revealStart = Math.max(0, dot.t - 0.05);
 	const revealEnd = Math.max(dot.t, revealStart + 0.001);
 	const opacity = useTransform(
@@ -362,27 +363,24 @@ function FoamBubble({ dot, progress, reduced }: FoamBubbleProps) {
 		[0, dot.opacity]
 	);
 	const bobOffset = dot.bob ? -3 : 0;
-	const driftX = dot.x + dot.tx * FOAM_DRIFT;
-	const driftY = dot.y + dot.ty * FOAM_DRIFT + bobOffset;
 	const duration = dot.bob ? dot.duration : dot.driftDuration;
 	return (
-		<motion.circle
-			animate={
-				reduced
-					? undefined
-					: { cx: [dot.x, driftX, dot.x], cy: [dot.y, driftY, dot.y] }
-			}
-			cx={dot.x}
-			cy={dot.y}
-			fill="#ffffff"
-			r={dot.r}
-			style={{ opacity }}
-			transition={{
-				duration,
-				ease: "easeInOut",
-				repeat: Number.POSITIVE_INFINITY,
-			}}
-		/>
+		<motion.g style={{ opacity }}>
+			<circle
+				className="foam-drift"
+				cx={dot.x}
+				cy={dot.y}
+				fill="#ffffff"
+				r={dot.r}
+				style={
+					{
+						"--foam-dur": `${duration}s`,
+						"--foam-dx": `${dot.tx * FOAM_DRIFT}px`,
+						"--foam-dy": `${dot.ty * FOAM_DRIFT + bobOffset}px`,
+					} as React.CSSProperties
+				}
+			/>
+		</motion.g>
 	);
 }
 
@@ -533,7 +531,6 @@ export function LiquidPath() {
 					// biome-ignore lint/suspicious/noArrayIndexKey: lista de tamanho fixo (FOAM_COUNT), o índice É a identidade determinística da bolha
 					key={index}
 					progress={progress}
-					reduced={Boolean(reduced)}
 				/>
 			))}
 		</svg>

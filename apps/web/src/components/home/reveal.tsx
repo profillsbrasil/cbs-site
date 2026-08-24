@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from "motion/react";
 
-const EASE_OUT = [0.16, 1, 0.3, 1] as const;
+import { BRAND_EASE } from "./motion-tokens";
 
 /**
  * Entrada padrão das seções: sobe 24px e aparece, uma vez, quando entra na
@@ -21,10 +21,13 @@ export function Reveal({
 	return (
 		<motion.div
 			className={className}
-			initial={{ opacity: 0, y: reduced ? 0 : 24 }}
-			transition={{ delay, duration: 0.45, ease: EASE_OUT }}
+			initial={{
+				opacity: 0,
+				transform: reduced ? "translateY(0px)" : "translateY(24px)",
+			}}
+			transition={{ delay, duration: 0.45, ease: BRAND_EASE }}
 			viewport={{ margin: "-40px", once: true }}
-			whileInView={{ opacity: 1, y: 0 }}
+			whileInView={{ opacity: 1, transform: "translateY(0px)" }}
 		>
 			{children}
 		</motion.div>
@@ -64,7 +67,7 @@ export function RevealGroups({
 				<div className="flex flex-wrap items-center gap-2" key={group.label}>
 					<motion.dt
 						className={labelClassName}
-						transition={{ duration: 0.45, ease: EASE_OUT }}
+						transition={{ duration: 0.45, ease: BRAND_EASE }}
 						variants={{
 							hidden: { opacity: 0 },
 							shown: { opacity: 1 },
@@ -76,10 +79,13 @@ export function RevealGroups({
 						<motion.dd
 							className={itemClassName}
 							key={item}
-							transition={{ duration: 0.45, ease: EASE_OUT }}
+							transition={{ duration: 0.45, ease: BRAND_EASE }}
 							variants={{
-								hidden: { opacity: 0, y: reduced ? 0 : 14 },
-								shown: { opacity: 1, y: 0 },
+								hidden: {
+									opacity: 0,
+									transform: reduced ? "translateY(0px)" : "translateY(14px)",
+								},
+								shown: { opacity: 1, transform: "translateY(0px)" },
 							}}
 						>
 							{item}
