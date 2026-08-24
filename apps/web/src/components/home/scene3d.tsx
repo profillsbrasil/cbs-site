@@ -91,7 +91,7 @@ const DOCK_IDLE_BOUNCE_AMPLITUDE = 0; // parado no asfalto: sem flutuar
 const DOCK_BOUNCE_FREQUENCY = 7;
 const DOCK_SETTLE_SQUASH_PEAK = 0.1;
 const DOCK_HEADLIGHT_FLASH_PEAK = 0.4; // emissiveIntensity 0.6 → 1 → 0.6
-const DOCK_HEADLIGHT_HEX = "fff3d6"; // cor dos faróis em FrenteCaminhao
+const DOCK_HEADLIGHT_HEX = "fff3d6"; // cor dos faróis em CabineVan
 
 // Handoff da caixa: o quanto ela desvia do pouso na âncora "doca" para
 // dentro do baú (dockCargoWorld), com um arco por cima e encolhendo ao
@@ -1125,7 +1125,10 @@ function DocaFinal() {
 			1 + DOCK_SETTLE_SQUASH_PEAK * 0.5 * settlePulse
 		);
 
-		parts.door.rotation.z = DOCK_DOOR_OPEN_ANGLE * computeDockDoorAmount(p);
+		// Portas duplas: cada folha gira para o seu lado na dobradiça vertical.
+		const doorAngle = DOCK_DOOR_OPEN_ANGLE * computeDockDoorAmount(p);
+		parts.doors[0].rotation.y = doorAngle;
+		parts.doors[1].rotation.y = -doorAngle;
 
 		const flash = settlePulse * DOCK_HEADLIGHT_FLASH_PEAK;
 		for (const material of headlightsRef.current) {
