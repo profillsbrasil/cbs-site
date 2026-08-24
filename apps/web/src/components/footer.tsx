@@ -57,8 +57,8 @@ export function Footer() {
 							C<span className="text-brand-blue">B</span>S
 						</a>
 						<p className="mt-6 max-w-md text-base text-brand-navy/75 leading-relaxed">
-							Companhia Brasileira de Saneantes. Sua marca, nossa fábrica —
-							produzida ao lado do centro de distribuição do Mercado Livre.
+							Companhia Brasileira de Saneantes. Fabricamos com a sua marca, ao
+							lado dos centros de distribuição do Mercado Livre.
 						</p>
 					</div>
 					<div className="flex flex-wrap items-center gap-4 lg:justify-end">
@@ -68,7 +68,7 @@ export function Footer() {
 				</div>
 				<div className="mt-14 flex flex-col gap-4 border-brand-navy/10 border-t pt-5 text-brand-navy/70 text-sm sm:flex-row sm:items-center sm:justify-between">
 					<p>
-						© 2026 CBS — Companhia Brasileira de Saneantes ·{" "}
+						© 2026 CBS · Companhia Brasileira de Saneantes ·{" "}
 						<a
 							className="transition-colors hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2"
 							href={EMAIL_URL}

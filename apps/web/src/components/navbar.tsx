@@ -85,7 +85,7 @@ export function Navbar() {
 				) : null}
 				<motion.a aria-label="Voltar ao topo" href="#topo" layout>
 					<Image
-						alt="CBS — Companhia Brasileira de Saneantes"
+						alt="CBS, Companhia Brasileira de Saneantes"
 						className={scrolled ? "h-9 w-auto" : "h-12 w-auto"}
 						height={62}
 						priority
