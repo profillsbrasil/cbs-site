@@ -1217,7 +1217,10 @@ export function Scene3D() {
 	const journeyActive = useJourneyActive();
 
 	return (
-		<div aria-hidden className="pointer-events-none fixed inset-0 z-10">
+		<div
+			aria-hidden
+			className="scene-canvas pointer-events-none fixed inset-0 z-10"
+		>
 			<Canvas
 				camera={{ fov: 35, position: [0, 0, CAMERA_Z] }}
 				dpr={[1, 1.5]}

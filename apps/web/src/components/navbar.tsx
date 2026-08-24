@@ -43,10 +43,10 @@ export function Navbar() {
 			(entries) => {
 				for (const entry of entries) {
 					const { id } = entry.target;
+					// A gota só troca de link, nunca some: entre duas seções o
+					// último link ativo continua aceso em vez de piscar.
 					if (entry.isIntersecting) {
 						setActive(id);
-					} else {
-						setActive((prev) => (prev === id ? null : prev));
 					}
 				}
 			},
@@ -60,7 +60,7 @@ export function Navbar() {
 
 	const layoutTransition = reduced
 		? { duration: 0 }
-		: { duration: 0.5, ease: CAPSULE_EASE };
+		: { duration: 0.35, ease: CAPSULE_EASE };
 	const gotaTransition = reduced
 		? { duration: 0 }
 		: { bounce: 0.2, duration: 0.5, type: "spring" as const };
@@ -100,7 +100,7 @@ export function Navbar() {
 				>
 					{SECTIONS.map((section) => (
 						<a
-							className="relative rounded-full px-4 py-1.5 font-semibold text-brand-navy/70 text-sm transition-colors hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2"
+							className="relative rounded-full px-4 py-1.5 font-semibold text-brand-navy/70 text-sm transition-[color,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2 active:scale-95"
 							href={`#${section.id}`}
 							key={section.id}
 						>
@@ -117,7 +117,7 @@ export function Navbar() {
 					))}
 				</motion.nav>
 				<motion.a
-					className="inline-flex items-center gap-2 rounded-full bg-brand-navy px-5 py-2.5 font-semibold text-sm text-white transition-colors hover:bg-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2"
+					className="inline-flex items-center gap-2 rounded-full bg-brand-navy px-5 py-2.5 font-semibold text-sm text-white transition-[background-color,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2 active:scale-[0.97]"
 					href={WHATSAPP_URL}
 					layout
 					rel="noopener"

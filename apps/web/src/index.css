@@ -108,11 +108,34 @@
    `data-scene-ready` no <html>. */
 .hero-placeholder {
 	opacity: 1;
-	transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+	filter: blur(0);
+	transition:
+		opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+		filter 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* O blur funde os dois estados do cross-fade (bolhas CSS -> vidro WebGL)
+   num único objeto em vez de dois sobrepostos. */
 html[data-scene-ready] .hero-placeholder {
 	opacity: 0;
+	filter: blur(6px);
+}
+
+.scene-canvas {
+	opacity: 0;
+	transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html[data-scene-ready] .scene-canvas {
+	opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.hero-placeholder,
+	.scene-canvas {
+		filter: none;
+		transition-duration: 0.15s;
+	}
 }
 
 .bubble-ghost {
@@ -258,6 +281,29 @@ html[data-scene-ready] .hero-placeholder {
 	height: 4px;
 	content: "";
 	background: linear-gradient(to bottom, rgb(255 255 255 / 25%), transparent);
+}
+
+/* Espuma do rio: deriva na direção da corrente (variáveis por bolha). */
+@keyframes foam-drift {
+	0%,
+	100% {
+		transform: translate(0, 0);
+	}
+	50% {
+		transform: translate(var(--foam-dx, 0px), var(--foam-dy, 0px));
+	}
+}
+
+.foam-drift {
+	transform-origin: center;
+	transform-box: fill-box;
+	animation: foam-drift var(--foam-dur, 4s) ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.foam-drift {
+		animation: none;
+	}
 }
 
 /* Navbar-cápsula: microbolhas que sobem dentro do vidro condensado. */

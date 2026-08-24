@@ -21,10 +21,13 @@ export function Reveal({
 	return (
 		<motion.div
 			className={className}
-			initial={{ opacity: 0, y: reduced ? 0 : 24 }}
+			initial={{
+				opacity: 0,
+				transform: reduced ? "translateY(0px)" : "translateY(24px)",
+			}}
 			transition={{ delay, duration: 0.45, ease: EASE_OUT }}
 			viewport={{ margin: "-40px", once: true }}
-			whileInView={{ opacity: 1, y: 0 }}
+			whileInView={{ opacity: 1, transform: "translateY(0px)" }}
 		>
 			{children}
 		</motion.div>
@@ -78,8 +81,11 @@ export function RevealGroups({
 							key={item}
 							transition={{ duration: 0.45, ease: EASE_OUT }}
 							variants={{
-								hidden: { opacity: 0, y: reduced ? 0 : 14 },
-								shown: { opacity: 1, y: 0 },
+								hidden: {
+									opacity: 0,
+									transform: reduced ? "translateY(0px)" : "translateY(14px)",
+								},
+								shown: { opacity: 1, transform: "translateY(0px)" },
 							}}
 						>
 							{item}
