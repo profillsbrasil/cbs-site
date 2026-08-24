@@ -1,19 +1,47 @@
 import { Mail } from "lucide-react";
 import Image from "next/image";
 
-import {
-	EMAIL_ADDRESS,
-	EMAIL_URL,
-	WHATSAPP_NUMBER,
-	WHATSAPP_URL,
-	WhatsAppIcon,
-} from "@/components/contact";
+import { EMAIL_URL, WHATSAPP_URL, WhatsAppIcon } from "@/components/contact";
 
 const NAV_LINKS = [
 	{ href: "#modelo", label: "Modelo" },
 	{ href: "#qualidade", label: "Qualidade" },
 	{ href: "#malha", label: "Malha de fábricas" },
 ] as const;
+
+/**
+ * Selo de autorização: anel pontilhado com visto — o mesmo vocabulário do
+ * selo 3D da estação Qualidade, agora como carimbo da credencial ANVISA.
+ */
+function SeloAnvisa({ className }: { className?: string }) {
+	return (
+		<svg aria-hidden className={className} fill="none" viewBox="0 0 36 36">
+			<circle
+				cx="18"
+				cy="18"
+				fill="var(--color-brand-mist)"
+				r="15"
+				stroke="var(--color-brand-blue)"
+				strokeWidth="1.6"
+			/>
+			<circle
+				cx="18"
+				cy="18"
+				r="11.5"
+				stroke="var(--color-brand-blue)"
+				strokeDasharray="2.4 2.6"
+				strokeWidth="1.1"
+			/>
+			<path
+				d="M12.5 18.5l3.6 3.4 7-7.6"
+				stroke="var(--color-brand-navy)"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				strokeWidth="2.2"
+			/>
+		</svg>
+	);
+}
 
 /**
  * Rodapé-espuma: a página abre numa bolha e fecha num tanque de espuma.
@@ -81,7 +109,7 @@ export function Footer() {
 								target="_blank"
 							>
 								<WhatsAppIcon className="size-4" />
-								WhatsApp {WHATSAPP_NUMBER}
+								Falar no WhatsApp
 								<span className="sr-only"> (abre em nova aba)</span>
 							</a>
 							<a
@@ -89,14 +117,26 @@ export function Footer() {
 								href={EMAIL_URL}
 							>
 								<Mail aria-hidden className="size-4" />
-								{EMAIL_ADDRESS}
+								Contato por e-mail
 							</a>
 						</div>
 					</div>
 				</div>
-				<div className="mt-14 flex flex-col gap-2 border-brand-navy/10 border-t pt-5 text-brand-navy/60 text-sm sm:flex-row sm:items-center sm:justify-between">
-					<p>© 2026 CBS — Companhia Brasileira de Saneantes</p>
-					<p>Fabricação de saneantes autorizada pela ANVISA</p>
+				<div className="mt-14 flex flex-col items-center gap-4 border-brand-navy/10 border-t pt-5 sm:flex-row sm:justify-between">
+					<p className="text-brand-navy/60 text-sm">
+						© 2026 CBS — Companhia Brasileira de Saneantes
+					</p>
+					<p className="flex items-center gap-3">
+						<SeloAnvisa className="size-9 shrink-0" />
+						<span className="text-left">
+							<span className="block font-semibold text-brand-navy text-sm">
+								Autorizada pela ANVISA
+							</span>
+							<span className="block text-brand-navy/55 text-xs">
+								Fabricação de saneantes
+							</span>
+						</span>
+					</p>
 				</div>
 			</div>
 		</footer>
