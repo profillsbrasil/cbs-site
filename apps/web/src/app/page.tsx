@@ -51,10 +51,13 @@ function Hero() {
 					style={{ "--rise-delay": "120ms" } as React.CSSProperties}
 				>
 					<p className="mt-7 max-w-lg text-brand-navy/75 text-xl leading-relaxed">
-						A CBS fabrica os seus saneantes e envia de fábricas ao lado dos
-						centros de distribuição do Mercado Livre, com autorização ANVISA.
-						Você vende, a gente produz perto do CD e{" "}
-						<strong className="text-brand-navy">o frete sai menor</strong>.
+						A CBS fabrica o seu saneante, aplica o seu rótulo e entrega no
+						centro de distribuição do Mercado Livre, com autorização ANVISA.
+						Cada fábrica fica ao lado de um CD, e{" "}
+						<strong className="text-brand-navy">
+							a remessa até lá sai mais barata
+						</strong>
+						.
 					</p>
 				</div>
 				<div
@@ -205,8 +208,8 @@ function Chegada() {
 			</Reveal>
 			<Reveal delay={0.12}>
 				<p className="relative z-20 mx-auto mt-7 max-w-xl text-brand-navy/75 text-xl leading-relaxed">
-					Diga o que você quer vender. A CBS responde com produto, rótulo,
-					produção e envio.
+					Diga o que você quer vender e em qual volume. A CBS responde com
+					produto, rótulo, produção e envio.
 				</p>
 			</Reveal>
 			<Reveal delay={0.22}>
@@ -254,14 +257,15 @@ export default function Home() {
 
 				<Station
 					anchor="modelo"
-					title="Você vende. A gente fabrica e envia."
+					title="Você vende. A CBS fabrica e envia."
 					variant="frasco"
 				>
 					<Reveal delay={0.1}>
 						<p className="mt-6 max-w-md text-brand-navy/75 text-lg leading-relaxed">
 							Terceirização completa de produção: a CBS produz o saneante,
 							rotula com a sua marca e despacha direto para o centro de
-							distribuição. Você cuida do anúncio e da venda.
+							distribuição. Você cuida do anúncio e da venda. A marca no rótulo
+							é sua; a CBS não assina o produto final.
 						</p>
 					</Reveal>
 				</Station>
@@ -269,14 +273,14 @@ export default function Home() {
 				<Station
 					anchor="qualidade"
 					flip
-					title="Qualidade com autorização ANVISA."
+					title="Fábrica autorizada pela ANVISA."
 					variant="selo"
 				>
 					<Reveal delay={0.1}>
 						<p className="mt-6 max-w-md text-brand-navy/75 text-lg leading-relaxed">
-							A produção é autorizada pela ANVISA e segue o mesmo padrão de
-							qualidade da formulação ao lacre da caixa. O rótulo é seu. A
-							responsabilidade técnica é da CBS.
+							A CBS tem autorização da ANVISA para fabricar saneantes e segue o
+							mesmo padrão de qualidade da formulação ao lacre da caixa. O
+							rótulo é seu; a autorização de fabricação é da CBS.
 						</p>
 					</Reveal>
 				</Station>
@@ -284,14 +288,15 @@ export default function Home() {
 				<Station
 					anchor="malha"
 					backdrop={<MapaMalhaLazy />}
-					title="Frete menor porque a fábrica fica perto do CD."
+					title="Fábrica ao lado do CD, remessa curta."
 					variant="fabrica"
 				>
 					<Reveal delay={0.1}>
 						<p className="mt-6 max-w-md text-brand-navy/75 text-lg leading-relaxed">
 							São 6 a 7 fábricas junto aos centros de distribuição do Mercado
-							Livre. O produto sai da fábrica e entra no CD, e esse trecho curto
-							é o que corta o frete de quem vende no ML.
+							Livre. Quem vende no Full paga o transporte da remessa até o CD.
+							Saneante é pesado e barato por unidade, então esse trecho pesa na
+							margem, e é ele que a malha encurta.
 						</p>
 					</Reveal>
 					<RevealGroups
