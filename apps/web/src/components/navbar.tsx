@@ -10,7 +10,7 @@ import { BRAND_EASE } from "@/components/home/motion-tokens";
 const SECTIONS = [
 	{ id: "modelo", label: "Modelo" },
 	{ id: "qualidade", label: "Qualidade" },
-	{ id: "malha", label: "Malha" },
+	{ id: "malha", label: "Fábricas" },
 ] as const;
 
 /** Rolagem a partir da qual a barra condensa em cápsula. */

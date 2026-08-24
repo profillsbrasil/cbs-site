@@ -57,8 +57,8 @@ export function Footer() {
 							C<span className="text-brand-blue">B</span>S
 						</a>
 						<p className="mt-6 max-w-md text-base text-brand-navy/75 leading-relaxed">
-							Companhia Brasileira de Saneantes. Fabricamos com a sua marca, ao
-							lado dos centros de distribuição do Mercado Livre.
+							Companhia Brasileira de Saneantes. Terceirização de produção de
+							saneantes, com fábricas junto aos CDs do Mercado Livre.
 						</p>
 					</div>
 					<div className="flex flex-wrap items-center gap-4 lg:justify-end">

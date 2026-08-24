@@ -51,11 +51,14 @@ function Hero() {
 					className="rise"
 					style={{ "--rise-delay": "120ms" } as React.CSSProperties}
 				>
-					<p className="mt-7 max-w-lg text-brand-navy/75 text-xl leading-relaxed">
-						A CBS fabrica os seus saneantes e envia de fábricas ao lado dos
-						centros de distribuição do Mercado Livre, com autorização ANVISA.
-						Você vende, a gente produz perto do CD e{" "}
-						<strong className="text-brand-navy">o frete sai menor</strong>.
+					<p className="mt-7 max-w-lg text-pretty text-brand-navy/75 text-xl leading-relaxed">
+						A CBS fabrica o seu saneante, aplica o seu rótulo e entrega no
+						centro de distribuição do Mercado Livre, com autorização ANVISA.
+						Cada fábrica fica ao lado de um CD, e{" "}
+						<strong className="text-brand-navy">
+							a remessa até lá sai mais barata
+						</strong>
+						.
 					</p>
 				</div>
 				<div
@@ -186,6 +189,9 @@ function Station({
 	);
 }
 
+/** O que a CBS devolve na primeira resposta, na ordem do fluxo. */
+const RESPOSTA = ["produto", "rótulo", "produção", "envio"] as const;
+
 function Chegada() {
 	return (
 		<section className="relative mx-auto max-w-6xl px-6 pt-32 text-center">
@@ -201,10 +207,19 @@ function Chegada() {
 				<EntregaTitulo />
 			</Reveal>
 			<Reveal delay={0.12}>
-				<p className="relative z-20 mx-auto mt-7 max-w-xl text-brand-navy/75 text-xl leading-relaxed">
-					Diga o que você quer vender. A CBS responde com produto, rótulo,
-					produção e envio.
+				<p className="relative z-20 mx-auto mt-7 max-w-xl text-pretty text-brand-navy/75 text-xl leading-relaxed">
+					Diga o que você quer vender e em qual volume. A CBS responde com:
 				</p>
+				<ul className="relative z-20 mt-5 flex flex-wrap items-center justify-center gap-2">
+					{RESPOSTA.map((item) => (
+						<li
+							className="rounded-full bg-brand-mist px-4 py-1.5 font-medium text-brand-navy text-sm"
+							key={item}
+						>
+							{item}
+						</li>
+					))}
+				</ul>
 			</Reveal>
 			<Reveal delay={0.22}>
 				<div className="relative z-20 mt-11 flex flex-wrap items-center justify-center gap-4">
@@ -251,14 +266,15 @@ export default function Home() {
 
 				<Station
 					anchor="modelo"
-					title="Você vende. A gente fabrica e envia."
+					title="Você vende. A CBS fabrica e envia."
 					variant="frasco"
 				>
 					<Reveal delay={0.1}>
-						<p className="mt-6 max-w-md text-brand-navy/75 text-lg leading-relaxed">
+						<p className="mt-6 max-w-md text-pretty text-brand-navy/75 text-lg leading-relaxed">
 							Terceirização completa de produção: a CBS produz o saneante,
-							rotula com a sua marca e despacha direto para o centro de
-							distribuição. Você cuida do anúncio e da venda.
+							aplica o seu rótulo e despacha para o CD. Você anuncia, precifica
+							e vende. A marca no rótulo é sua; a CBS não assina o produto
+							final.
 						</p>
 					</Reveal>
 				</Station>
@@ -266,14 +282,17 @@ export default function Home() {
 				<Station
 					anchor="qualidade"
 					flip
-					title="Qualidade com autorização ANVISA."
+					title="Fábrica autorizada pela ANVISA."
 					variant="selo"
 				>
 					<Reveal delay={0.1}>
-						<p className="mt-6 max-w-md text-brand-navy/75 text-lg leading-relaxed">
-							A produção é autorizada pela ANVISA e segue o mesmo padrão de
-							qualidade da formulação ao lacre da caixa. O rótulo é seu. A
-							responsabilidade técnica é da CBS.
+						<p className="mt-6 max-w-md text-pretty text-brand-navy/75 text-lg leading-relaxed">
+							A CBS tem{" "}
+							<strong className="text-brand-navy">
+								autorização da ANVISA para fabricar saneantes
+							</strong>{" "}
+							e produz com o mesmo padrão em cada lote. O rótulo é seu; a
+							autorização de fabricação é da CBS.
 						</p>
 					</Reveal>
 				</Station>
@@ -281,14 +300,16 @@ export default function Home() {
 				<Station
 					anchor="malha"
 					backdrop={<MapaMalhaLazy />}
-					title="Frete menor porque a fábrica fica perto do CD."
+					title="6 a 7 fábricas, uma por CD."
 					variant="fabrica"
 				>
 					<Reveal delay={0.1}>
-						<p className="mt-6 max-w-md text-brand-navy/75 text-lg leading-relaxed">
-							São 6 a 7 fábricas junto aos centros de distribuição do Mercado
-							Livre. O produto sai da fábrica e entra no CD, e esse trecho curto
-							é o que corta o frete de quem vende no ML.
+						<p className="mt-6 max-w-md text-pretty text-brand-navy/75 text-lg leading-relaxed">
+							<strong className="text-brand-navy">
+								Quem vende no Full paga a remessa até o CD.
+							</strong>{" "}
+							Saneante é pesado e barato por unidade, então esse trecho pesa na
+							margem, e é ele que a fábrica ao lado encurta.
 						</p>
 					</Reveal>
 					<RevealGroups
