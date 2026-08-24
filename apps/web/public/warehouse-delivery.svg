@@ -51,16 +51,8 @@
 					</g>
 				</g>
 			</g>
-			<g id="i5" visibility="hidden">
-				<animate
-					attributeName="visibility"
-					begin="0s"
-					calcMode="discrete"
-					dur="4.052s"
-					keyTimes="0; 0.031002; 0.371019; 1"
-					repeatCount="indefinite"
-					values="hidden; visible; hidden; hidden"
-				/>
+			<g id="i5" opacity="0">
+				<animate repeatCount="indefinite" begin="0s" calcMode="linear" dur="4.052s" values="0; 0; 1; 1; 0; 0" keyTimes="0; 0.031002; 0.091; 0.311; 0.371019; 1" attributeName="opacity" fill="freeze" />
 				<g transform="translate(308.654,145.74)">
 					<animateTransform
 						attributeName="transform"
@@ -104,17 +96,9 @@
 						<g
 							id="i6"
 							transform="matrix(1,0,0,1,1.347,20.66)"
-							visibility="hidden"
+							opacity="0"
 						>
-							<animate
-								attributeName="visibility"
-								begin="0s"
-								calcMode="discrete"
-								dur="4.052s"
-								keyTimes="0; 0.031002; 0.371019; 1"
-								repeatCount="indefinite"
-								values="hidden; visible; hidden; hidden"
-							/>
+							<animate repeatCount="indefinite" begin="0s" calcMode="linear" dur="4.052s" values="0; 0; 1; 1; 0; 0" keyTimes="0; 0.031002; 0.091; 0.311; 0.371019; 1" attributeName="opacity" fill="freeze" />
 							<image
 								height="32"
 								href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACMAAAAgCAYAAACYTcH3AAAACXBIWXMAAAABAAAAAQBPJcTWAAAAJHpUWHRDcmVhdG9yAAAImXNMyU9KVXBMK0ktUnBNS0tNLikGAEF6Bs5qehXFAAAEzklEQVRYhbWX228UVRzHv+fM7O7MXrpdW1qkXBYSiEkBaaJoohD6At4STIzxEXwhMYpZEl+BtfAHLPEBfdHy7IP6IqIhApqYCtjWtAht6d4otN2W7XR2dmZnZ87xoeymZXa7s4V+H8/v9tmd8/tmhqBJKcPfxAGc5cB1zlg80vPJtWZ71BNxm5gfvHiIUtoPYNtToUtsCSq17jD5we9aKTUTAI6tnskvMOaLR3o+XlgXmGJ26AcieN+11HseZsy66acASDDmTawFqiZMMfP3R9TX/jXxRlorZ6yUg6WMwi0UISTWsvdE/5phnjySGPW2nhUjPaC+DY4CW0vBUkbBLc1N/zQhJO4WqgpT64JSqQOeF/aDiH4nlDoOSxkBZ+WGQ9xuHskPXoxSKiQAfrRekhCIQgzvdkKxMix1DLY61gQUiUV6TgzVhFkYupghhG5p1IhQD4TQLoihXQD1OKDK+UHYWqoh0BPVtAOSudLH5VBQ8QT8XgIiu4YKdzti3CrCUkaagFppByRzpY8vDaGQAn7FGwiE3bQhYgBiuBtCIOqINbt5ABItex/1VWEqoqIAORScEX1Sp1soT9v+mpvHSjlY+UEwc3XL0TVtZuLfe+85YJZD+VvDc4LoaXcDRaUOiOHupuyAc6Y/vJ8muYczEiV4XazXnFk2CnOP20WvF3I4NEMFcdV/ihmzMI1ZCHIXxEjPis0TAlEIgegKO8jn5mcejE922pZdzasLU5FlmlBz850eSSrK4VCZELrqnbL1Kdj6VG07kKOYzxl8fuR7oi0WHD+uIUxFZcPwlw0DXr+sS6Gg2RBKS4HpU1U7UNVFJO/c5JbFiLlYqFnjGqYis6jLZaMkSwF/QzvgrAxLGYU6PTSfnI204YnjE1EGt3RHPm0WZmkIg64WwursnGxqmlI3jzMjc3dCv3fzdlv1zFTr9hUBDAN4+VmgSrrusIPc1PTcdDrbXr2gzIKtTMJezKwKs+aXoYqYZUPLK51ULMAjywOp/8ZfM4rGCksoPxqo+WiWiz4PmOVQen5RMoqGI9YIBADo1iNn3uccp7Bkyw5dHZjA1YEJKAXngOcpxngXBYBtb51J2F4W5eBfPg21aUMLVK2EG7cm1x3I8dqZ/D3eKphCAuDHAOC3v8ZB6VKa7BOhlyyEgxL27NwIn9fpDMxiw+nJdLMLoTDKDzlWe3tvfGHrkdPHbca2A+RSV0cLHi8UoagGvB4RokBxcySLPwdTKJlWkzNr6jqz+L7eT/uHGn6qZC+fO6SZ5vl/7jx4Y1NHC4p6GUrBwHRORWd7EIQQhIMSdu/cWCkpJMeSQRcQCgE/fvBk/4+Vg4amt+Xt09deOnruzQP7dvTu2Nw2DABGqYwPDu/BolbCzm3tuHE7ict/3K2UuAG5wCweXQ4CNPFFWVHm177jeUU/f+f+TFfQ74Nf8mBkfBqv7tkCxji2vtiK5FiyZi0Hhjl4rPdk/7Va8aZhKkr/0hcjBPFbow/CyanH+PDwXmQeLdSDUQgh8YOffZtYreeaYYClzaMmiWUeLnwxkZ0PvNK9GeGgtBKG4ydm81jvqf5Uo37PBFOFuhyPClSIV+wgOZYEAdIAjz19L9YdpqLxn+MtHsoOZCeycyoLDr3z+VelZur/B5FEY0FwN1KJAAAAAElFTkSuQmCC"
@@ -191,16 +175,8 @@
 					</g>
 				</g>
 			</g>
-			<g id="i11" visibility="hidden">
-				<animate
-					attributeName="visibility"
-					begin="0s"
-					calcMode="discrete"
-					dur="4.052s"
-					keyTimes="0; 0.433022; 1"
-					repeatCount="indefinite"
-					values="hidden; visible; visible"
-				/>
+			<g id="i11" opacity="0">
+				<animate repeatCount="indefinite" begin="0s" calcMode="linear" dur="4.052s" values="0; 0; 1; 1" keyTimes="0; 0.433022; 0.493; 1" attributeName="opacity" fill="freeze" />
 				<g transform="translate(1079.868,-186.36)">
 					<animateTransform
 						attributeName="transform"
@@ -226,16 +202,8 @@
 					</g>
 				</g>
 			</g>
-			<g id="i12" visibility="hidden">
-				<animate
-					attributeName="visibility"
-					begin="0s"
-					calcMode="discrete"
-					dur="4.052s"
-					keyTimes="0; 0.433022; 1"
-					repeatCount="indefinite"
-					values="hidden; visible; visible"
-				/>
+			<g id="i12" opacity="0">
+				<animate repeatCount="indefinite" begin="0s" calcMode="linear" dur="4.052s" values="0; 0; 1; 1" keyTimes="0; 0.433022; 0.493; 1" attributeName="opacity" fill="freeze" />
 				<g transform="translate(-224.911,11.435)">
 					<animateTransform
 						attributeName="transform"
@@ -301,16 +269,8 @@
 					</g>
 				</g>
 			</g>
-			<g visibility="hidden">
-				<animate
-					attributeName="visibility"
-					begin="0s"
-					calcMode="discrete"
-					dur="4.052s"
-					keyTimes="0; 0.031002; 0.371019; 1"
-					repeatCount="indefinite"
-					values="hidden; visible; hidden; hidden"
-				/>
+			<g opacity="0">
+				<animate repeatCount="indefinite" begin="0s" calcMode="linear" dur="4.052s" values="0; 0; 1; 1; 0; 0" keyTimes="0; 0.031002; 0.091; 0.311; 0.371019; 1" attributeName="opacity" fill="freeze" />
 				<g transform="translate(308.654,145.74)">
 					<animateTransform
 						attributeName="transform"
@@ -351,16 +311,8 @@
 						values="308.654 145.74; 308.654 145.74; 177.654 257.74; 177.654 257.74"
 					/>
 					<g transform="scale(1,1) translate(-31.044,-27.35)">
-						<g transform="matrix(1,0,0,1,1.347,20.66)" visibility="hidden">
-							<animate
-								attributeName="visibility"
-								begin="0s"
-								calcMode="discrete"
-								dur="4.052s"
-								keyTimes="0; 0.031002; 0.371019; 1"
-								repeatCount="indefinite"
-								values="hidden; visible; hidden; hidden"
-							/>
+						<g transform="matrix(1,0,0,1,1.347,20.66)" opacity="0">
+							<animate repeatCount="indefinite" begin="0s" calcMode="linear" dur="4.052s" values="0; 0; 1; 1; 0; 0" keyTimes="0; 0.031002; 0.091; 0.311; 0.371019; 1" attributeName="opacity" fill="freeze" />
 							<image
 								height="32"
 								href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACMAAAAgCAYAAACYTcH3AAAACXBIWXMAAAABAAAAAQBPJcTWAAAAJHpUWHRDcmVhdG9yAAAImXNMyU9KVXBMK0ktUnBNS0tNLikGAEF6Bs5qehXFAAAEzklEQVRYhbWX228UVRzHv+fM7O7MXrpdW1qkXBYSiEkBaaJoohD6At4STIzxEXwhMYpZEl+BtfAHLPEBfdHy7IP6IqIhApqYCtjWtAht6d4otN2W7XR2dmZnZ87xoeymZXa7s4V+H8/v9tmd8/tmhqBJKcPfxAGc5cB1zlg80vPJtWZ71BNxm5gfvHiIUtoPYNtToUtsCSq17jD5we9aKTUTAI6tnskvMOaLR3o+XlgXmGJ26AcieN+11HseZsy66acASDDmTawFqiZMMfP3R9TX/jXxRlorZ6yUg6WMwi0UISTWsvdE/5phnjySGPW2nhUjPaC+DY4CW0vBUkbBLc1N/zQhJO4WqgpT64JSqQOeF/aDiH4nlDoOSxkBZ+WGQ9xuHskPXoxSKiQAfrRekhCIQgzvdkKxMix1DLY61gQUiUV6TgzVhFkYupghhG5p1IhQD4TQLoihXQD1OKDK+UHYWqoh0BPVtAOSudLH5VBQ8QT8XgIiu4YKdzti3CrCUkaagFppByRzpY8vDaGQAn7FGwiE3bQhYgBiuBtCIOqINbt5ABItex/1VWEqoqIAORScEX1Sp1soT9v+mpvHSjlY+UEwc3XL0TVtZuLfe+85YJZD+VvDc4LoaXcDRaUOiOHupuyAc6Y/vJ8muYczEiV4XazXnFk2CnOP20WvF3I4NEMFcdV/ihmzMI1ZCHIXxEjPis0TAlEIgegKO8jn5mcejE922pZdzasLU5FlmlBz850eSSrK4VCZELrqnbL1Kdj6VG07kKOYzxl8fuR7oi0WHD+uIUxFZcPwlw0DXr+sS6Gg2RBKS4HpU1U7UNVFJO/c5JbFiLlYqFnjGqYis6jLZaMkSwF/QzvgrAxLGYU6PTSfnI204YnjE1EGt3RHPm0WZmkIg64WwursnGxqmlI3jzMjc3dCv3fzdlv1zFTr9hUBDAN4+VmgSrrusIPc1PTcdDrbXr2gzIKtTMJezKwKs+aXoYqYZUPLK51ULMAjywOp/8ZfM4rGCksoPxqo+WiWiz4PmOVQen5RMoqGI9YIBADo1iNn3uccp7Bkyw5dHZjA1YEJKAXngOcpxngXBYBtb51J2F4W5eBfPg21aUMLVK2EG7cm1x3I8dqZ/D3eKphCAuDHAOC3v8ZB6VKa7BOhlyyEgxL27NwIn9fpDMxiw+nJdLMLoTDKDzlWe3tvfGHrkdPHbca2A+RSV0cLHi8UoagGvB4RokBxcySLPwdTKJlWkzNr6jqz+L7eT/uHGn6qZC+fO6SZ5vl/7jx4Y1NHC4p6GUrBwHRORWd7EIQQhIMSdu/cWCkpJMeSQRcQCgE/fvBk/4+Vg4amt+Xt09deOnruzQP7dvTu2Nw2DABGqYwPDu/BolbCzm3tuHE7ict/3K2UuAG5wCweXQ4CNPFFWVHm177jeUU/f+f+TFfQ74Nf8mBkfBqv7tkCxji2vtiK5FiyZi0Hhjl4rPdk/7Va8aZhKkr/0hcjBPFbow/CyanH+PDwXmQeLdSDUQgh8YOffZtYreeaYYClzaMmiWUeLnwxkZ0PvNK9GeGgtBKG4ydm81jvqf5Uo37PBFOFuhyPClSIV+wgOZYEAdIAjz19L9YdpqLxn+MtHsoOZCeycyoLDr3z+VelZur/B5FEY0FwN1KJAAAAAElFTkSuQmCC"
@@ -437,16 +389,8 @@
 					</g>
 				</g>
 			</g>
-			<g visibility="hidden">
-				<animate
-					attributeName="visibility"
-					begin="0s"
-					calcMode="discrete"
-					dur="4.052s"
-					keyTimes="0; 0.433022; 1"
-					repeatCount="indefinite"
-					values="hidden; visible; visible"
-				/>
+			<g opacity="0">
+				<animate repeatCount="indefinite" begin="0s" calcMode="linear" dur="4.052s" values="0; 0; 1; 1" keyTimes="0; 0.433022; 0.493; 1" attributeName="opacity" fill="freeze" />
 				<g transform="translate(1079.868,-186.36)">
 					<animateTransform
 						attributeName="transform"
@@ -472,16 +416,8 @@
 					</g>
 				</g>
 			</g>
-			<g visibility="hidden">
-				<animate
-					attributeName="visibility"
-					begin="0s"
-					calcMode="discrete"
-					dur="4.052s"
-					keyTimes="0; 0.433022; 1"
-					repeatCount="indefinite"
-					values="hidden; visible; visible"
-				/>
+			<g opacity="0">
+				<animate repeatCount="indefinite" begin="0s" calcMode="linear" dur="4.052s" values="0; 0; 1; 1" keyTimes="0; 0.433022; 0.493; 1" attributeName="opacity" fill="freeze" />
 				<g transform="translate(-224.911,11.435)">
 					<animateTransform
 						attributeName="transform"
