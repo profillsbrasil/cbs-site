@@ -1178,12 +1178,22 @@ function SceneReady() {
 // ---------------------------------------------------------------------------
 // Rodapé-espuma: bolhas de vidro vivas atrás do conteúdo do footer.
 
-const FOAM_COUNT = 9;
+const FOAM_COUNT = 5;
 /** Velocidade do estouro (clique) e do renascimento da bolha. */
 const FOAM_POP_SPEED = 2.6;
 const FOAM_REGROW_SPEED = 1.1;
-/** Alcance da repulsão do cursor, somado ao raio da bolha (unid. de cena). */
-const FOAM_POINTER_REACH = 0.85;
+/** Alcance da influência do cursor, somado ao raio da bolha (unid. de cena). */
+const FOAM_POINTER_REACH = 1.1;
+// Física com inércia: mola fraca para o ponto da deriva + amortecimento —
+// o empurrão do cursor vira velocidade, não teleporte, e a bolha volta
+// balançando devagar.
+const FOAM_SPRING = 2.2;
+const FOAM_DAMPING = 2.4;
+const FOAM_PUSH_STRENGTH = 5;
+// Wobble: mesmo MeshDistortMaterial das estações; o cursor perto intensifica.
+const FOAM_DISTORT_REST = 0.1;
+const FOAM_DISTORT_PEAK = 0.42;
+const FOAM_DISTORT_SMOOTH_TIME = 0.22;
 
 interface FoamSeed {
 	ampX: number;
@@ -1196,8 +1206,8 @@ interface FoamSeed {
 	y: number;
 }
 
-/** Sementes determinísticas (hash fracionário, como nas microbolhas):
- * posição como fração do retângulo do footer + deriva própria. */
+/** Sementes determinísticas: 5 bolhas grandes em faixas horizontais fixas
+ * (sem aglomerar) com jitter e deriva próprios por hash fracionário. */
 function makeFoamSeeds(): FoamSeed[] {
 	const seeds: FoamSeed[] = [];
 	for (let i = 0; i < FOAM_COUNT; i += 1) {
@@ -1205,25 +1215,20 @@ function makeFoamSeeds(): FoamSeed[] {
 		const hy = (Math.sin(i * 269.5 + 183.3) * 28_001.897) % 1;
 		const hr = (Math.sin(i * 419.2 + 371.9) * 61_337.221) % 1;
 		seeds.push({
-			ampX: 0.25 + Math.abs(hy) * 0.3,
-			ampY: 0.16 + Math.abs(hr) * 0.2,
+			ampX: 0.3 + Math.abs(hy) * 0.35,
+			ampY: 0.2 + Math.abs(hr) * 0.24,
 			id: i,
 			phase: hx * Math.PI * 2,
-			r: 0.24 + Math.abs(hr) * 0.34,
-			speed: 0.28 + Math.abs(hx) * 0.3,
-			x: hx * 0.92,
-			y: hy * 0.6,
+			r: 0.42 + Math.abs(hr) * 0.34,
+			speed: 0.22 + Math.abs(hx) * 0.24,
+			// Faixa fixa por índice + jitter: cobre o footer de ponta a ponta
+			x: -0.78 + (1.56 * i) / (FOAM_COUNT - 1) + hx * 0.08,
+			y: hy * 0.5,
 		});
 	}
 	return seeds;
 }
 
-/**
- * A espuma do rodapé: bolhas de vidro (mesmo material do hero) derivando em
- * lava-lamp atrás do conteúdo. O canvas é pointer-events-none, então o
- * cursor chega por listeners de janela: passar perto empurra a bolha,
- * clicar dentro do footer estoura a mais próxima (que renasce em seguida).
- */
 interface FoamFrameGeometry {
 	centerX: number;
 	centerY: number;
@@ -1231,6 +1236,21 @@ interface FoamFrameGeometry {
 	halfW: number;
 	rect: DOMRect;
 	wpp: number;
+}
+
+/** Estado físico de uma bolha (fora do React, mutado por frame). */
+interface FoamBody {
+	distort: { value: number };
+	vx: number;
+	vy: number;
+}
+
+function makeFoamBodies(): FoamBody[] {
+	return Array.from({ length: FOAM_COUNT }, () => ({
+		distort: { value: FOAM_DISTORT_REST },
+		vx: 0,
+		vy: 0,
+	}));
 }
 
 /** Converte um ponto de tela (px) para coordenadas locais do grupo da
@@ -1254,7 +1274,7 @@ function popNearestFoamBubble(
 	seeds: FoamSeed[],
 	pops: number[],
 	click: { x: number; y: number }
-): void {
+): number {
 	let nearest = -1;
 	let nearestDist = Number.POSITIVE_INFINITY;
 	let i = 0;
@@ -1264,7 +1284,7 @@ function popNearestFoamBubble(
 			child.position.x - click.x,
 			child.position.y - click.y
 		);
-		if (seed && pops[i] === 0 && dist < seed.r * 1.6 && dist < nearestDist) {
+		if (seed && pops[i] === 0 && dist < seed.r * 1.5 && dist < nearestDist) {
 			nearest = i;
 			nearestDist = dist;
 		}
@@ -1273,33 +1293,81 @@ function popNearestFoamBubble(
 	if (nearest >= 0) {
 		pops[nearest] = Number.EPSILON;
 	}
+	return nearest;
 }
 
-/** Posição-alvo da bolha no instante t: deriva lava-lamp em torno do
- * ponto-base + repulsão do cursor com decaimento linear até o alcance. */
-function foamTargetPosition(
+/** Ponto-base da deriva lava-lamp da bolha no instante t. */
+function foamDriftTarget(
 	seed: FoamSeed,
 	t: number,
-	geo: FoamFrameGeometry,
-	pointer: { x: number; y: number } | null
+	geo: FoamFrameGeometry
 ): { x: number; y: number } {
-	let x =
-		seed.x * geo.halfW + Math.sin(t * seed.speed + seed.phase) * seed.ampX;
-	let y =
-		seed.y * geo.halfH +
-		Math.cos(t * seed.speed * 0.8 + seed.phase * 1.7) * seed.ampY;
+	return {
+		x: seed.x * geo.halfW + Math.sin(t * seed.speed + seed.phase) * seed.ampX,
+		y:
+			seed.y * geo.halfH +
+			Math.cos(t * seed.speed * 0.8 + seed.phase * 1.7) * seed.ampY,
+	};
+}
+
+/**
+ * Um passo de física da bolha: mola fraca para o ponto da deriva, empurrão
+ * contínuo do cursor (com decaimento linear até o alcance), amortecimento e
+ * integração. Devolve a proximidade do cursor (0-1) para o wobble.
+ */
+function stepFoamBody(
+	child: { position: { x: number; y: number; z: number } },
+	body: FoamBody,
+	seed: FoamSeed,
+	target: { x: number; y: number },
+	pointer: { x: number; y: number } | null,
+	delta: number
+): number {
+	body.vx += (target.x - child.position.x) * FOAM_SPRING * delta;
+	body.vy += (target.y - child.position.y) * FOAM_SPRING * delta;
+	let proximity = 0;
 	if (pointer) {
-		const dx = x - pointer.x;
-		const dy = y - pointer.y;
+		const dx = child.position.x - pointer.x;
+		const dy = child.position.y - pointer.y;
 		const dist = Math.hypot(dx, dy);
 		const reach = seed.r + FOAM_POINTER_REACH;
 		if (dist > 0.001 && dist < reach) {
-			const force = (1 - dist / reach) * 0.55;
-			x += (dx / dist) * force;
-			y += (dy / dist) * force;
+			proximity = 1 - dist / reach;
+			const push = proximity * FOAM_PUSH_STRENGTH * delta;
+			body.vx += (dx / dist) * push;
+			body.vy += (dy / dist) * push;
 		}
 	}
-	return { x, y };
+	const damping = Math.max(0, 1 - FOAM_DAMPING * delta);
+	body.vx *= damping;
+	body.vy *= damping;
+	child.position.x += body.vx * delta;
+	child.position.y += body.vy * delta;
+	child.position.z = 0;
+	return proximity;
+}
+
+/** Wobble da bolha: distorção de repouso que sobe com o cursor perto —
+ * mesmo cast seguro de MeshDistortMaterial usado nas estações. */
+function updateFoamDistort(
+	material: BubbleMaterial | null,
+	body: FoamBody,
+	proximity: number,
+	delta: number
+): void {
+	const target = MathUtils.lerp(
+		FOAM_DISTORT_REST,
+		FOAM_DISTORT_PEAK,
+		proximity
+	);
+	damp(body.distort, "value", target, FOAM_DISTORT_SMOOTH_TIME, delta);
+	if (!material) {
+		return;
+	}
+	const distortMaterial = material as unknown as { distort: number };
+	if (typeof distortMaterial.distort === "number") {
+		distortMaterial.distort = body.distort.value;
+	}
 }
 
 /** Uma bolha da espuma: adapta o materialRef indexado sem recriar closures
@@ -1317,24 +1385,109 @@ function FoamBubbleMesh({
 	);
 	return (
 		<group position={[seed.x, seed.y, 0]}>
-			<SoapBubble materialRef={register} radius={seed.r} />
+			<SoapBubble materialRef={register} quality="station" radius={seed.r} />
 		</group>
 	);
 }
 
+interface FoamBurstState {
+	armed: boolean;
+	playing: boolean;
+	t0: number;
+}
+
+/** Clique dentro do footer: estoura a bolha mais próxima e dispara o burst
+ * de gotículas no centro dela. */
+function handleFoamClick(
+	g: Group,
+	dropletsNode: Group | null,
+	seeds: FoamSeed[],
+	pops: number[],
+	burst: FoamBurstState,
+	click: { x: number; y: number },
+	elapsedTime: number
+): void {
+	const popped = popNearestFoamBubble(g.children, seeds, pops, click);
+	if (popped < 0 || !dropletsNode) {
+		return;
+	}
+	const child = g.children[popped];
+	const seed = seeds[popped];
+	if (!(child && seed)) {
+		return;
+	}
+	dropletsNode.position.set(child.position.x, child.position.y, 0);
+	dropletsNode.scale.setScalar(seed.r * 1.1);
+	burst.playing = true;
+	burst.t0 = elapsedTime;
+}
+
+interface FoamStepContext {
+	bodies: FoamBody[];
+	delta: number;
+	geo: FoamFrameGeometry;
+	materials: (BubbleMaterial | null)[];
+	pointer: { x: number; y: number } | null;
+	pops: number[];
+	seeds: FoamSeed[];
+	t: number;
+}
+
+/** Um frame das bolhas: deriva + física + wobble + ciclo de estouro. */
+function stepFoamBubbles(
+	g: Group,
+	dropletsNode: Group | null,
+	ctx: FoamStepContext
+): void {
+	let i = 0;
+	for (const child of g.children) {
+		const seed = ctx.seeds[i];
+		const body = ctx.bodies[i];
+		if (!(seed && body) || child === dropletsNode) {
+			i += 1;
+			continue;
+		}
+		const target = foamDriftTarget(seed, ctx.t, ctx.geo);
+		const proximity = stepFoamBody(
+			child,
+			body,
+			seed,
+			target,
+			ctx.pointer,
+			ctx.delta
+		);
+		updateFoamDistort(ctx.materials[i], body, proximity, ctx.delta);
+		ctx.pops[i] = updateFoamPop(
+			child,
+			ctx.materials[i],
+			ctx.pops[i] ?? 0,
+			ctx.delta
+		);
+		i += 1;
+	}
+}
+
 /**
- * A espuma do rodapé: bolhas de vidro (mesmo material do hero) derivando em
- * lava-lamp atrás do conteúdo. O canvas é pointer-events-none, então o
- * cursor chega por listeners de janela: passar perto empurra a bolha,
- * clicar dentro do footer estoura a mais próxima (que renasce em seguida).
+ * A espuma do rodapé: 5 bolhas de vidro iridescente (o MeshDistortMaterial
+ * das estações) com física de inércia — derivam em lava-lamp, o cursor
+ * empurra com molejo e intensifica o wobble, e o clique estoura a mais
+ * próxima num burst de gotículas antes de ela renascer. O canvas é
+ * pointer-events-none, então o cursor chega por listeners de janela.
  */
 function FoamBubbles() {
 	const group = useRef<Group>(null);
+	const dropletsGroup = useRef<Group>(null);
 	const getEl = useAnchor('[data-s-anchor="espuma"]');
 	const { size, viewport } = useThree();
 	const seeds = useMemo(makeFoamSeeds, []);
+	const bodies = useMemo(makeFoamBodies, []);
+	const droplets = useMemo(
+		() => makeDroplets(STATION_DROPLET_COUNT, STATION_DROPLET_SIZE_SCALE),
+		[]
+	);
 	// >0 estourando, <0 renascendo, 0 viva (ver updateFoamPop)
 	const pops = useRef<number[]>(new Array(FOAM_COUNT).fill(0));
+	const burst = useRef({ armed: false, playing: false, t0: 0 });
 	const materials = useRef<(BubbleMaterial | null)[]>(
 		new Array(FOAM_COUNT).fill(null)
 	);
@@ -1396,31 +1549,36 @@ function FoamBubbles() {
 			const click = foamLocalPoint(clickPx.current, geo);
 			clickPx.current = null;
 			if (click) {
-				popNearestFoamBubble(g.children, seeds, pops.current, click);
+				handleFoamClick(
+					g,
+					dropletsGroup.current,
+					seeds,
+					pops.current,
+					burst.current,
+					click,
+					state.clock.elapsedTime
+				);
 			}
 		}
 
-		const t = state.clock.elapsedTime;
-		let i = 0;
-		for (const child of g.children) {
-			const seed = seeds[i];
-			if (!seed) {
-				i += 1;
-				continue;
-			}
-			const target = foamTargetPosition(seed, t, geo, pointer);
-			child.position.x +=
-				(target.x - child.position.x) * Math.min(delta * 3, 1);
-			child.position.y +=
-				(target.y - child.position.y) * Math.min(delta * 3, 1);
-			child.position.z = 0;
-			pops.current[i] = updateFoamPop(
-				child,
-				materials.current[i],
-				pops.current[i] ?? 0,
-				delta
+		stepFoamBubbles(g, dropletsGroup.current, {
+			bodies,
+			delta,
+			geo,
+			materials: materials.current,
+			pointer,
+			pops: pops.current,
+			seeds,
+			t: state.clock.elapsedTime,
+		});
+
+		if (dropletsGroup.current) {
+			animateDropletBurst(
+				dropletsGroup.current,
+				droplets,
+				burst.current,
+				state.clock.elapsedTime
 			);
-			i += 1;
 		}
 	});
 
@@ -1429,6 +1587,19 @@ function FoamBubbles() {
 			{seeds.map((seed) => (
 				<FoamBubbleMesh key={seed.id} onMaterial={onMaterial} seed={seed} />
 			))}
+			<group ref={dropletsGroup} visible={false}>
+				{droplets.map((droplet) => (
+					<mesh key={droplet.id}>
+						<sphereGeometry args={[1, 12, 12]} />
+						<meshPhysicalMaterial
+							color="#cdeef9"
+							opacity={0.5}
+							roughness={0.1}
+							transparent
+						/>
+					</mesh>
+				))}
+			</group>
 		</group>
 	);
 }
