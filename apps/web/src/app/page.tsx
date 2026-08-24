@@ -309,7 +309,7 @@ export default function Home() {
 					<Reveal delay={0.1}>
 						<p className="mt-6 max-w-md text-pretty text-brand-navy/75 text-lg leading-relaxed">
 							<strong className="text-brand-navy">
-								Quem vende no Full paga a remessa até o CD do Mercado Livre.
+								Quem vende no Full paga a remessa até o CD.
 							</strong>{" "}
 							Saneante é pesado e barato por unidade, então esse trecho pesa na
 							margem, e é ele que a fábrica ao lado encurta.
