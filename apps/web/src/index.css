@@ -10,6 +10,8 @@
 	--color-brand-aqua: #a8e0f0;
 	--color-brand-mist: #dcf3fa;
 	--color-brand-paper: #fafbfc;
+	/* Ease-out da casa (Regra da Suavização): gera o utilitário `ease-brand`. */
+	--ease-brand: var(--ease-brand);
 }
 
 /* Display: Sora, injetada pelo next/font como --font-sora no body */
@@ -63,6 +65,19 @@
 	animation: scroll-nudge 2.2s ease-in-out infinite;
 }
 
+/* O aceno some no primeiro scroll (`data-scrolled` no <html>, marcado pela
+   navbar no mesmo limiar da cápsula): depois disso é ruído. */
+.scroll-hint {
+	transition:
+		opacity 0.2s var(--ease-brand),
+		transform 0.2s var(--ease-brand);
+}
+
+html[data-scrolled] .scroll-hint {
+	opacity: 0;
+	transform: translateY(4px);
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.scroll-hint-arrow {
 		animation: none;
@@ -83,7 +98,7 @@
 }
 
 .rise {
-	animation: rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+	animation: rise 0.55s var(--ease-brand) both;
 	animation-delay: var(--rise-delay, 0ms);
 }
 
@@ -110,8 +125,8 @@
 	opacity: 1;
 	filter: blur(0);
 	transition:
-		opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-		filter 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+		opacity 0.5s var(--ease-brand),
+		filter 0.5s var(--ease-brand);
 }
 
 /* O blur funde os dois estados do cross-fade (bolhas CSS -> vidro WebGL)
@@ -123,7 +138,7 @@ html[data-scene-ready] .hero-placeholder {
 
 .scene-canvas {
 	opacity: 0;
-	transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+	transition: opacity 0.5s var(--ease-brand);
 }
 
 html[data-scene-ready] .scene-canvas {
@@ -204,8 +219,8 @@ html[data-scene-ready] .scene-canvas {
 	transform-origin: center;
 	transform-box: fill-box;
 	transition:
-		opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-		transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+		opacity 0.45s var(--ease-brand),
+		transform 0.45s var(--ease-brand);
 	transition-delay: calc(var(--praca-index, 0) * 60ms);
 }
 
@@ -225,7 +240,7 @@ html[data-scene-ready] .scene-canvas {
    fica transparente (blank) e os estados vêm do GeoJSON local. */
 .malha-map-gl {
 	opacity: 0;
-	transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+	transition: opacity 0.6s var(--ease-brand);
 }
 
 [data-map-ready] .malha-map-gl {
@@ -234,7 +249,7 @@ html[data-scene-ready] .scene-canvas {
 
 [data-map-ready] .malha-map-fallback {
 	opacity: 0;
-	transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+	transition: opacity 0.6s var(--ease-brand);
 }
 
 /* Marcadores DOM do MapLibre: mesmo acendimento dos pontos do SVG. */
@@ -242,8 +257,8 @@ html[data-scene-ready] .scene-canvas {
 	opacity: 0.35;
 	transform: scale(1);
 	transition:
-		opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-		transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+		opacity 0.45s var(--ease-brand),
+		transform 0.45s var(--ease-brand);
 	transition-delay: calc(var(--praca-index, 0) * 60ms);
 }
 

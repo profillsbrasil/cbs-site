@@ -2,6 +2,7 @@ import { ArrowDown, Mail } from "lucide-react";
 
 import { EMAIL_URL, WHATSAPP_URL, WhatsAppIcon } from "@/components/contact";
 import { Footer } from "@/components/footer";
+import { EntregaTitulo } from "@/components/home/entrega-titulo";
 import { LiquidPath } from "@/components/home/liquid-path";
 import { MapaMalhaLazy } from "@/components/home/mapa-malha-lazy";
 import { pracasPorRegiao } from "@/components/home/pracas";
@@ -12,12 +13,14 @@ import { Navbar } from "@/components/navbar";
 function CtaWhatsApp({ label }: { label: string }) {
 	return (
 		<a
-			className="group inline-flex items-center gap-3 rounded-full bg-brand-navy px-8 py-4 font-semibold text-base text-white shadow-brand-navy/25 shadow-lg transition-[transform,background-color,box-shadow] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5 hover:bg-brand-ink hover:shadow-brand-ink/30 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2 active:scale-[0.97] active:duration-100 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+			/* A sombra de hover mora num ::after que só troca de opacidade: box-shadow
+			   animado é repaint; opacity e transform vão pra GPU. */
+			className="group relative isolate inline-flex items-center gap-3 rounded-full bg-brand-navy px-8 py-4 font-semibold text-base text-white shadow-brand-navy/25 shadow-lg transition-[transform,background-color] duration-200 ease-brand after:absolute after:inset-0 after:-z-10 after:rounded-full after:opacity-0 after:shadow-brand-ink/30 after:shadow-xl after:transition-opacity after:duration-200 after:ease-brand after:content-[''] hover:-translate-y-0.5 hover:bg-brand-ink hover:after:opacity-100 focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2 active:scale-[0.97] active:duration-100 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
 			href={WHATSAPP_URL}
 			rel="noopener"
 			target="_blank"
 		>
-			<WhatsAppIcon className="size-5 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-110" />
+			<WhatsAppIcon className="size-5 transition-transform duration-200 ease-brand group-hover:scale-110" />
 			{label}
 			<span className="sr-only"> (abre em nova aba)</span>
 		</a>
@@ -40,7 +43,7 @@ function CtaReassurance({ className = "" }: { className?: string }) {
 function CtaEmail() {
 	return (
 		<a
-			className="inline-flex items-center gap-3 rounded-full border border-brand-navy/15 bg-white/60 px-8 py-4 font-semibold text-base text-brand-navy transition-[transform,border-color,color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5 hover:border-brand-ink hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2 active:scale-[0.97] active:duration-100 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+			className="inline-flex items-center gap-3 rounded-full border border-brand-navy/15 bg-white/60 px-8 py-4 font-semibold text-base text-brand-navy transition-[transform,border-color,color] duration-200 ease-brand hover:-translate-y-0.5 hover:border-brand-ink hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2 active:scale-[0.97] active:duration-100 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
 			href={EMAIL_URL}
 		>
 			<Mail aria-hidden className="size-5" />
@@ -118,7 +121,7 @@ function Hero() {
 					data-j-anchor="hero"
 				/>
 			</div>
-			<div className="absolute bottom-8 left-1/2 hidden translate-x-[-50%] items-center gap-2 text-brand-navy/70 text-sm lg:flex">
+			<div className="scroll-hint absolute bottom-8 left-1/2 hidden translate-x-[-50%] items-center gap-2 text-brand-navy/70 text-sm lg:flex">
 				<ArrowDown aria-hidden className="scroll-hint-arrow size-4" />
 				Role para acompanhar a entrega
 			</div>
@@ -237,11 +240,7 @@ function Chegada() {
 				data-j-anchor="chegada"
 			/>
 			<Reveal>
-				<h2 className="relative z-20 mx-auto max-w-2xl font-bold font-display text-4xl text-brand-navy leading-tight tracking-tight sm:text-6xl">
-					Entregue no CD.
-					<br />
-					<span className="text-brand-ink">Pronto para vender.</span>
-				</h2>
+				<EntregaTitulo />
 			</Reveal>
 			<Reveal delay={0.12}>
 				<p className="relative z-20 mx-auto mt-7 max-w-xl text-brand-navy/75 text-xl leading-relaxed">
