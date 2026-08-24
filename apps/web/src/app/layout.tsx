@@ -30,7 +30,11 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="pt-BR" suppressHydrationWarning>
+		<html
+			className="scroll-smooth motion-reduce:scroll-auto"
+			lang="pt-BR"
+			suppressHydrationWarning
+		>
 			<body
 				className={`${sora.variable} bg-brand-paper text-brand-navy antialiased`}
 			>

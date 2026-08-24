@@ -7,7 +7,7 @@
 import { ContactShadows, Float } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { damp, damp3, dampAngle } from "maath/easing";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { type Group, MathUtils, Vector3 } from "three";
 
 import { boxActive, boxWorldPosition } from "./box-position";
@@ -1175,6 +1175,299 @@ function SceneReady() {
  * hero, a caixa viajante (única) e vinhetas das seções, cada grupo ancorado
  * ao elemento do DOM que marca seu lugar.
  */
+// ---------------------------------------------------------------------------
+// Rodapé-espuma: bolhas de vidro vivas atrás do conteúdo do footer.
+
+const FOAM_COUNT = 9;
+/** Velocidade do estouro (clique) e do renascimento da bolha. */
+const FOAM_POP_SPEED = 2.6;
+const FOAM_REGROW_SPEED = 1.1;
+/** Alcance da repulsão do cursor, somado ao raio da bolha (unid. de cena). */
+const FOAM_POINTER_REACH = 0.85;
+
+interface FoamSeed {
+	ampX: number;
+	ampY: number;
+	id: number;
+	phase: number;
+	r: number;
+	speed: number;
+	x: number;
+	y: number;
+}
+
+/** Sementes determinísticas (hash fracionário, como nas microbolhas):
+ * posição como fração do retângulo do footer + deriva própria. */
+function makeFoamSeeds(): FoamSeed[] {
+	const seeds: FoamSeed[] = [];
+	for (let i = 0; i < FOAM_COUNT; i += 1) {
+		const hx = (Math.sin(i * 127.1 + 311.7) * 43_758.545) % 1;
+		const hy = (Math.sin(i * 269.5 + 183.3) * 28_001.897) % 1;
+		const hr = (Math.sin(i * 419.2 + 371.9) * 61_337.221) % 1;
+		seeds.push({
+			ampX: 0.25 + Math.abs(hy) * 0.3,
+			ampY: 0.16 + Math.abs(hr) * 0.2,
+			id: i,
+			phase: hx * Math.PI * 2,
+			r: 0.24 + Math.abs(hr) * 0.34,
+			speed: 0.28 + Math.abs(hx) * 0.3,
+			x: hx * 0.92,
+			y: hy * 0.6,
+		});
+	}
+	return seeds;
+}
+
+/**
+ * A espuma do rodapé: bolhas de vidro (mesmo material do hero) derivando em
+ * lava-lamp atrás do conteúdo. O canvas é pointer-events-none, então o
+ * cursor chega por listeners de janela: passar perto empurra a bolha,
+ * clicar dentro do footer estoura a mais próxima (que renasce em seguida).
+ */
+interface FoamFrameGeometry {
+	centerX: number;
+	centerY: number;
+	halfH: number;
+	halfW: number;
+	rect: DOMRect;
+	wpp: number;
+}
+
+/** Converte um ponto de tela (px) para coordenadas locais do grupo da
+ * espuma, ou null quando o ponto está fora da faixa vertical do footer. */
+function foamLocalPoint(
+	point: { x: number; y: number } | null,
+	geo: FoamFrameGeometry
+): { x: number; y: number } | null {
+	if (!point || point.y <= geo.rect.top || point.y >= geo.rect.bottom) {
+		return null;
+	}
+	return {
+		x: (point.x - geo.centerX) * geo.wpp,
+		y: -(point.y - geo.centerY) * geo.wpp,
+	};
+}
+
+/** Estoura a bolha viva mais próxima do clique (se houver uma ao alcance). */
+function popNearestFoamBubble(
+	children: { position: { x: number; y: number } }[],
+	seeds: FoamSeed[],
+	pops: number[],
+	click: { x: number; y: number }
+): void {
+	let nearest = -1;
+	let nearestDist = Number.POSITIVE_INFINITY;
+	let i = 0;
+	for (const child of children) {
+		const seed = seeds[i];
+		const dist = Math.hypot(
+			child.position.x - click.x,
+			child.position.y - click.y
+		);
+		if (seed && pops[i] === 0 && dist < seed.r * 1.6 && dist < nearestDist) {
+			nearest = i;
+			nearestDist = dist;
+		}
+		i += 1;
+	}
+	if (nearest >= 0) {
+		pops[nearest] = Number.EPSILON;
+	}
+}
+
+/** Posição-alvo da bolha no instante t: deriva lava-lamp em torno do
+ * ponto-base + repulsão do cursor com decaimento linear até o alcance. */
+function foamTargetPosition(
+	seed: FoamSeed,
+	t: number,
+	geo: FoamFrameGeometry,
+	pointer: { x: number; y: number } | null
+): { x: number; y: number } {
+	let x =
+		seed.x * geo.halfW + Math.sin(t * seed.speed + seed.phase) * seed.ampX;
+	let y =
+		seed.y * geo.halfH +
+		Math.cos(t * seed.speed * 0.8 + seed.phase * 1.7) * seed.ampY;
+	if (pointer) {
+		const dx = x - pointer.x;
+		const dy = y - pointer.y;
+		const dist = Math.hypot(dx, dy);
+		const reach = seed.r + FOAM_POINTER_REACH;
+		if (dist > 0.001 && dist < reach) {
+			const force = (1 - dist / reach) * 0.55;
+			x += (dx / dist) * force;
+			y += (dy / dist) * force;
+		}
+	}
+	return { x, y };
+}
+
+/** Uma bolha da espuma: adapta o materialRef indexado sem recriar closures
+ * no JSX do pai (regra noJsxPropsBind). */
+function FoamBubbleMesh({
+	onMaterial,
+	seed,
+}: {
+	onMaterial: (id: number, material: BubbleMaterial | null) => void;
+	seed: FoamSeed;
+}) {
+	const register = useCallback(
+		(material: BubbleMaterial | null) => onMaterial(seed.id, material),
+		[onMaterial, seed.id]
+	);
+	return (
+		<group position={[seed.x, seed.y, 0]}>
+			<SoapBubble materialRef={register} radius={seed.r} />
+		</group>
+	);
+}
+
+/**
+ * A espuma do rodapé: bolhas de vidro (mesmo material do hero) derivando em
+ * lava-lamp atrás do conteúdo. O canvas é pointer-events-none, então o
+ * cursor chega por listeners de janela: passar perto empurra a bolha,
+ * clicar dentro do footer estoura a mais próxima (que renasce em seguida).
+ */
+function FoamBubbles() {
+	const group = useRef<Group>(null);
+	const getEl = useAnchor('[data-s-anchor="espuma"]');
+	const { size, viewport } = useThree();
+	const seeds = useMemo(makeFoamSeeds, []);
+	// >0 estourando, <0 renascendo, 0 viva (ver updateFoamPop)
+	const pops = useRef<number[]>(new Array(FOAM_COUNT).fill(0));
+	const materials = useRef<(BubbleMaterial | null)[]>(
+		new Array(FOAM_COUNT).fill(null)
+	);
+	const pointerPx = useRef<{ x: number; y: number } | null>(null);
+	const clickPx = useRef<{ x: number; y: number } | null>(null);
+
+	const onMaterial = useCallback(
+		(id: number, material: BubbleMaterial | null) => {
+			materials.current[id] = material;
+		},
+		[]
+	);
+
+	useEffect(() => {
+		const onMove = (event: PointerEvent) => {
+			pointerPx.current = { x: event.clientX, y: event.clientY };
+		};
+		const onClick = (event: MouseEvent) => {
+			clickPx.current = { x: event.clientX, y: event.clientY };
+		};
+		window.addEventListener("pointermove", onMove, { passive: true });
+		window.addEventListener("click", onClick);
+		return () => {
+			window.removeEventListener("pointermove", onMove);
+			window.removeEventListener("click", onClick);
+		};
+	}, []);
+
+	useFrame((state, delta) => {
+		const el = getEl();
+		const g = group.current;
+		if (!(el && g)) {
+			return;
+		}
+		const rect = el.getBoundingClientRect();
+		const onScreen =
+			rect.bottom > -VIEW_MARGIN && rect.top < size.height + VIEW_MARGIN;
+		g.visible = onScreen;
+		if (!onScreen) {
+			clickPx.current = null;
+			return;
+		}
+		const geo: FoamFrameGeometry = {
+			centerX: rect.left + rect.width / 2,
+			centerY: rect.top + rect.height / 2,
+			halfH: (rect.height * (viewport.height / size.height)) / 2,
+			halfW: (rect.width * (viewport.height / size.height)) / 2,
+			rect,
+			wpp: viewport.height / size.height,
+		};
+		g.position.set(
+			(geo.centerX / size.width - 0.5) * viewport.width,
+			-(geo.centerY / size.height - 0.5) * viewport.height,
+			0
+		);
+
+		const pointer = foamLocalPoint(pointerPx.current, geo);
+		if (clickPx.current) {
+			const click = foamLocalPoint(clickPx.current, geo);
+			clickPx.current = null;
+			if (click) {
+				popNearestFoamBubble(g.children, seeds, pops.current, click);
+			}
+		}
+
+		const t = state.clock.elapsedTime;
+		let i = 0;
+		for (const child of g.children) {
+			const seed = seeds[i];
+			if (!seed) {
+				i += 1;
+				continue;
+			}
+			const target = foamTargetPosition(seed, t, geo, pointer);
+			child.position.x +=
+				(target.x - child.position.x) * Math.min(delta * 3, 1);
+			child.position.y +=
+				(target.y - child.position.y) * Math.min(delta * 3, 1);
+			child.position.z = 0;
+			pops.current[i] = updateFoamPop(
+				child,
+				materials.current[i],
+				pops.current[i] ?? 0,
+				delta
+			);
+			i += 1;
+		}
+	});
+
+	return (
+		<group ref={group} visible={false}>
+			{seeds.map((seed) => (
+				<FoamBubbleMesh key={seed.id} onMaterial={onMaterial} seed={seed} />
+			))}
+		</group>
+	);
+}
+
+/**
+ * Ciclo de vida do estouro de uma bolha da espuma: >0 incha e some, ao
+ * completar vira <0 (renascendo: cresce do zero de volta ao filme cheio),
+ * 0 = viva. Devolve o próximo estado.
+ */
+function updateFoamPop(
+	child: { scale: { setScalar: (s: number) => void } },
+	material: BubbleMaterial | null,
+	pop: number,
+	delta: number
+): number {
+	if (pop > 0) {
+		const next = Math.min(pop + delta * FOAM_POP_SPEED, 1);
+		child.scale.setScalar(1 + next * 0.4);
+		if (material) {
+			material.opacity = BUBBLE_BASE_OPACITY * (1 - next);
+		}
+		return next >= 1 ? -1 : next;
+	}
+	if (pop < 0) {
+		const next = Math.min(pop + delta * FOAM_REGROW_SPEED, 0);
+		const grown = 1 + next; // -1 → 0 vira 0 → 1
+		child.scale.setScalar(Math.max(grown, 0.001));
+		if (material) {
+			material.opacity = BUBBLE_BASE_OPACITY * grown;
+		}
+		return next;
+	}
+	child.scale.setScalar(1);
+	if (material) {
+		material.opacity = BUBBLE_BASE_OPACITY;
+	}
+	return 0;
+}
+
 export function Scene3D() {
 	const journeyActive = useJourneyActive();
 
@@ -1202,6 +1495,7 @@ export function Scene3D() {
 					/>
 				</AnchoredGroup>
 				<DocaFinal />
+				<FoamBubbles />
 				<JourneyBox journeyActive={journeyActive} />
 				<StationVignette variant="frasco" />
 				<StationVignette variant="selo" />
