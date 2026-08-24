@@ -126,6 +126,30 @@ function Hero() {
 	);
 }
 
+/**
+ * Slot do objeto 3D de uma estação. Na "fabrica", a ilustração animada
+ * (SVG com SMIL — caminhão e trem em loop) vive aqui no DOM, atrás do
+ * canvas: o vidro da bolha é pintado por cima e ela fica "dentro" da bolha
+ * sem perder a animação (uma textura WebGL a congelaria).
+ */
+function StationSlot({ variant }: { variant: string }) {
+	return (
+		<div className="absolute inset-0" data-s-anchor={variant}>
+			{variant === "fabrica" ? (
+				/* <object> e não <img>: o Chrome congela SMIL em contexto de
+				   imagem; como documento embutido a animação roda. */
+				<object
+					aria-hidden
+					className="pointer-events-none absolute top-1/2 left-1/2 w-[135%] max-w-none -translate-x-1/2 -translate-y-[54%] contrast-[1.06] saturate-[1.4]"
+					data="/warehouse-delivery.svg"
+					title=""
+					type="image/svg+xml"
+				/>
+			) : null}
+		</div>
+	);
+}
+
 function Station({
 	anchor,
 	backdrop,
@@ -173,7 +197,7 @@ function Station({
 						aria-hidden
 						className="relative h-72 w-72 lg:absolute lg:bottom-0 lg:left-0 lg:h-80 lg:w-80"
 					>
-						<div className="absolute inset-0" data-s-anchor={variant} />
+						<StationSlot variant={variant} />
 						<div
 							className="absolute top-full -right-10 hidden h-24 w-24 -translate-y-1/2 lg:block"
 							data-j-anchor={anchor}
@@ -185,7 +209,7 @@ function Station({
 					className={`relative z-10 flex justify-center ${flip ? "lg:order-1" : ""}`}
 				>
 					<div aria-hidden className="relative h-72 w-72 sm:h-96 sm:w-96">
-						<div className="absolute inset-0" data-s-anchor={variant} />
+						<StationSlot variant={variant} />
 						{/* Parada da caixa: logo abaixo da bolha, na coluna dela — a
 						    travessia nunca atravessa a coluna de texto. */}
 						<div

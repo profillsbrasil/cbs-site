@@ -13,7 +13,6 @@ import { type Group, MathUtils, Vector3 } from "three";
 import { boxActive, boxWorldPosition } from "./box-position";
 import { CardboardBox } from "./cardboard-box";
 import { dockCargoWorld, dockReady } from "./dock-state";
-import { FabricaIlustrada } from "./fabrica-ilustrada";
 import { journeyFraction, segmentWeights } from "./journey-math";
 import { journeyProgress } from "./journey-progress";
 import {
@@ -784,8 +783,14 @@ function MicroBubbles() {
 	);
 }
 
+/** A fábrica não tem modelo no canvas: a ilustração animada vive no DOM,
+ * atrás do vidro (ver StationSlot em page.tsx). A bolha continua aqui. */
+function FabricaNoDom() {
+	return null;
+}
+
 const STATION_MODELS = {
-	fabrica: FabricaIlustrada,
+	fabrica: FabricaNoDom,
 	frasco: Frasco,
 	selo: Selo,
 } as const;
