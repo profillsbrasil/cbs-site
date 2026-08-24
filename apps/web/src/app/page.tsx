@@ -50,7 +50,7 @@ function Hero() {
 					className="rise"
 					style={{ "--rise-delay": "120ms" } as React.CSSProperties}
 				>
-					<p className="mt-7 max-w-lg text-brand-navy/75 text-xl leading-relaxed">
+					<p className="mt-7 max-w-lg text-pretty text-brand-navy/75 text-xl leading-relaxed">
 						A CBS fabrica o seu saneante, aplica o seu rótulo e entrega no
 						centro de distribuição do Mercado Livre, com autorização ANVISA.
 						Cada fábrica fica ao lado de um CD, e{" "}
@@ -210,7 +210,7 @@ function Chegada() {
 				</h2>
 			</Reveal>
 			<Reveal delay={0.12}>
-				<p className="relative z-20 mx-auto mt-7 max-w-xl text-brand-navy/75 text-xl leading-relaxed">
+				<p className="relative z-20 mx-auto mt-7 max-w-xl text-pretty text-brand-navy/75 text-xl leading-relaxed">
 					Diga o que você quer vender e em qual volume. A CBS responde com:
 				</p>
 				<ul className="relative z-20 mt-5 flex flex-wrap items-center justify-center gap-2">
@@ -273,24 +273,11 @@ export default function Home() {
 					variant="frasco"
 				>
 					<Reveal delay={0.1}>
-						<p className="mt-6 max-w-md text-brand-navy/75 text-lg leading-relaxed">
-							Terceirização completa de produção, dividida em duas partes.
-						</p>
-						<dl className="mt-5 grid max-w-md grid-cols-[auto_1fr] gap-x-5 gap-y-3 text-lg leading-relaxed">
-							<dt className="font-semibold text-brand-navy">Você</dt>
-							<dd className="text-brand-navy/75">
-								anuncia, precifica e vende.
-							</dd>
-							<dt className="font-semibold text-brand-navy">A CBS</dt>
-							<dd className="text-brand-navy/75">
-								produz o saneante, aplica o seu rótulo e despacha para o CD.
-							</dd>
-						</dl>
-						<p className="mt-5 max-w-md text-brand-navy/75 text-lg leading-relaxed">
-							A marca no rótulo é sua.{" "}
-							<strong className="text-brand-navy">
-								A CBS não assina o produto final.
-							</strong>
+						<p className="mt-6 max-w-md text-pretty text-brand-navy/75 text-lg leading-relaxed">
+							Terceirização completa de produção: a CBS produz o saneante,
+							aplica o seu rótulo e despacha para o CD. Você anuncia, precifica
+							e vende. A marca no rótulo é sua; a CBS não assina o produto
+							final.
 						</p>
 					</Reveal>
 				</Station>
@@ -302,7 +289,7 @@ export default function Home() {
 					variant="selo"
 				>
 					<Reveal delay={0.1}>
-						<p className="mt-6 max-w-md text-brand-navy/75 text-lg leading-relaxed">
+						<p className="mt-6 max-w-md text-pretty text-brand-navy/75 text-lg leading-relaxed">
 							A CBS tem{" "}
 							<strong className="text-brand-navy">
 								autorização da ANVISA para fabricar saneantes
@@ -320,7 +307,7 @@ export default function Home() {
 					variant="fabrica"
 				>
 					<Reveal delay={0.1}>
-						<p className="mt-6 max-w-md text-brand-navy/75 text-lg leading-relaxed">
+						<p className="mt-6 max-w-md text-pretty text-brand-navy/75 text-lg leading-relaxed">
 							<strong className="text-brand-navy">
 								Quem vende no Full paga a remessa até o CD do Mercado Livre.
 							</strong>{" "}
