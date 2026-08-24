@@ -91,7 +91,7 @@ const DOCK_IDLE_BOUNCE_AMPLITUDE = 0; // parado no asfalto: sem flutuar
 const DOCK_BOUNCE_FREQUENCY = 7;
 const DOCK_SETTLE_SQUASH_PEAK = 0.1;
 const DOCK_HEADLIGHT_FLASH_PEAK = 0.4; // emissiveIntensity 0.6 → 1 → 0.6
-const DOCK_HEADLIGHT_HEX = "fff3d6"; // cor dos faróis em FrenteCaminhao
+const DOCK_HEADLIGHT_HEX = "fff3d6"; // cor dos faróis em CabineVan
 
 // Handoff da caixa: o quanto ela desvia do pouso na âncora "doca" para
 // dentro do baú (dockCargoWorld), com um arco por cima e encolhendo ao
@@ -720,12 +720,31 @@ function updateMicroPop(
 	return next;
 }
 
+/** Topo do asfalto (.road) em Y de mundo no plano z=0, para as microbolhas
+ * não pintarem por cima da pista (o canvas fica acima dela no z-index).
+ * Fora da tela devolve -Infinity: nenhuma bolha é cortada. */
+function computeRoadTopWorldY(
+	el: Element | null,
+	screenHeight: number,
+	worldHeight: number
+): number {
+	if (!el) {
+		return Number.NEGATIVE_INFINITY;
+	}
+	const { top } = el.getBoundingClientRect();
+	if (top >= screenHeight) {
+		return Number.NEGATIVE_INFINITY;
+	}
+	return -(top / screenHeight - 0.5) * worldHeight;
+}
+
 function MicroBubbles() {
 	const group = useRef<Group>(null);
 	const bubbles = useMemo(makeMicroBubbles, []);
 	// Progresso do estouro por bolha: 0 = viva, (0,1) = estourando, 1 = renasce
 	const pops = useRef<number[]>(new Array(MICRO_COUNT).fill(0));
-	const { viewport } = useThree();
+	const { size, viewport } = useThree();
+	const getRoad = useAnchor(".road");
 
 	useFrame((_, delta) => {
 		if (!group.current) {
@@ -733,6 +752,11 @@ function MicroBubbles() {
 		}
 		const halfH = viewport.height / 2 + 0.4;
 		const halfW = viewport.width / 2;
+		const roadTopY = computeRoadTopWorldY(
+			getRoad(),
+			size.height,
+			viewport.height
+		);
 		let i = 0;
 		for (const child of group.current.children) {
 			const data = bubbles[i];
@@ -750,6 +774,12 @@ function MicroBubbles() {
 					delta,
 					halfH
 				);
+				// Abaixo da linha do asfalto (projetada no plano z=0), a bolha
+				// some — em vez de "sair" do asfalto.
+				const depth = CAMERA_Z / (CAMERA_Z - data.z);
+				if (child.position.y * depth < roadTopY) {
+					(child as unknown as PoppableMesh).material.opacity = 0;
+				}
 			}
 			i += 1;
 		}
@@ -1125,7 +1155,10 @@ function DocaFinal() {
 			1 + DOCK_SETTLE_SQUASH_PEAK * 0.5 * settlePulse
 		);
 
-		parts.door.rotation.z = DOCK_DOOR_OPEN_ANGLE * computeDockDoorAmount(p);
+		// Portas duplas: cada folha gira para o seu lado na dobradiça vertical.
+		const doorAngle = DOCK_DOOR_OPEN_ANGLE * computeDockDoorAmount(p);
+		parts.doors[0].rotation.y = doorAngle;
+		parts.doors[1].rotation.y = -doorAngle;
 
 		const flash = settlePulse * DOCK_HEADLIGHT_FLASH_PEAK;
 		for (const material of headlightsRef.current) {

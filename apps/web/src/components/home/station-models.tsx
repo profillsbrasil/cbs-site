@@ -5,7 +5,6 @@
 
 // biome-ignore-end lint: diretiva do React Compiler
 
-import { RoundedBox } from "@react-three/drei";
 import type { Ref } from "react";
 import { useEffect, useMemo, useRef } from "react";
 import {
@@ -86,137 +85,6 @@ function makeFrascoLabel(): Texture {
 	const logoImage = new Image();
 	logoImage.onload = () => paint(logoImage);
 	logoImage.src = "/cbs-logo.png";
-	return texture;
-}
-
-const BAU_TEX_W = 512;
-const BAU_TEX_H = 320;
-
-/**
- * Lateral do baú, pintura de frota: logo oficial da CBS à frente e uma faixa
- * diagonal azul→aqua na traseira, com um filete navy. `traseira` diz em que
- * borda da textura fica a faixa — cada lado do baú recebe a sua, para a logo
- * nunca sair espelhada. A logo (PNG) carrega assíncrona: a textura atualiza
- * quando a imagem chega.
- */
-function makeBauSide(traseira: "direita" | "esquerda"): Texture {
-	const canvas = document.createElement("canvas");
-	canvas.width = BAU_TEX_W;
-	canvas.height = BAU_TEX_H;
-	const texture = new CanvasTexture(canvas);
-	texture.colorSpace = SRGBColorSpace;
-	texture.anisotropy = 4;
-	const ctx = canvas.getContext("2d");
-	if (!ctx) {
-		return texture;
-	}
-	const paint = (logo: HTMLImageElement | null) => {
-		ctx.setTransform(1, 0, 0, 1, 0, 0);
-		// Fundo branco opaco: clearRect deixaria alfa zero, que vira preto
-		// num material sem transparent.
-		ctx.fillStyle = "#ffffff";
-		ctx.fillRect(0, 0, BAU_TEX_W, BAU_TEX_H);
-		// Faixa e filete espelhados em X quando a traseira é à esquerda; a
-		// logo é pintada depois, fora da transformação, sempre legível.
-		if (traseira === "esquerda") {
-			ctx.setTransform(-1, 0, 0, 1, BAU_TEX_W, 0);
-		}
-		// Frisos verticais sutis (chapa do baú)
-		ctx.fillStyle = "rgba(15,28,43,0.06)";
-		for (let i = 1; i < 12; i += 1) {
-			ctx.fillRect(i * 44 - 1, 0, 2, BAU_TEX_H);
-		}
-		// Faixa diagonal na traseira: azul CBS → aqua, inclinada ~18°
-		const skew = 0.32 * BAU_TEX_H;
-		const bandX = BAU_TEX_W * 0.66;
-		const bandW = BAU_TEX_W * 0.2;
-		const grad = ctx.createLinearGradient(0, 0, 0, BAU_TEX_H);
-		grad.addColorStop(0, "#1d9dd8");
-		grad.addColorStop(1, "#a8e0f0");
-		ctx.fillStyle = grad;
-		ctx.beginPath();
-		ctx.moveTo(bandX + skew, 0);
-		ctx.lineTo(bandX + skew + bandW, 0);
-		ctx.lineTo(bandX + bandW, BAU_TEX_H);
-		ctx.lineTo(bandX, BAU_TEX_H);
-		ctx.closePath();
-		ctx.fill();
-		// Filete navy paralelo, à frente da faixa
-		const stripeX = bandX - BAU_TEX_W * 0.06;
-		const stripeW = BAU_TEX_W * 0.022;
-		ctx.fillStyle = "#0f1c2b";
-		ctx.beginPath();
-		ctx.moveTo(stripeX + skew, 0);
-		ctx.lineTo(stripeX + skew + stripeW, 0);
-		ctx.lineTo(stripeX + stripeW, BAU_TEX_H);
-		ctx.lineTo(stripeX, BAU_TEX_H);
-		ctx.closePath();
-		ctx.fill();
-		ctx.setTransform(1, 0, 0, 1, 0, 0);
-		// Logo oficial à frente (ou wordmark de fallback enquanto carrega)
-		const logoW = BAU_TEX_W * 0.42;
-		const logoX =
-			traseira === "direita"
-				? BAU_TEX_W * 0.07
-				: BAU_TEX_W - BAU_TEX_W * 0.07 - logoW;
-		if (logo) {
-			const logoH = (logo.height / logo.width) * logoW;
-			ctx.drawImage(logo, logoX, (BAU_TEX_H - logoH) / 2, logoW, logoH);
-		} else {
-			ctx.fillStyle = "#0f1c2b";
-			ctx.font = 'bold 84px Sora, "Sora Fallback", sans-serif';
-			ctx.textAlign = "left";
-			ctx.textBaseline = "middle";
-			ctx.fillText("CBS", logoX, BAU_TEX_H / 2);
-		}
-		texture.needsUpdate = true;
-	};
-	paint(null);
-	const logoImage = new Image();
-	logoImage.onload = () => paint(logoImage);
-	logoImage.src = "/cbs-logo.png";
-	return texture;
-}
-
-/** Grade frontal: lâminas horizontais escuras sobre fundo navy. */
-function makeGradeTexture(): Texture {
-	const canvas = document.createElement("canvas");
-	canvas.width = 128;
-	canvas.height = 96;
-	const ctx = canvas.getContext("2d");
-	if (ctx) {
-		ctx.fillStyle = "#111b26";
-		ctx.fillRect(0, 0, 128, 96);
-		ctx.fillStyle = "#2c3e4e";
-		for (let i = 0; i < 5; i += 1) {
-			ctx.fillRect(6, 10 + i * 16, 116, 7);
-		}
-	}
-	const texture = new CanvasTexture(canvas);
-	texture.colorSpace = SRGBColorSpace;
-	return texture;
-}
-
-/** Porta traseira: painel de enrolar, frisos horizontais claros. */
-function makePortaTexture(): Texture {
-	const canvas = document.createElement("canvas");
-	canvas.width = 128;
-	canvas.height = 160;
-	const ctx = canvas.getContext("2d");
-	if (ctx) {
-		ctx.fillStyle = "#f2f7fa";
-		ctx.fillRect(0, 0, 128, 160);
-		ctx.strokeStyle = "rgba(15,28,43,0.18)";
-		ctx.lineWidth = 2;
-		for (let i = 1; i < 10; i += 1) {
-			ctx.beginPath();
-			ctx.moveTo(0, i * 16);
-			ctx.lineTo(128, i * 16);
-			ctx.stroke();
-		}
-	}
-	const texture = new CanvasTexture(canvas);
-	texture.colorSpace = SRGBColorSpace;
 	return texture;
 }
 
@@ -353,72 +221,217 @@ export function Selo() {
 }
 
 // ---------------------------------------------------------------------------
-// Caminhão de entrega
+// Van de entrega
 //
-// Convenção de eixos do grupo raiz (`body`): +X aponta para a frente (cabine),
+// Convenção de eixos do grupo raiz (`body`): +X aponta para a frente (capô),
 // Y é altura (rodas em y=0) e Z é a lateral (largura). Comprimento total
-// ~2.4, altura ~1.1.
+// ~2.16, altura ~1.04.
 //
-// Rodas e porta usam um truque de composição de Euler: o grupo que o
-// consumidor vai girar (`rotation.x` puro, contínuo) carrega uma rotação de
-// base fixa em Y (ou, para a roda, um subgrupo interno com Z fixo) que
-// reorienta o eixo de giro local para o eixo lateral correto do mundo — sem
-// isso, girar só em X giraria a peça no eixo errado. A ordem de Euler padrão
-// do three.js (XYZ) aplica X primeiro, então a rotação de base em Y sempre
-// compõe por cima do giro sem resetá-lo.
+// A carroceria é UMA extrusão só (traseira → nariz) para a silhueta não ter
+// emendas; a boca traseira é um anel de paredes com interior cinza. As rodas
+// ficam por FORA da lateral (z=±0.44), emolduradas por para-lamas salientes —
+// sem isso o pneu renderiza atrás da chapa e a calota na frente dela. As
+// portas traseiras têm pivô na dobradiça vertical e abrem via `rotation.y`.
 // ---------------------------------------------------------------------------
 
-// ─── Caminhão de entrega (referência: caminhão baú urbano cab-over, tipo
-// Iveco Tector do Mercado Livre): cabine baixa e curta na frente, baú alto
-// dominante atrás, rodas pequenas. Aponta para +X, chão em y=0.
+// ─── Van de entrega da frota CBS (silhueta tipo Renault Master): monobloco
+// branco, capô curto inclinado, para-brisa com moldura navy, teto alto,
+// traseira reta com portas duplas. Pintura de frota: logo oficial na porta
+// deslizante, faixa diagonal azul→aqua na traseira e saia azul.
 
 const RODA_RAIO = 0.16;
 const RODA_LARGURA = 0.12;
 
-const CHASSI_Y = 0.2;
+const CBS_NAVY = "#0f1c2b";
+const CBS_AZUL = "#1d9dd8";
+const CINZA_PARACHOQUE = "#c3ced6";
 
-const BAU_COMPRIMENTO = 1.45;
-const BAU_ALTURA = 0.92;
-const BAU_LARGURA = 0.92;
-const BAU_X = -0.35;
-const BAU_Y = 0.26 + BAU_ALTURA / 2;
-const BAU_FRENTE_X = BAU_X + BAU_COMPRIMENTO / 2;
-const BAU_TRAS_X = BAU_X - BAU_COMPRIMENTO / 2;
+const VAN_LARGURA = 0.92;
+const VAN_TETO_Y = 1.04;
+const VAN_PISO_Y = 0.16;
+const VAN_TRAS_X = -1.05;
 
-const CABINE_COMPRIMENTO = 0.5;
-// Teto da cabine a ~80% do teto do baú, como num Tector (cabine baixa, mas
-// não um degrau de meio caminhão).
-const CABINE_ALTURA = 0.74;
-const CABINE_LARGURA = 0.88;
-const CABINE_BASE_Y = 0.2;
-const CABINE_X = BAU_FRENTE_X + 0.06 + CABINE_COMPRIMENTO / 2;
-const CABINE_FRENTE_X = CABINE_X + CABINE_COMPRIMENTO / 2;
-const PARABRISA_RECUO = 0.09;
+// Carroceria extrudada de CARGA_BOCA_X ao nariz; atrás fica o anel da boca.
+const CARGA_BOCA_X = -0.78;
+const ABERTURA_MEIA_LARGURA = 0.38;
+const ABERTURA_Y0 = 0.28;
+const ABERTURA_Y1 = 0.96;
 
-const WHEEL_Z = BAU_LARGURA / 2 - 0.06;
-const RODA_FRENTE_X = CABINE_X + 0.02;
-const RODA_TRAS_A_X = BAU_X - 0.18;
-const RODA_TRAS_B_X = BAU_X - 0.52;
+// Rodas por fora da chapa: face externa em z=0.50, dentro do para-lama.
+const WHEEL_Z = 0.44;
+const RODA_FRENTE_X = 0.7;
+const RODA_TRAS_X = -0.6;
 
-/** Altura total do caminhão (chão em y=0 até o teto do baú). Quem ancora o
- * modelo usa isto como `unitHeight` para o chão cair exatamente na borda
- * inferior da âncora. */
-export const CAMINHAO_ALTURA = BAU_Y + BAU_ALTURA / 2;
+/** Altura total da van (chão em y=0 até o teto). Quem ancora o modelo usa
+ * isto como `unitHeight` para o chão cair exatamente na borda inferior da
+ * âncora. */
+export const CAMINHAO_ALTURA = VAN_TETO_Y;
 
-// Chassi: longarina entre a traseira do baú e a frente da cabine — nunca
-// sobrando para fora do corpo.
-const CHASSI_TRAS_X = BAU_TRAS_X + 0.04;
-const CHASSI_FRENTE_X = CABINE_FRENTE_X - 0.06;
-const CHASSI_COMPRIMENTO = CHASSI_FRENTE_X - CHASSI_TRAS_X;
-const CHASSI_X = (CHASSI_FRENTE_X + CHASSI_TRAS_X) / 2;
+/** Ponto-alvo dentro do vão de carga (posição local do grupo raiz), um pouco
+ * à frente das portas traseiras. */
+const CARGO_TARGET = new Vector3(-0.88, 0.58, 0);
 
-/** Ponto-alvo dentro do baú (posição local do grupo raiz), perto do centro
- * e um pouco à frente da porta traseira. */
-const CARGO_TARGET = new Vector3(BAU_X + 0.2, BAU_Y - 0.08, 0);
+const VAN_TEX_W = 1024;
+const VAN_TEX_H = 448;
+
+// O decalque lateral cobre x∈[-0.76, 0.30] e y∈[0.24, 1.00] do modelo (só a
+// face plana da extrusão — o anel da boca fica branco liso).
+// px(x) = (x + 0.76) / 1.06 * 1024; py(y) = (1.00 - y) / 0.76 * 448.
+const DECAL_COMPRIMENTO = 1.06;
+const DECAL_ALTURA = 0.76;
+const DECAL_CENTRO_X = -0.23;
+const DECAL_CENTRO_Y = 0.62;
+
+const VAN_PINTURA = {
+	clearcoat: 0.35,
+	clearcoatRoughness: 0.3,
+	color: "#ffffff",
+	roughness: 0.35,
+} as const;
+
+const VIDRO = {
+	color: "#a5d3e8",
+	metalness: 0,
+	roughness: 0.06,
+} as const;
+
+/**
+ * Lateral da van, pintura de frota da CBS: logo oficial na porta deslizante,
+ * faixa diagonal azul→aqua com filete navy na traseira, vincos e trilho da
+ * porta. `traseira` diz em que borda da textura fica a traseira — cada lado
+ * recebe a sua, para o logo nunca sair espelhado. O logo (PNG) carrega
+ * assíncrono: a textura atualiza quando a imagem chega.
+ */
+function makeLadoVan(traseira: "direita" | "esquerda"): Texture {
+	const canvas = document.createElement("canvas");
+	canvas.width = VAN_TEX_W;
+	canvas.height = VAN_TEX_H;
+	const texture = new CanvasTexture(canvas);
+	texture.colorSpace = SRGBColorSpace;
+	texture.anisotropy = 4;
+	const ctx = canvas.getContext("2d");
+	if (!ctx) {
+		return texture;
+	}
+	const paint = (logo: HTMLImageElement | null) => {
+		ctx.setTransform(1, 0, 0, 1, 0, 0);
+		ctx.fillStyle = "#ffffff";
+		ctx.fillRect(0, 0, VAN_TEX_W, VAN_TEX_H);
+		// Arte espelhada quando a traseira fica à direita; o logo é pintado
+		// depois, fora da transformação, sempre legível.
+		if (traseira === "direita") {
+			ctx.setTransform(-1, 0, 0, 1, VAN_TEX_W, 0);
+		}
+		// Frisos verticais sutis (chapa)
+		ctx.fillStyle = "rgba(15,28,43,0.05)";
+		for (let i = 1; i < 12; i += 1) {
+			ctx.fillRect(i * 88 - 1, 0, 2, VAN_TEX_H);
+		}
+		// Faixa diagonal na traseira: azul CBS → aqua, inclinada
+		const skew = 0.32 * VAN_TEX_H;
+		const grad = ctx.createLinearGradient(0, 0, 0, VAN_TEX_H);
+		grad.addColorStop(0, CBS_AZUL);
+		grad.addColorStop(1, "#a8e0f0");
+		ctx.fillStyle = grad;
+		ctx.beginPath();
+		ctx.moveTo(20 + skew, 0);
+		ctx.lineTo(110 + skew, 0);
+		ctx.lineTo(110, VAN_TEX_H);
+		ctx.lineTo(20, VAN_TEX_H);
+		ctx.closePath();
+		ctx.fill();
+		// Filete navy paralelo, à frente da faixa
+		ctx.fillStyle = CBS_NAVY;
+		ctx.beginPath();
+		ctx.moveTo(150 + skew, 0);
+		ctx.lineTo(168 + skew, 0);
+		ctx.lineTo(168, VAN_TEX_H);
+		ctx.lineTo(150, VAN_TEX_H);
+		ctx.closePath();
+		ctx.fill();
+		// Vincos da porta deslizante (x=-0.35 e x=0.25 do modelo)
+		ctx.fillStyle = "rgba(15,28,43,0.14)";
+		ctx.fillRect(396, 30, 3, VAN_TEX_H - 50);
+		ctx.fillRect(976, 30, 3, VAN_TEX_H - 50);
+		// Trilho da porta deslizante (y≈0.40) com o puxador na ponta
+		ctx.fillStyle = "rgba(15,28,43,0.2)";
+		ctx.fillRect(396, 350, 580, 8);
+		ctx.fillStyle = CBS_NAVY;
+		ctx.fillRect(936, 342, 30, 24);
+		ctx.setTransform(1, 0, 0, 1, 0, 0);
+		// Logo oficial centrado na porta deslizante (ou wordmark de fallback)
+		const logoW = 320;
+		const logoX = traseira === "esquerda" ? 500 : VAN_TEX_W - 500 - logoW;
+		if (logo) {
+			const logoH = (logo.height / logo.width) * logoW;
+			ctx.drawImage(logo, logoX, 210 - logoH / 2, logoW, logoH);
+		} else {
+			ctx.fillStyle = CBS_NAVY;
+			ctx.font = 'bold 96px Sora, "Sora Fallback", sans-serif';
+			ctx.textAlign = "left";
+			ctx.textBaseline = "middle";
+			ctx.fillText("CBS", logoX, 210);
+		}
+		texture.needsUpdate = true;
+	};
+	paint(null);
+	const logoImage = new Image();
+	logoImage.onload = () => paint(logoImage);
+	logoImage.src = "/cbs-logo.png";
+	return texture;
+}
+
+/**
+ * Folha da porta traseira: branca com frisos, logo pequeno da CBS na folha
+ * de dobradiça +z e frisos simples na outra, maçaneta navy na borda interna.
+ */
+function makePortaVanTexture(variante: "frisos" | "logo"): Texture {
+	const canvas = document.createElement("canvas");
+	canvas.width = 256;
+	canvas.height = 448;
+	const texture = new CanvasTexture(canvas);
+	texture.colorSpace = SRGBColorSpace;
+	const ctx = canvas.getContext("2d");
+	if (!ctx) {
+		return texture;
+	}
+	const paint = (logo: HTMLImageElement | null) => {
+		ctx.fillStyle = "#ffffff";
+		ctx.fillRect(0, 0, 256, 448);
+		ctx.fillStyle = "rgba(15,28,43,0.12)";
+		ctx.fillRect(6, 8, 3, 432);
+		ctx.fillRect(247, 8, 3, 432);
+		ctx.fillRect(16, 60, 224, 2);
+		ctx.fillRect(16, 386, 224, 2);
+		if (variante === "logo") {
+			if (logo) {
+				const logoH = (logo.height / logo.width) * 160;
+				ctx.drawImage(logo, 48, 170 - logoH / 2, 160, logoH);
+			} else {
+				ctx.fillStyle = CBS_NAVY;
+				ctx.font = 'bold 56px Sora, "Sora Fallback", sans-serif';
+				ctx.textAlign = "center";
+				ctx.textBaseline = "middle";
+				ctx.fillText("CBS", 128, 170);
+			}
+		}
+		// Maçaneta na borda interna (a borda z=0 do vão)
+		ctx.fillStyle = CBS_NAVY;
+		ctx.fillRect(variante === "logo" ? 214 : 20, 200, 22, 44);
+		texture.needsUpdate = true;
+	};
+	paint(null);
+	if (variante === "logo") {
+		const logoImage = new Image();
+		logoImage.onload = () => paint(logoImage);
+		logoImage.src = "/cbs-logo.png";
+	}
+	return texture;
+}
 
 /**
  * Uma roda: pneu + aro + cubo, com o eixo do cilindro deitado em Z (lateral
- * do caminhão). O grupo gira via `rotation.z` — rolagem física correta, sem
+ * da van). O grupo gira via `rotation.z` — rolagem física correta, sem
  * composição de Euler que entorte a roda.
  */
 function Roda({ ref, x, z }: { ref?: Ref<Group>; x: number; z: number }) {
@@ -452,144 +465,113 @@ function Roda({ ref, x, z }: { ref?: Ref<Group>; x: number; z: number }) {
 	);
 }
 
-/** Para-lama reto sobre uma roda (estilo caminhão urbano, não arco de moto). */
+/** Para-lama saliente: meio-arco sólido (torus) que emoldura a roda por fora
+ * da chapa — a razão de a roda poder ficar em z=±0.44 sem furar a lateral. */
 function ParaLama({ x, z }: { x: number; z: number }) {
 	return (
-		<mesh position={[x, RODA_RAIO * 2 + 0.035, z]}>
-			<boxGeometry args={[RODA_RAIO * 2.4, 0.03, RODA_LARGURA + 0.05]} />
+		<mesh castShadow position={[x, RODA_RAIO, z]}>
+			<torusGeometry args={[0.2, 0.035, 12, 24, Math.PI]} />
 			<meshStandardMaterial color="#16232f" roughness={0.6} />
 		</mesh>
 	);
 }
 
 /**
- * Cabine cab-over: perfil lateral desenhado como Shape (base reta, frente
- * quase vertical, para-brisa inclinado, teto curto) extrudado na largura —
- * a silhueta certa sem empilhar caixas.
+ * Carroceria unificada: perfil lateral completo (traseira reta, teto, rampa
+ * do para-brisa, capô curto e nariz arredondado) extrudado na largura — uma
+ * peça só, sem emenda cabine/baú. Carrega vidros com moldura navy, fascia de
+ * faróis, grade, para-choques, retrovisores, saia azul, decalques da pintura
+ * e o anel da boca traseira com interior cinza.
  */
-function Cabine() {
+function Carroceria() {
+	const lateralZ = useMemo(() => makeLadoVan("esquerda"), []);
+	const lateralMenosZ = useMemo(() => makeLadoVan("direita"), []);
 	const geometria = useMemo(() => {
 		const perfil = new Shape();
-		const t = CABINE_COMPRIMENTO;
-		const h = CABINE_ALTURA;
-		perfil.moveTo(0, 0);
-		perfil.lineTo(t, 0);
-		perfil.lineTo(t, h * 0.62);
-		perfil.lineTo(t - PARABRISA_RECUO, h);
-		perfil.lineTo(0, h);
+		perfil.moveTo(CARGA_BOCA_X, VAN_PISO_Y);
+		perfil.lineTo(1, VAN_PISO_Y);
+		perfil.quadraticCurveTo(1.08, VAN_PISO_Y, 1.08, 0.3);
+		perfil.lineTo(1.08, 0.44);
+		perfil.quadraticCurveTo(1.07, 0.53, 0.98, 0.55);
+		perfil.lineTo(0.8, 0.61);
+		perfil.quadraticCurveTo(0.75, 0.63, 0.72, 0.68);
+		perfil.lineTo(0.48, 1);
+		perfil.quadraticCurveTo(0.46, VAN_TETO_Y, 0.42, VAN_TETO_Y);
+		perfil.lineTo(CARGA_BOCA_X, VAN_TETO_Y);
 		perfil.closePath();
 		return [
 			perfil,
 			{
 				bevelEnabled: true,
 				bevelSegments: 2,
-				bevelSize: 0.018,
-				bevelThickness: 0.018,
-				depth: CABINE_LARGURA - 0.036,
+				bevelSize: 0.02,
+				bevelThickness: 0.02,
+				depth: VAN_LARGURA - 0.08,
 				steps: 1,
 			},
 		] as const;
 	}, []);
-	const vidro = {
-		color: "#bfe4f2",
-		metalness: 0,
-		roughness: 0.08,
-	} as const;
-	// Ângulo do para-brisa em relação à vertical
-	const anguloParabrisa = Math.atan2(PARABRISA_RECUO, CABINE_ALTURA * 0.38);
+	// Janela da cabine: moldura navy atrás, vidro na frente, borda dianteira
+	// acompanhando o A-pilar.
+	const moldura = useMemo(() => {
+		const forma = new Shape();
+		forma.moveTo(0.33, 0.62);
+		forma.lineTo(0.71, 0.62);
+		forma.lineTo(0.53, 0.97);
+		forma.lineTo(0.33, 0.97);
+		forma.closePath();
+		return [forma, { bevelEnabled: false, depth: 0.012 }] as const;
+	}, []);
+	const janela = useMemo(() => {
+		const forma = new Shape();
+		forma.moveTo(0.355, 0.645);
+		forma.lineTo(0.675, 0.645);
+		forma.lineTo(0.525, 0.945);
+		forma.lineTo(0.355, 0.945);
+		forma.closePath();
+		return [forma, { bevelEnabled: false, depth: 0.012 }] as const;
+	}, []);
 	return (
-		<group position={[CABINE_X, CABINE_BASE_Y, 0]}>
-			<mesh
-				castShadow
-				position={[-CABINE_COMPRIMENTO / 2, 0, -(CABINE_LARGURA - 0.036) / 2]}
-			>
+		<group>
+			<mesh castShadow position={[0, 0, -(VAN_LARGURA - 0.08) / 2]}>
 				<extrudeGeometry args={geometria} />
-				<meshPhysicalMaterial
-					clearcoat={0.7}
-					clearcoatRoughness={0.2}
-					color="#0f1c2b"
-					roughness={0.3}
-				/>
+				<meshPhysicalMaterial {...VAN_PINTURA} />
 			</mesh>
-			{/* Para-brisa: painel colado na rampa frontal */}
-			<mesh
-				position={[
-					CABINE_COMPRIMENTO / 2 - PARABRISA_RECUO / 2 + 0.012,
-					CABINE_ALTURA * 0.81,
-					0,
-				]}
-				rotation={[0, 0, -anguloParabrisa]}
-			>
-				<boxGeometry
-					args={[0.015, CABINE_ALTURA * 0.34, CABINE_LARGURA * 0.82]}
-				/>
-				<meshStandardMaterial {...vidro} />
+			{/* Para-brisa: moldura navy e vidro sobre a rampa (0.72,0.68)→(0.48,1.00) */}
+			<mesh position={[0.61, 0.847, 0]} rotation={[0, 0, 0.6435]}>
+				<boxGeometry args={[0.014, 0.4, 0.78]} />
+				<meshStandardMaterial color={CBS_NAVY} roughness={0.45} />
 			</mesh>
-			{/* Janelas laterais */}
+			<mesh position={[0.616, 0.852, 0]} rotation={[0, 0, 0.6435]}>
+				<boxGeometry args={[0.014, 0.34, 0.7]} />
+				<meshStandardMaterial {...VIDRO} />
+			</mesh>
+			{/* Janelas das portas da cabine, com moldura */}
 			{[1, -1].map((lado) => (
-				<mesh
-					key={lado}
-					position={[
-						-CABINE_COMPRIMENTO * 0.04,
-						CABINE_ALTURA * 0.78,
-						(lado * CABINE_LARGURA) / 2,
-					]}
-				>
-					<boxGeometry
-						args={[CABINE_COMPRIMENTO * 0.55, CABINE_ALTURA * 0.3, 0.015]}
-					/>
-					<meshStandardMaterial {...vidro} />
-				</mesh>
-			))}
-			{/* Retrovisores */}
-			{[1, -1].map((lado) => (
-				<group
-					key={lado}
-					position={[
-						CABINE_COMPRIMENTO / 2 - 0.05,
-						CABINE_ALTURA * 0.86,
-						(lado * (CABINE_LARGURA + 0.14)) / 2,
-					]}
-				>
-					<mesh>
-						<boxGeometry args={[0.02, 0.02, 0.14]} />
-						<meshStandardMaterial color="#0f1c2b" roughness={0.5} />
+				<group key={lado}>
+					<mesh position={[0, 0, lado === 1 ? 0.447 : -0.459]}>
+						<extrudeGeometry args={moldura} />
+						<meshStandardMaterial color={CBS_NAVY} roughness={0.45} />
 					</mesh>
-					<mesh position={[0, -0.05, (lado * 0.14) / 2]}>
-						<boxGeometry args={[0.025, 0.11, 0.06]} />
-						<meshStandardMaterial color="#16232f" roughness={0.4} />
+					<mesh position={[0, 0, lado === 1 ? 0.452 : -0.464]}>
+						<extrudeGeometry args={janela} />
+						<meshStandardMaterial {...VIDRO} />
+					</mesh>
+					{/* Maçaneta da porta da cabine */}
+					<mesh position={[0.44, 0.56, lado * 0.447]}>
+						<boxGeometry args={[0.07, 0.02, 0.012]} />
+						<meshStandardMaterial color={CBS_NAVY} roughness={0.4} />
 					</mesh>
 				</group>
 			))}
-		</group>
-	);
-}
-
-/** Frente: grade texturizada, para-choque envolvente, faróis e placa. */
-function FrenteCaminhao() {
-	const grade = useMemo(makeGradeTexture, []);
-	return (
-		<group position={[CABINE_FRENTE_X, 0, 0]}>
-			<mesh position={[0.005, CABINE_BASE_Y + 0.14, 0]}>
-				<boxGeometry args={[0.02, 0.2, CABINE_LARGURA * 0.72]} />
-				<meshStandardMaterial map={grade} roughness={0.55} />
+			{/* Fascia navy do nariz com as lentes dos faróis embutidas */}
+			<mesh position={[1.081, 0.49, 0]}>
+				<boxGeometry args={[0.02, 0.1, 0.74]} />
+				<meshStandardMaterial color={CBS_NAVY} roughness={0.45} />
 			</mesh>
-			{/* Para-choque */}
-			<mesh castShadow position={[0.02, CABINE_BASE_Y - 0.02, 0]}>
-				<boxGeometry args={[0.07, 0.12, CABINE_LARGURA + 0.04]} />
-				<meshStandardMaterial color="#c3ced6" roughness={0.45} />
-			</mesh>
-			{/* Faróis */}
 			{[1, -1].map((lado) => (
-				<mesh
-					key={lado}
-					position={[
-						0.035,
-						CABINE_BASE_Y + 0.075,
-						lado * (CABINE_LARGURA / 2 - 0.1),
-					]}
-				>
-					<boxGeometry args={[0.025, 0.05, 0.1]} />
+				<mesh key={lado} position={[1.089, 0.49, lado * 0.22]}>
+					<boxGeometry args={[0.014, 0.055, 0.18]} />
 					<meshStandardMaterial
 						color="#fff3d6"
 						emissive="#fff3d6"
@@ -597,72 +579,107 @@ function FrenteCaminhao() {
 					/>
 				</mesh>
 			))}
-			{/* Placa */}
-			<mesh position={[0.058, CABINE_BASE_Y - 0.02, 0]}>
-				<boxGeometry args={[0.012, 0.055, 0.16]} />
+			{/* Grade */}
+			<mesh position={[1.084, 0.36, 0]}>
+				<boxGeometry args={[0.016, 0.08, 0.52]} />
+				<meshStandardMaterial color="#2c3e4e" roughness={0.55} />
+			</mesh>
+			{/* Para-choque dianteiro envolvente e placa */}
+			<mesh castShadow position={[1.06, 0.22, 0]}>
+				<boxGeometry args={[0.07, 0.16, VAN_LARGURA + 0.06]} />
+				<meshStandardMaterial color={CINZA_PARACHOQUE} roughness={0.45} />
+			</mesh>
+			<mesh position={[1.098, 0.22, 0]}>
+				<boxGeometry args={[0.012, 0.05, 0.16]} />
 				<meshStandardMaterial color="#f2f5f7" roughness={0.4} />
 			</mesh>
-		</group>
-	);
-}
-
-/** Baú branco com marca CBS nas laterais, faixa azul e luzes traseiras. */
-function Bau() {
-	// Lado +z (rotação 0): u cresce para +X = frente, traseira à esquerda.
-	// Lado -z (rotação π): u cresce para -X = traseira à direita.
-	const lateralZ = useMemo(() => makeBauSide("esquerda"), []);
-	const lateralMenosZ = useMemo(() => makeBauSide("direita"), []);
-	return (
-		<group>
-			<RoundedBox
-				args={[BAU_COMPRIMENTO, BAU_ALTURA, BAU_LARGURA]}
-				castShadow
-				position={[BAU_X, BAU_Y, 0]}
-				radius={0.02}
-				smoothness={3}
-			>
-				<meshPhysicalMaterial
-					clearcoat={0.35}
-					clearcoatRoughness={0.3}
-					color="#ffffff"
-					roughness={0.35}
-				/>
-			</RoundedBox>
-			{/* Marca nas duas laterais */}
+			{/* Retrovisores navy */}
+			{[1, -1].map((lado) => (
+				<group
+					key={lado}
+					position={[0.68, 0.84, (lado * (VAN_LARGURA + 0.16)) / 2]}
+				>
+					<mesh>
+						<boxGeometry args={[0.02, 0.02, 0.12]} />
+						<meshStandardMaterial color={CBS_NAVY} roughness={0.5} />
+					</mesh>
+					<mesh position={[0, 0.02, (lado * 0.1) / 2]}>
+						<boxGeometry args={[0.025, 0.12, 0.06]} />
+						<meshStandardMaterial color="#16232f" roughness={0.4} />
+					</mesh>
+				</group>
+			))}
+			{/* Saia azul da frota, contornando a base */}
+			<mesh position={[-0.02, 0.195, 0]}>
+				<boxGeometry args={[2.04, 0.07, VAN_LARGURA + 0.004]} />
+				<meshStandardMaterial color={CBS_AZUL} roughness={0.35} />
+			</mesh>
+			{/* Decalque da pintura nas duas laterais (face plana da extrusão) */}
 			{[1, -1].map((lado) => (
 				<mesh
 					key={lado}
-					position={[BAU_X, BAU_Y + 0.06, (lado * (BAU_LARGURA + 0.006)) / 2]}
+					position={[DECAL_CENTRO_X, DECAL_CENTRO_Y, lado * 0.448]}
 					rotation={[0, lado === 1 ? 0 : Math.PI, 0]}
 				>
-					<planeGeometry args={[BAU_COMPRIMENTO * 0.94, BAU_ALTURA * 0.74]} />
-					<meshStandardMaterial
+					<planeGeometry args={[DECAL_COMPRIMENTO, DECAL_ALTURA]} />
+					<meshPhysicalMaterial
+						clearcoat={0.35}
+						clearcoatRoughness={0.3}
 						map={lado === 1 ? lateralZ : lateralMenosZ}
-						roughness={0.4}
+						roughness={0.35}
 					/>
 				</mesh>
 			))}
-			{/* Faixa azul na base do baú */}
-			<mesh position={[BAU_X, 0.26 + 0.045, 0]}>
+			{/* Anel da boca traseira: teto, piso e laterais da abertura */}
+			<mesh castShadow position={[(CARGA_BOCA_X + VAN_TRAS_X) / 2, 1, 0]}>
 				<boxGeometry
-					args={[BAU_COMPRIMENTO + 0.004, 0.09, BAU_LARGURA + 0.004]}
+					args={[
+						CARGA_BOCA_X - VAN_TRAS_X,
+						VAN_TETO_Y - ABERTURA_Y1,
+						VAN_LARGURA,
+					]}
 				/>
-				<meshStandardMaterial color="#1d9dd8" roughness={0.35} />
+				<meshPhysicalMaterial {...VAN_PINTURA} />
 			</mesh>
-			{/* Interior visível com a porta aberta */}
-			<mesh position={[BAU_X, BAU_Y, 0]}>
+			<mesh castShadow position={[(CARGA_BOCA_X + VAN_TRAS_X) / 2, 0.22, 0]}>
 				<boxGeometry
-					args={[BAU_COMPRIMENTO - 0.08, BAU_ALTURA - 0.08, BAU_LARGURA - 0.08]}
+					args={[
+						CARGA_BOCA_X - VAN_TRAS_X,
+						ABERTURA_Y0 - VAN_PISO_Y,
+						VAN_LARGURA,
+					]}
 				/>
-				<meshStandardMaterial color="#d7dee3" roughness={0.8} side={BackSide} />
+				<meshPhysicalMaterial {...VAN_PINTURA} />
 			</mesh>
-			{/* Luzes traseiras */}
 			{[1, -1].map((lado) => (
 				<mesh
+					castShadow
 					key={lado}
-					position={[BAU_TRAS_X - 0.005, 0.34, lado * (BAU_LARGURA / 2 - 0.07)]}
+					position={[
+						(CARGA_BOCA_X + VAN_TRAS_X) / 2,
+						(ABERTURA_Y0 + ABERTURA_Y1) / 2,
+						lado * (ABERTURA_MEIA_LARGURA + 0.04),
+					]}
 				>
-					<boxGeometry args={[0.02, 0.05, 0.08]} />
+					<boxGeometry
+						args={[
+							CARGA_BOCA_X - VAN_TRAS_X,
+							ABERTURA_Y1 - ABERTURA_Y0,
+							VAN_LARGURA / 2 - ABERTURA_MEIA_LARGURA,
+						]}
+					/>
+					<meshPhysicalMaterial {...VAN_PINTURA} />
+				</mesh>
+			))}
+			{/* Interior do vão de carga, visível com as portas abertas */}
+			<mesh position={[-0.91, 0.62, 0]}>
+				<boxGeometry args={[0.26, 0.66, 0.74]} />
+				<meshStandardMaterial color="#d7dee3" roughness={0.8} side={BackSide} />
+			</mesh>
+			{/* Lanternas traseiras verticais */}
+			{[1, -1].map((lado) => (
+				<mesh key={lado} position={[VAN_TRAS_X - 0.008, 0.44, lado * 0.435]}>
+					<boxGeometry args={[0.02, 0.22, 0.05]} />
 					<meshStandardMaterial
 						color="#c94f43"
 						emissive="#b33327"
@@ -670,49 +687,37 @@ function Bau() {
 					/>
 				</mesh>
 			))}
+			{/* Para-choque traseiro baixo */}
+			<mesh position={[VAN_TRAS_X - 0.01, 0.12, 0]}>
+				<boxGeometry args={[0.05, 0.07, VAN_LARGURA * 0.94]} />
+				<meshStandardMaterial color={CINZA_PARACHOQUE} roughness={0.45} />
+			</mesh>
 		</group>
 	);
 }
 
 /**
- * Porta traseira de enrolar: pivô na dobradiça superior. Abre girando
- * `rotation.z` positivo (o painel sobe em direção ao teto do baú).
+ * Folha da porta traseira: pivô na dobradiça vertical (borda externa da
+ * abertura, z=±0.40). `rotation.y` 0 = fechada; a folha de dobradiça +z abre
+ * com ângulo positivo e a de -z com negativo (as duas giram para fora).
  */
-function Porta({ ref }: { ref?: Ref<Group> }) {
-	const painel = useMemo(makePortaTexture, []);
-	return (
-		<group position={[BAU_TRAS_X, BAU_Y + BAU_ALTURA / 2 - 0.06, 0]} ref={ref}>
-			<mesh castShadow position={[0, -(BAU_ALTURA - 0.12) / 2, 0]}>
-				<boxGeometry args={[0.025, BAU_ALTURA - 0.12, BAU_LARGURA - 0.1]} />
-				<meshStandardMaterial map={painel} roughness={0.5} />
-			</mesh>
-		</group>
+function PortaTraseira({ lado, ref }: { lado: 1 | -1; ref?: Ref<Group> }) {
+	const painel = useMemo(
+		() => makePortaVanTexture(lado === 1 ? "logo" : "frisos"),
+		[lado]
 	);
-}
-
-/** Chassi: longarina escura contida no corpo, para-choque traseiro e tanque. */
-function Chassi() {
 	return (
-		<group>
-			<mesh position={[CHASSI_X, CHASSI_Y, 0]}>
-				<boxGeometry args={[CHASSI_COMPRIMENTO, 0.08, BAU_LARGURA * 0.6]} />
-				<meshStandardMaterial color="#13202d" roughness={0.6} />
-			</mesh>
-			{/* Para-choque traseiro: barra baixa sob a porta, na largura do baú */}
-			<mesh position={[BAU_TRAS_X + 0.02, CHASSI_Y - 0.06, 0]}>
-				<boxGeometry args={[0.04, 0.05, BAU_LARGURA * 0.9]} />
-				<meshStandardMaterial color="#c3ced6" roughness={0.45} />
-			</mesh>
-			<mesh
-				position={[BAU_FRENTE_X - 0.1, CHASSI_Y - 0.03, WHEEL_Z * 0.8]}
-				rotation={[0, 0, Math.PI / 2]}
-			>
-				<cylinderGeometry args={[0.055, 0.055, 0.3, 14]} />
-				<meshStandardMaterial
-					color="#8fa3b0"
-					metalness={0.5}
-					roughness={0.35}
-				/>
+		<group
+			position={[
+				VAN_TRAS_X - 0.005,
+				(ABERTURA_Y0 + ABERTURA_Y1) / 2,
+				lado * (ABERTURA_MEIA_LARGURA + 0.02),
+			]}
+			ref={ref}
+		>
+			<mesh castShadow position={[0, 0, -lado * 0.2]}>
+				<boxGeometry args={[0.025, ABERTURA_Y1 - ABERTURA_Y0, 0.4]} />
+				<meshStandardMaterial map={painel} roughness={0.45} />
 			</mesh>
 		</group>
 	);
@@ -721,10 +726,11 @@ function Chassi() {
 export interface CaminhaoParts {
 	/** Grupo raiz do corpo (balanço/suspensão). */
 	body: Group;
-	/** Ponto-alvo dentro do baú onde a caixa deve terminar (posição local do grupo raiz). */
+	/** Ponto-alvo dentro do vão de carga onde a caixa deve terminar (posição local do grupo raiz). */
 	cargoTarget: Vector3;
-	/** Porta traseira do baú; pivô na dobradiça superior (`rotation.z` 0 = fechada, ~1.6 = aberta pra cima). */
-	door: Group;
+	/** Portas traseiras [dobradiça em +z, dobradiça em -z]; `rotation.y` 0 =
+	 * fechadas, a folha +z abre com ângulo positivo e a -z com negativo. */
+	doors: [Group, Group];
 	/** Rodas para girar (`rotation.z` contínuo — eixo lateral, rolagem física). */
 	wheels: Group[];
 }
@@ -732,14 +738,12 @@ export interface CaminhaoParts {
 const WHEEL_POSITIONS: [number, number][] = [
 	[RODA_FRENTE_X, WHEEL_Z],
 	[RODA_FRENTE_X, -WHEEL_Z],
-	[RODA_TRAS_A_X, WHEEL_Z],
-	[RODA_TRAS_A_X, -WHEEL_Z],
-	[RODA_TRAS_B_X, WHEEL_Z],
-	[RODA_TRAS_B_X, -WHEEL_Z],
+	[RODA_TRAS_X, WHEEL_Z],
+	[RODA_TRAS_X, -WHEEL_Z],
 ];
 
 /**
- * O caminhão de entrega da CBS, com partes animáveis expostas via `onParts`
+ * A van de entrega da CBS, com partes animáveis expostas via `onParts`
  * (chamado uma vez após o mount). O componente não anima nada sozinho.
  */
 export function CaminhaoEntrega({
@@ -748,7 +752,8 @@ export function CaminhaoEntrega({
 	onParts?: (parts: CaminhaoParts) => void;
 }) {
 	const body = useRef<Group>(null);
-	const door = useRef<Group>(null);
+	const doorZ = useRef<Group>(null);
+	const doorMenosZ = useRef<Group>(null);
 	const wheelRefs = useRef<(Group | null)[]>([]);
 	const wheelSetters = useMemo(
 		() =>
@@ -760,11 +765,16 @@ export function CaminhaoEntrega({
 
 	useEffect(() => {
 		const wheels = wheelRefs.current.filter((w): w is Group => w !== null);
-		if (body.current && door.current && wheels.length > 0) {
+		if (
+			body.current &&
+			doorZ.current &&
+			doorMenosZ.current &&
+			wheels.length > 0
+		) {
 			onParts?.({
 				body: body.current,
 				cargoTarget: CARGO_TARGET,
-				door: door.current,
+				doors: [doorZ.current, doorMenosZ.current],
 				wheels,
 			});
 		}
@@ -772,18 +782,16 @@ export function CaminhaoEntrega({
 
 	return (
 		<group ref={body}>
-			<Bau />
-			<Porta ref={door} />
-			<Cabine />
-			<FrenteCaminhao />
-			<Chassi />
+			<Carroceria />
+			<PortaTraseira lado={1} ref={doorZ} />
+			<PortaTraseira lado={-1} ref={doorMenosZ} />
 			{WHEEL_POSITIONS.map(([x, z], index) => (
 				<Roda key={`${x}:${z}`} ref={wheelSetters[index]} x={x} z={z} />
 			))}
-			<ParaLama x={RODA_TRAS_A_X} z={WHEEL_Z} />
-			<ParaLama x={RODA_TRAS_A_X} z={-WHEEL_Z} />
-			<ParaLama x={RODA_TRAS_B_X} z={WHEEL_Z} />
-			<ParaLama x={RODA_TRAS_B_X} z={-WHEEL_Z} />
+			<ParaLama x={RODA_FRENTE_X} z={WHEEL_Z + 0.03} />
+			<ParaLama x={RODA_FRENTE_X} z={-WHEEL_Z - 0.03} />
+			<ParaLama x={RODA_TRAS_X} z={WHEEL_Z + 0.03} />
+			<ParaLama x={RODA_TRAS_X} z={-WHEEL_Z - 0.03} />
 		</group>
 	);
 }

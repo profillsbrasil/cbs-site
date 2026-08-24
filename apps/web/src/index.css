@@ -237,7 +237,10 @@ html[data-scene-ready] .hero-placeholder {
 	}
 }
 
-/* Asfalto da doca: faixa navy com a linha tracejada central em aqua. */
+/* Asfalto da doca, com profundidade: meio-fio claro no topo (::before),
+   asfalto em gradiente (claro no horizonte, escuro na frente) e UMA linha
+   tracejada central — a segunda faixa lia como duplicada, não como
+   perspectiva. */
 .road {
 	background:
 		repeating-linear-gradient(
@@ -245,6 +248,14 @@ html[data-scene-ready] .hero-placeholder {
 			var(--color-brand-aqua) 0 2.5rem,
 			transparent 2.5rem 4.5rem
 		)
-		center / 100% 3px no-repeat,
-		var(--color-brand-navy);
+		left 0 top 58% / 100% 4px no-repeat,
+		linear-gradient(to bottom, #24384d 0%, #14263a 40%, #0a1520 100%);
+}
+
+.road::before {
+	position: absolute;
+	inset: 0 0 auto;
+	height: 4px;
+	content: "";
+	background: linear-gradient(to bottom, rgb(255 255 255 / 25%), transparent);
 }
