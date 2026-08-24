@@ -1,6 +1,6 @@
-import { ArrowDown, Mail } from "lucide-react";
+import { ArrowDown } from "lucide-react";
 
-import { EMAIL_URL, WHATSAPP_URL, WhatsAppIcon } from "@/components/contact";
+import { CtaEmail, CtaReassurance, CtaWhatsApp } from "@/components/cta";
 import { Footer } from "@/components/footer";
 import { EntregaTitulo } from "@/components/home/entrega-titulo";
 import { LiquidPath } from "@/components/home/liquid-path";
@@ -9,48 +9,6 @@ import { pracasPorRegiao } from "@/components/home/pracas";
 import { Reveal, RevealGroups } from "@/components/home/reveal";
 import { Scene3D } from "@/components/home/scene3d";
 import { Navbar } from "@/components/navbar";
-
-function CtaWhatsApp({ label }: { label: string }) {
-	return (
-		<a
-			/* A sombra de hover mora num ::after que só troca de opacidade: box-shadow
-			   animado é repaint; opacity e transform vão pra GPU. */
-			className="group relative isolate inline-flex items-center gap-3 rounded-full bg-brand-navy px-8 py-4 font-semibold text-base text-white shadow-brand-navy/25 shadow-lg transition-[transform,background-color] duration-200 ease-brand after:absolute after:inset-0 after:-z-10 after:rounded-full after:opacity-0 after:shadow-brand-ink/30 after:shadow-xl after:transition-opacity after:duration-200 after:ease-brand after:content-[''] hover:-translate-y-0.5 hover:bg-brand-ink hover:after:opacity-100 focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2 active:scale-[0.97] active:duration-100 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-			href={WHATSAPP_URL}
-			rel="noopener"
-			target="_blank"
-		>
-			<WhatsAppIcon className="size-5 transition-transform duration-200 ease-brand group-hover:scale-110" />
-			{label}
-			<span className="sr-only"> (abre em nova aba)</span>
-		</a>
-	);
-}
-
-/**
- * Linha de reasseguramento sob o par de CTAs: o site não tem formulário nem
- * cadastro, e o clique leva a uma conversa — é o que o visitante precisa
- * saber antes de sair da página.
- */
-function CtaReassurance({ className = "" }: { className?: string }) {
-	return (
-		<p className={`text-brand-navy/70 text-sm ${className}`}>
-			Conversa direta, sem formulário nem cadastro.
-		</p>
-	);
-}
-
-function CtaEmail() {
-	return (
-		<a
-			className="inline-flex items-center gap-3 rounded-full border border-brand-navy/15 bg-white/60 px-8 py-4 font-semibold text-base text-brand-navy transition-[transform,border-color,color] duration-200 ease-brand hover:-translate-y-0.5 hover:border-brand-ink hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2 active:scale-[0.97] active:duration-100 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-			href={EMAIL_URL}
-		>
-			<Mail aria-hidden className="size-5" />
-			Enviar e-mail
-		</a>
-	);
-}
 
 /**
  * Silhueta CSS do aglomerado de bolhas, na mesma geometria da cena 3D
@@ -94,10 +52,10 @@ function Hero() {
 					style={{ "--rise-delay": "120ms" } as React.CSSProperties}
 				>
 					<p className="mt-7 max-w-lg text-brand-navy/75 text-xl leading-relaxed">
-						A CBS fabrica seus saneantes com autorização ANVISA e envia de
-						fábricas ao lado dos centros de distribuição do Mercado Livre. Você
-						vende; <strong className="text-brand-navy">o frete despenca</strong>
-						.
+						A CBS fabrica os seus saneantes e envia de fábricas ao lado dos
+						centros de distribuição do Mercado Livre, com autorização ANVISA.
+						Você vende, a gente produz perto do CD e{" "}
+						<strong className="text-brand-navy">o frete sai menor</strong>.
 					</p>
 				</div>
 				<div
@@ -244,8 +202,8 @@ function Chegada() {
 			</Reveal>
 			<Reveal delay={0.12}>
 				<p className="relative z-20 mx-auto mt-7 max-w-xl text-brand-navy/75 text-xl leading-relaxed">
-					Conte o que você quer vender e a CBS devolve o caminho: produto,
-					rótulo, produção e envio.
+					Diga o que você quer vender. A CBS responde com produto, rótulo,
+					produção e envio.
 				</p>
 			</Reveal>
 			<Reveal delay={0.22}>
@@ -300,7 +258,7 @@ export default function Home() {
 						<p className="mt-6 max-w-md text-brand-navy/75 text-lg leading-relaxed">
 							Terceirização completa de produção: a CBS produz o saneante,
 							rotula com a sua marca e despacha direto para o centro de
-							distribuição. Seu produto, sua marca, nossa operação.
+							distribuição. Você cuida do anúncio e da venda.
 						</p>
 					</Reveal>
 				</Station>
@@ -308,14 +266,14 @@ export default function Home() {
 				<Station
 					anchor="qualidade"
 					flip
-					title="Qualidade com registro, não com promessa."
+					title="Qualidade com autorização ANVISA."
 					variant="selo"
 				>
 					<Reveal delay={0.1}>
 						<p className="mt-6 max-w-md text-brand-navy/75 text-lg leading-relaxed">
-							Produção autorizada pela ANVISA e padrões de qualidade de ponta a
-							ponta — da formulação ao lacre da caixa. O rótulo é seu; a
-							responsabilidade técnica é nossa.
+							A produção é autorizada pela ANVISA e segue o mesmo padrão de
+							qualidade da formulação ao lacre da caixa. O rótulo é seu. A
+							responsabilidade técnica é da CBS.
 						</p>
 					</Reveal>
 				</Station>
@@ -323,14 +281,14 @@ export default function Home() {
 				<Station
 					anchor="malha"
 					backdrop={<MapaMalhaLazy />}
-					title="Fábricas onde o frete nasce menor."
+					title="Frete menor porque a fábrica fica perto do CD."
 					variant="fabrica"
 				>
 					<Reveal delay={0.1}>
 						<p className="mt-6 max-w-md text-brand-navy/75 text-lg leading-relaxed">
-							De 6 a 7 unidades ao lado dos centros de distribuição do Mercado
-							Livre. Produzir a poucos quilômetros do CD corta o custo de frete
-							de quem vende no ML.
+							São 6 a 7 fábricas junto aos centros de distribuição do Mercado
+							Livre. O produto sai da fábrica e entra no CD, e esse trecho curto
+							é o que corta o frete de quem vende no ML.
 						</p>
 					</Reveal>
 					<RevealGroups

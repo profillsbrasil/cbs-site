@@ -12,8 +12,8 @@ const sora = Sora({
 
 export const metadata: Metadata = {
 	description:
-		"A CBS fabrica saneantes com a sua marca e envia de fábricas ao lado dos CDs do Mercado Livre. Terceirização completa de produção: você vende, a gente fabrica e envia.",
-	title: "CBS — Companhia Brasileira de Saneantes",
+		"Terceirização de produção de saneantes: a CBS fabrica com a sua marca, com autorização ANVISA, e envia de fábricas ao lado dos CDs do Mercado Livre. Você vende, o frete sai menor.",
+	title: "CBS | Companhia Brasileira de Saneantes",
 };
 
 const DIRECTION_CONTRACT = `impeccable-direction b61342a9/870fbad3 (user-pinned)
