@@ -13,7 +13,7 @@ import { type Group, MathUtils, Vector3 } from "three";
 import { boxActive, boxWorldPosition } from "./box-position";
 import { CardboardBox } from "./cardboard-box";
 import { dockCargoWorld, dockReady } from "./dock-state";
-import { Fabrica } from "./fabrica";
+import { FabricaIlustrada } from "./fabrica-ilustrada";
 import { journeyFraction, segmentWeights } from "./journey-math";
 import { journeyProgress } from "./journey-progress";
 import {
@@ -785,7 +785,7 @@ function MicroBubbles() {
 }
 
 const STATION_MODELS = {
-	fabrica: Fabrica,
+	fabrica: FabricaIlustrada,
 	frasco: Frasco,
 	selo: Selo,
 } as const;
