@@ -303,3 +303,16 @@ html[data-scene-ready] .hero-placeholder {
 		animation: none;
 	}
 }
+
+/* Fio do rodapé: a fita aqua tracejada do asfalto continua por 1 linha
+   abaixo da doca, emendando o quase-preto ao branco em vez de cortar. */
+.road-thread {
+	height: 3px;
+	margin-top: 0.75rem;
+	background: repeating-linear-gradient(
+		90deg,
+		var(--color-brand-aqua) 0 2.5rem,
+		transparent 2.5rem 4.5rem
+	);
+	opacity: 0.55;
+}
