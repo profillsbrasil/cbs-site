@@ -7,12 +7,13 @@
 import { ContactShadows, Float } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { damp, damp3, dampAngle } from "maath/easing";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { type Group, MathUtils, Vector3 } from "three";
 
 import { boxActive, boxWorldPosition } from "./box-position";
 import { CardboardBox } from "./cardboard-box";
 import { dockCargoWorld, dockReady } from "./dock-state";
+import { DOCK_HANDOFF_END, JOURNEY_ANCHORS } from "./journey-constants";
 import { journeyFraction, segmentWeights } from "./journey-math";
 import { journeyProgress } from "./journey-progress";
 import {
@@ -31,14 +32,7 @@ import {
 } from "./station-models";
 import { useJourneyActive } from "./use-journey-active";
 
-export const JOURNEY_ANCHORS = [
-	"hero",
-	"modelo",
-	"qualidade",
-	"malha",
-	"chegada",
-	"doca",
-] as const;
+export { DOCK_HANDOFF_END, JOURNEY_ANCHORS } from "./journey-constants";
 
 const FOCUS_LINE = 0.52;
 const CAMERA_Z = 8;
@@ -74,8 +68,6 @@ const DOCK_TRUCK_ENTER_END = 0.92;
 const DOCK_DOOR_OPEN_START = 0.9;
 const DOCK_DOOR_OPEN_END = 0.94;
 const DOCK_HANDOFF_START = 0.94;
-/** Fim da entrega: a caixa está dentro do baú. O título da Chegada lê isto. */
-export const DOCK_HANDOFF_END = 0.985;
 const DOCK_SETTLE_START = 0.985;
 const DOCK_SETTLE_END = 1;
 
@@ -1122,7 +1114,7 @@ function spinDockWheels(wheels: Group[], dx: number): void {
  * a `JourneyBox` desviar o pouso final da caixa para dentro do baú — os dois
  * componentes não se conhecem, só o canal fora do React.
  */
-function DocaFinal() {
+function DocaFinal({ journeyActive }: { journeyActive: boolean }) {
 	const partsRef = useRef<CaminhaoParts | null>(null);
 	const headlightsRef = useRef<EmissiveMaterial[]>([]);
 	const bodyBaseY = useRef(0);
@@ -1142,7 +1134,9 @@ function DocaFinal() {
 		if (!parts) {
 			return;
 		}
-		const p = journeyProgress.get();
+		// Sem coreografia (mobile / reduced-motion) o caminhão já nasce
+		// estacionado na doca, portas fechadas — nunca fora da tela.
+		const p = journeyActive ? journeyProgress.get() : 1;
 		const elapsed = state.clock.elapsedTime;
 
 		const bodyX = computeDockBodyX(p);
@@ -1193,6 +1187,36 @@ function DocaFinal() {
 }
 
 /**
+ * Em `frameloop="demand"`, pede um quadro novo a cada scroll/resize (os
+ * grupos ancorados leem o DOM por frame) e alguns quadros extras logo após a
+ * montagem, para texturas e o Suspense da cena terminarem de resolver.
+ */
+function DemandRedraw({ active }: { active: boolean }) {
+	const invalidate = useThree((state) => state.invalidate);
+
+	useEffect(() => {
+		if (!active) {
+			return;
+		}
+		const redraw = () => invalidate();
+		window.addEventListener("scroll", redraw, { passive: true });
+		window.addEventListener("resize", redraw);
+		// Aquecimento: garante que o primeiro quadro pintado já tenha as
+		// texturas resolvidas, sem depender de um scroll do usuário.
+		const warmup = window.setInterval(redraw, 250);
+		const stop = window.setTimeout(() => window.clearInterval(warmup), 3000);
+		return () => {
+			window.removeEventListener("scroll", redraw);
+			window.removeEventListener("resize", redraw);
+			window.clearInterval(warmup);
+			window.clearTimeout(stop);
+		};
+	}, [active, invalidate]);
+
+	return null;
+}
+
+/**
  * Sinal de "cena pronta" para o DOM: no primeiro frame desenhado (o que só
  * acontece depois das texturas resolverem o Suspense da cena), marca o
  * <html> e o placeholder CSS do hero faz cross-fade para o vidro real.
@@ -1222,11 +1246,17 @@ export function Scene3D() {
 			aria-hidden
 			className="scene-canvas pointer-events-none fixed inset-0 z-10"
 		>
+			{/* Fora da jornada (telas < 1024px ou reduced-motion) a cena é
+			    estática: o loop só desenha sob demanda — um quadro por scroll
+			    ou resize, para os grupos ancorados seguirem a página — em vez
+			    de rAF contínuo a 60fps no celular. */}
 			<Canvas
 				camera={{ fov: 35, position: [0, 0, CAMERA_Z] }}
 				dpr={[1, 1.5]}
+				frameloop={journeyActive ? "always" : "demand"}
 				gl={{ alpha: true, antialias: true }}
 			>
+				<DemandRedraw active={!journeyActive} />
 				<StudioRig />
 				<MicroBubbles />
 				<AnchoredGroup selector='[data-s-anchor="hero-cluster"]' unitHeight={5}>
@@ -1243,7 +1273,7 @@ export function Scene3D() {
 						scale={9}
 					/>
 				</AnchoredGroup>
-				<DocaFinal />
+				<DocaFinal journeyActive={journeyActive} />
 				<JourneyBox journeyActive={journeyActive} />
 				<StationVignette variant="frasco" />
 				<StationVignette variant="selo" />

@@ -67,10 +67,10 @@ export function Footer() {
 					</div>
 				</div>
 				<div className="mt-14 flex flex-col gap-4 border-brand-navy/10 border-t pt-5 text-brand-navy/70 text-sm sm:flex-row sm:items-center sm:justify-between">
-					<p>
-						© 2026 CBS · Companhia Brasileira de Saneantes ·{" "}
+					<p className="flex flex-wrap items-center gap-x-1.5">
+						<span>© 2026 CBS · Companhia Brasileira de Saneantes ·</span>
 						<a
-							className="transition-colors hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2"
+							className="-my-3 inline-flex min-h-11 items-center underline decoration-brand-navy/30 underline-offset-4 transition-colors hover:text-brand-ink hover:decoration-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2"
 							href={EMAIL_URL}
 						>
 							{EMAIL_ADDRESS}

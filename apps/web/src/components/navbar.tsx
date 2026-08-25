@@ -94,7 +94,12 @@ export function Navbar() {
 						<span aria-hidden className="nav-bub" />
 					</>
 				) : null}
-				<motion.a aria-label="Voltar ao topo" href="#topo" layout>
+				<motion.a
+					aria-label="Voltar ao topo"
+					className="inline-flex min-h-11 items-center rounded-full focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2"
+					href="#topo"
+					layout
+				>
 					<Image
 						alt="CBS, Companhia Brasileira de Saneantes"
 						className={scrolled ? "h-9 w-auto" : "h-12 w-auto"}
@@ -106,12 +111,12 @@ export function Navbar() {
 				</motion.a>
 				<motion.nav
 					aria-label="Seções da página"
-					className="hidden items-center md:flex"
+					className="hidden items-center gap-1 md:flex"
 					layout
 				>
 					{SECTIONS.map((section) => (
 						<a
-							className="relative rounded-full px-4 py-1.5 font-semibold text-brand-navy/70 text-sm transition-[color,transform] duration-150 ease-brand hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2 active:scale-95"
+							className="relative inline-flex min-h-11 items-center rounded-full px-4 py-1.5 font-semibold text-brand-navy/70 text-sm transition-[color,transform] duration-150 ease-brand hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2 active:scale-95"
 							href={`#${section.id}`}
 							key={section.id}
 						>
@@ -128,7 +133,7 @@ export function Navbar() {
 					))}
 				</motion.nav>
 				<motion.a
-					className="inline-flex items-center gap-2 rounded-full bg-brand-navy px-5 py-2.5 font-semibold text-sm text-white transition-[background-color,transform] duration-150 ease-brand hover:bg-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2 active:scale-[0.97]"
+					className="inline-flex min-h-11 items-center gap-2 rounded-full bg-brand-navy px-5 py-2.5 font-semibold text-sm text-white transition-[background-color,transform] duration-150 ease-brand hover:bg-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2 active:scale-[0.97]"
 					href={WHATSAPP_URL}
 					layout
 					rel="noopener"

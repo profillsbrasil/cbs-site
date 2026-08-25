@@ -7,7 +7,7 @@ import { LiquidPath } from "@/components/home/liquid-path";
 import { MapaMalhaLazy } from "@/components/home/mapa-malha-lazy";
 import { pracasPorRegiao } from "@/components/home/pracas";
 import { Reveal, RevealGroups } from "@/components/home/reveal";
-import { Scene3D } from "@/components/home/scene3d";
+import { Scene3DLazy } from "@/components/home/scene3d-lazy";
 import { Navbar } from "@/components/navbar";
 
 /**
@@ -22,7 +22,7 @@ function HeroPlaceholder() {
 			aria-hidden
 			className="hero-placeholder pointer-events-none absolute inset-0 flex items-center justify-center"
 		>
-			<div className="relative aspect-square h-full">
+			<div className="relative aspect-square h-full max-h-full max-w-full">
 				<div className="bubble-ghost absolute top-[11%] left-[13%] size-[74%]" />
 				<div className="bubble-ghost absolute top-[19%] left-[-3%] size-[10%]" />
 				<div className="bubble-ghost absolute top-[61%] left-[69%] size-[7%]" />
@@ -35,7 +35,7 @@ function HeroPlaceholder() {
 function Hero() {
 	return (
 		<section
-			className="relative mx-auto grid min-h-[100svh] max-w-6xl items-center gap-10 px-6 pt-28 pb-16 lg:grid-cols-[1.05fr_1fr]"
+			className="relative mx-auto grid min-h-[100svh] max-w-6xl items-center gap-8 px-6 pt-24 pb-16 sm:gap-10 sm:pt-28 lg:grid-cols-[1.05fr_minmax(0,1fr)]"
 			id="topo"
 		>
 			<div className="mist-hero absolute inset-y-0 left-1/2 w-screen -translate-x-1/2" />
@@ -73,12 +73,14 @@ function Hero() {
 				</div>
 			</div>
 			<div
-				className="relative h-[420px] lg:h-[560px]"
+				className="relative h-[clamp(14rem,72vw,26rem)] lg:h-[560px]"
 				data-s-anchor="hero-cluster"
 			>
 				<HeroPlaceholder />
+				{/* Marco da caixa: proporcional à bolha abaixo de lg (a caixa
+				    estática escala por este marco, a bolha pela âncora acima). */}
 				<div
-					className="absolute top-1/2 left-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2"
+					className="absolute top-1/2 left-1/2 size-[30%] -translate-x-1/2 -translate-y-1/2 lg:size-32"
 					data-j-anchor="hero"
 				/>
 			</div>
@@ -104,7 +106,7 @@ function StationSlot({ variant }: { variant: string }) {
 				   imagem; como documento embutido a animação roda. */
 				<object
 					aria-hidden
-					className="pointer-events-none absolute top-1/2 left-1/2 w-[135%] max-w-none -translate-x-1/2 -translate-y-[54%] contrast-[1.06] saturate-[1.4]"
+					className="pointer-events-none absolute top-1/2 left-1/2 w-[120%] max-w-none -translate-x-1/2 -translate-y-[54%] contrast-[1.06] saturate-[1.4] sm:w-[135%]"
 					data="/warehouse-delivery.svg"
 					title=""
 					type="image/svg+xml"
@@ -133,7 +135,7 @@ function Station({
 	const hasBackdrop = Boolean(backdrop);
 	return (
 		<section
-			className="relative mx-auto grid min-h-[80vh] max-w-6xl scroll-mt-24 items-center gap-10 px-6 py-24 lg:grid-cols-2"
+			className="relative mx-auto grid max-w-6xl scroll-mt-24 items-center gap-10 px-6 py-20 sm:py-24 lg:min-h-[80vh] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]"
 			id={anchor}
 		>
 			{hasBackdrop ? null : (
@@ -153,13 +155,13 @@ function Station({
 			{hasBackdrop ? (
 				/* Composição D2: mapa no alto-direita, bolha em baixo-esquerda —
 				   a diagonal do rio líquido. Abaixo de lg empilha. */
-				<div className="relative z-10 flex min-h-[520px] flex-col items-center gap-6 lg:block">
-					<div className="relative h-72 w-72 lg:absolute lg:top-0 lg:right-0 lg:h-[380px] lg:w-[380px]">
+				<div className="relative z-10 flex flex-col items-center gap-6 lg:block lg:min-h-[520px]">
+					<div className="relative size-64 sm:size-72 lg:absolute lg:top-0 lg:right-0 lg:size-[380px]">
 						{backdrop}
 					</div>
 					<div
 						aria-hidden
-						className="relative h-72 w-72 lg:absolute lg:bottom-0 lg:left-0 lg:h-80 lg:w-80"
+						className="relative size-64 sm:size-72 lg:absolute lg:bottom-0 lg:left-0 lg:size-80"
 					>
 						<StationSlot variant={variant} />
 						<div
@@ -172,7 +174,7 @@ function Station({
 				<div
 					className={`relative z-10 flex justify-center ${flip ? "lg:order-1" : ""}`}
 				>
-					<div aria-hidden className="relative h-72 w-72 sm:h-96 sm:w-96">
+					<div aria-hidden className="relative size-64 sm:size-96">
 						<StationSlot variant={variant} />
 						{/* Parada da caixa: logo abaixo da bolha, na coluna dela — a
 						    travessia nunca atravessa a coluna de texto. */}
@@ -194,7 +196,7 @@ const RESPOSTA = ["produto", "rótulo", "produção", "envio"] as const;
 
 function Chegada() {
 	return (
-		<section className="relative mx-auto max-w-6xl px-6 pt-32 text-center">
+		<section className="relative mx-auto max-w-6xl px-6 pt-24 text-center sm:pt-32">
 			<div className="mist-final absolute inset-y-0 left-1/2 w-screen -translate-x-1/2" />
 			{/* Curva de chegada: rio e caixa descem pela margem direita e só
 			    então entram na doca — nunca por cima do título. */}
@@ -232,7 +234,7 @@ function Chegada() {
 			    palco inteiro abaixo dos CTAs para a coreografia final. */}
 			<div
 				aria-hidden
-				className="relative mx-auto mt-16 h-40 w-full max-w-xl"
+				className="relative mx-auto mt-12 h-28 w-full max-w-xl sm:mt-16 sm:h-40"
 				data-s-anchor="caminhao-doca"
 			>
 				{/* Marco da caixa separado da âncora do caminhão: a escala da
@@ -259,7 +261,7 @@ export default function Home() {
 	return (
 		<>
 			<Navbar />
-			<Scene3D />
+			<Scene3DLazy />
 			<main className="relative overflow-x-clip">
 				<LiquidPath />
 				<Hero />
@@ -316,7 +318,7 @@ export default function Home() {
 						className="mt-7 flex max-w-md flex-col gap-3"
 						groups={pracasPorRegiao()}
 						itemClassName="rounded-full bg-brand-mist px-4 py-1.5 font-medium text-brand-navy text-sm transition-[transform,background-color,color] duration-200 hover:-translate-y-0.5 hover:bg-brand-ink hover:text-white motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-						labelClassName="w-24 shrink-0 text-brand-navy/60 text-sm"
+						labelClassName="w-full text-brand-navy/60 text-sm sm:w-24 sm:shrink-0"
 					/>
 				</Station>
 

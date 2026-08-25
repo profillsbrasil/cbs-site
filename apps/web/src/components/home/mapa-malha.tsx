@@ -31,6 +31,9 @@ const brandNavy = "#0f1c2b";
 const LIT_LEAD = 0.02;
 // Só montar o MapLibre quando a estação estiver a essa distância do viewport.
 const MOUNT_MARGIN = "600px";
+// Abaixo disso o SVG (mesma geometria) fica sozinho: no celular o MapLibre
+// só abriria um segundo contexto WebGL para desenhar o que já está na tela.
+const GL_MIN_WIDTH = "(min-width: 1024px)";
 
 function hasWebGL(): boolean {
 	try {
@@ -64,7 +67,7 @@ export function MapaMalha() {
 	// Montagem tardia: o MapLibre só entra quando a estação se aproxima.
 	useEffect(() => {
 		const el = container.current;
-		if (!(el && hasWebGL())) {
+		if (!(el && hasWebGL() && window.matchMedia(GL_MIN_WIDTH).matches)) {
 			return;
 		}
 		const io = new IntersectionObserver(

@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
+import { JOURNEY_ANCHORS } from "./journey-constants";
 import { anchorFraction } from "./journey-math";
-import { JOURNEY_ANCHORS } from "./scene3d";
 
 type AnchorId = (typeof JOURNEY_ANCHORS)[number];
 
