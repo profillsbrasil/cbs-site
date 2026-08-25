@@ -35,7 +35,7 @@ function HeroPlaceholder() {
 function Hero() {
 	return (
 		<section
-			className="relative mx-auto grid min-h-[100svh] max-w-6xl items-center gap-8 px-6 pt-24 pb-16 sm:gap-10 sm:pt-28 lg:grid-cols-[1.05fr_minmax(0,1fr)]"
+			className="relative mx-auto grid min-h-[100svh] max-w-6xl items-start gap-8 px-6 pt-24 pb-16 sm:gap-10 sm:pt-28 lg:grid-cols-[1.05fr_minmax(0,1fr)] lg:items-center lg:pt-28"
 			id="topo"
 		>
 			<div className="mist-hero absolute inset-y-0 left-1/2 w-screen -translate-x-1/2" />
@@ -51,7 +51,7 @@ function Hero() {
 					className="rise"
 					style={{ "--rise-delay": "120ms" } as React.CSSProperties}
 				>
-					<p className="mt-[clamp(2rem,22vw,7rem)] max-w-lg text-pretty text-brand-navy/75 text-lg leading-relaxed sm:text-xl lg:mt-7">
+					<p className="mt-[clamp(2rem,22vw,7rem)] max-w-lg text-pretty text-brand-navy/75 text-lg leading-relaxed sm:mt-8 sm:text-xl lg:mt-7">
 						A CBS fabrica o seu saneante, aplica o seu rótulo e entrega no
 						centro de distribuição do Mercado Livre, com autorização ANVISA.
 						Cada fábrica fica ao lado de um CD, e{" "}
@@ -76,7 +76,7 @@ function Hero() {
 				</div>
 			</div>
 			<div
-				className="absolute top-10 -right-24 size-[clamp(13rem,66vw,17rem)] sm:top-16 sm:-right-16 lg:relative lg:top-auto lg:right-auto lg:h-[560px] lg:w-auto"
+				className="absolute top-14 -right-24 size-[clamp(13rem,66vw,17rem)] sm:top-16 sm:-right-16 sm:size-[clamp(17rem,40vw,24rem)] lg:relative lg:top-auto lg:right-auto lg:h-[560px] lg:w-auto"
 				data-s-anchor="hero-cluster"
 			>
 				<HeroPlaceholder />
