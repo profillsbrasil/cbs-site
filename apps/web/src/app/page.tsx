@@ -35,7 +35,7 @@ function HeroPlaceholder() {
 function Hero() {
 	return (
 		<section
-			className="relative mx-auto grid min-h-[100svh] max-w-6xl items-start gap-8 px-6 pt-24 pb-16 sm:gap-10 sm:pt-28 lg:grid-cols-[1.05fr_minmax(0,1fr)] lg:items-center lg:pt-28"
+			className="relative mx-auto grid min-h-[100svh] max-w-6xl items-start gap-8 px-6 pt-20 pb-12 sm:gap-10 sm:pt-28 sm:pb-16 lg:grid-cols-[1.05fr_minmax(0,1fr)] lg:items-center lg:pt-28"
 			id="topo"
 		>
 			<div className="mist-hero absolute inset-y-0 left-1/2 w-screen -translate-x-1/2" />
@@ -51,7 +51,7 @@ function Hero() {
 					className="rise"
 					style={{ "--rise-delay": "120ms" } as React.CSSProperties}
 				>
-					<p className="mt-[clamp(2rem,22vw,7rem)] max-w-lg text-pretty text-brand-navy/75 text-lg leading-relaxed sm:mt-8 sm:text-xl lg:mt-7">
+					<p className="mt-[clamp(1.5rem,20vw,7rem)] max-w-lg text-pretty text-base text-brand-navy/75 leading-relaxed sm:mt-8 sm:text-xl lg:mt-7">
 						A CBS fabrica o seu saneante, aplica o seu rótulo e entrega no
 						centro de distribuição do Mercado Livre, com autorização ANVISA.
 						Cada fábrica fica ao lado de um CD, e{" "}
@@ -65,7 +65,7 @@ function Hero() {
 					className="rise"
 					style={{ "--rise-delay": "220ms" } as React.CSSProperties}
 				>
-					<div className="mt-8 flex flex-col items-stretch gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+					<div className="mt-6 flex flex-col items-stretch gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
 						<CtaWhatsApp
 							className="justify-center"
 							label="Chamar no WhatsApp"
