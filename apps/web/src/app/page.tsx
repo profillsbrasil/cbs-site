@@ -143,6 +143,10 @@ function Station({
 	// Em md (tablet) título e corpo dividem a coluna 1 e a bolha ocupa a 2,
 	// nas duas linhas; em lg o wrapper volta a ser bloco e isso é ignorado.
 	const textMd = flip ? "md:col-start-2" : "md:col-start-1";
+	// As tracks também espelham: o texto sempre fica na coluna flexível.
+	const gridMd = flip
+		? "md:grid-cols-[auto_minmax(0,1fr)]"
+		: "md:grid-cols-[minmax(0,1fr)_auto]";
 	const visualMd = flip
 		? "md:col-start-1 md:justify-self-start md:ml-0"
 		: "md:col-start-2 md:justify-self-end md:mr-0";
@@ -151,7 +155,7 @@ function Station({
 		: "justify-self-end -mr-12 sm:-mr-8";
 	return (
 		<section
-			className="relative mx-auto grid max-w-6xl scroll-mt-24 items-center gap-y-5 px-6 py-14 sm:gap-y-8 sm:py-24 md:grid-cols-[minmax(0,1fr)_auto] md:grid-rows-[auto_auto] md:gap-x-8 lg:min-h-[80vh] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:grid-rows-none lg:gap-10"
+			className={`relative mx-auto grid max-w-6xl scroll-mt-24 items-center gap-y-5 px-6 py-14 sm:gap-y-8 sm:py-24 md:grid-rows-[auto_auto] md:gap-x-8 lg:min-h-[80vh] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:grid-rows-none lg:gap-10 ${gridMd}`}
 			id={anchor}
 		>
 			{hasBackdrop ? null : (
@@ -197,9 +201,7 @@ function Station({
 				</div>
 			) : (
 				<div
-					className={`relative z-10 order-2 md:row-span-2 md:row-start-1 lg:order-none lg:col-auto lg:row-auto lg:mx-0 lg:flex lg:justify-center lg:justify-self-auto ${sideBleed} ${visualMd} ${
-						flip ? "lg:order-1" : ""
-					}`}
+					className={`relative z-10 order-2 md:row-span-2 md:row-start-1 lg:order-none lg:col-auto lg:row-auto lg:mx-0 lg:flex lg:justify-center lg:justify-self-auto ${sideBleed} ${visualMd}`}
 				>
 					<div
 						aria-hidden
@@ -255,8 +257,8 @@ function Chegada() {
 			</Reveal>
 			<Reveal delay={0.22}>
 				<div className="relative z-20 mt-8 flex flex-col items-stretch gap-3 sm:mt-11 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
-					<CtaWhatsApp label="Falar com a CBS" />
-					<CtaEmail />
+					<CtaWhatsApp className="justify-center" label="Falar com a CBS" />
+					<CtaEmail className="justify-center" />
 				</div>
 				<CtaReassurance className="relative z-20 mt-4" />
 			</Reveal>
