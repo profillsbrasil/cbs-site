@@ -22,7 +22,7 @@ function HeroPlaceholder() {
 			aria-hidden
 			className="hero-placeholder pointer-events-none absolute inset-0 flex items-center justify-center"
 		>
-			<div className="relative aspect-square h-full max-h-full max-w-full">
+			<div className="relative aspect-square h-full">
 				<div className="bubble-ghost absolute top-[11%] left-[13%] size-[74%]" />
 				<div className="bubble-ghost absolute top-[19%] left-[-3%] size-[10%]" />
 				<div className="bubble-ghost absolute top-[61%] left-[69%] size-[7%]" />
@@ -80,7 +80,7 @@ function Hero() {
 				{/* Marco da caixa: proporcional à bolha abaixo de lg (a caixa
 				    estática escala por este marco, a bolha pela âncora acima). */}
 				<div
-					className="absolute top-1/2 left-1/2 size-[30%] -translate-x-1/2 -translate-y-1/2 lg:size-32"
+					className="absolute top-1/2 left-1/2 size-[23%] -translate-x-1/2 -translate-y-1/2 lg:size-32"
 					data-j-anchor="hero"
 				/>
 			</div>

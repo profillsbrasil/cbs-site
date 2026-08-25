@@ -70,7 +70,7 @@ export function Footer() {
 					<p className="flex flex-wrap items-center gap-x-1.5">
 						<span>© 2026 CBS · Companhia Brasileira de Saneantes ·</span>
 						<a
-							className="-my-3 inline-flex min-h-11 items-center underline decoration-brand-navy/30 underline-offset-4 transition-colors hover:text-brand-ink hover:decoration-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2"
+							className="inline-flex min-h-11 items-center underline decoration-brand-navy/30 underline-offset-4 transition-colors hover:text-brand-ink hover:decoration-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2"
 							href={EMAIL_URL}
 						>
 							{EMAIL_ADDRESS}

@@ -32,8 +32,6 @@ import {
 } from "./station-models";
 import { useJourneyActive } from "./use-journey-active";
 
-export { DOCK_HANDOFF_END, JOURNEY_ANCHORS } from "./journey-constants";
-
 const FOCUS_LINE = 0.52;
 const CAMERA_Z = 8;
 const DROPLET_COUNT = 16;
@@ -1193,14 +1191,25 @@ function DocaFinal({ journeyActive }: { journeyActive: boolean }) {
  */
 function DemandRedraw({ active }: { active: boolean }) {
 	const invalidate = useThree((state) => state.invalidate);
+	const clock = useThree((state) => state.clock);
 
 	useEffect(() => {
 		if (!active) {
 			return;
 		}
+		// Relógio parado: em demand o quadro seguinte pode vir segundos depois
+		// do anterior, e um delta/elapsedTime acumulado faria microbolhas,
+		// Float e o bob da caixa teleportarem a cada scroll. Parado, delta é 0
+		// e a cena fica de fato estática. (autoStart religaria no getDelta.)
+		clock.autoStart = false;
+		clock.stop();
 		const redraw = () => invalidate();
 		window.addEventListener("scroll", redraw, { passive: true });
 		window.addEventListener("resize", redraw);
+		// Reflow sem scroll/resize (fonte tardia, imagem que chega) também
+		// move as âncoras — mesmo padrão de use-anchor-fraction/liquid-path.
+		const observer = new ResizeObserver(redraw);
+		observer.observe(document.body);
 		// Aquecimento: garante que o primeiro quadro pintado já tenha as
 		// texturas resolvidas, sem depender de um scroll do usuário.
 		const warmup = window.setInterval(redraw, 250);
@@ -1208,10 +1217,13 @@ function DemandRedraw({ active }: { active: boolean }) {
 		return () => {
 			window.removeEventListener("scroll", redraw);
 			window.removeEventListener("resize", redraw);
+			observer.disconnect();
 			window.clearInterval(warmup);
 			window.clearTimeout(stop);
+			clock.autoStart = true;
+			clock.start();
 		};
-	}, [active, invalidate]);
+	}, [active, clock, invalidate]);
 
 	return null;
 }

@@ -30,7 +30,7 @@ export function EntregaTitulo() {
 	return (
 		<h2 className="relative z-20 mx-auto max-w-2xl text-balance font-bold font-display text-4xl text-brand-navy leading-tight tracking-tight sm:text-5xl md:text-6xl">
 			Entregue no CD.
-			<br className="hidden sm:inline" />{" "}
+			<br className="hidden sm:block" />{" "}
 			<span
 				className="text-brand-navy/30 transition-colors duration-300 ease-brand data-delivered:text-brand-ink"
 				data-delivered={delivered ? "" : undefined}
