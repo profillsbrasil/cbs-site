@@ -8,9 +8,8 @@ import {
 	useTransform,
 } from "motion/react";
 import { useEffect, useState } from "react";
-
+import { JOURNEY_ANCHORS } from "./journey-constants";
 import { journeyProgress } from "./journey-progress";
-import { JOURNEY_ANCHORS } from "./scene3d";
 import { useJourneyActive } from "./use-journey-active";
 
 interface Point {

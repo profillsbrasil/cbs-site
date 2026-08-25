@@ -31,12 +31,12 @@ export default function RootLayout({
 }>) {
 	return (
 		<html
-			className="scroll-smooth motion-reduce:scroll-auto"
+			className="overflow-x-clip scroll-smooth motion-reduce:scroll-auto"
 			lang="pt-BR"
 			suppressHydrationWarning
 		>
 			<body
-				className={`${sora.variable} bg-brand-paper text-brand-navy antialiased`}
+				className={`${sora.variable} overflow-x-clip bg-brand-paper text-brand-navy antialiased`}
 			>
 				<script id="direction-contract" type="text/x-impeccable-contract">
 					{DIRECTION_CONTRACT}

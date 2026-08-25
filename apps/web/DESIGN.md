@@ -119,13 +119,15 @@ Paleta de marca restrita a cinco tokens, com o branco puro como sexto papel func
 
 Contêiner consistente: `max-w-6xl` (72rem) centralizado, `px-6` de respiro lateral, repetido em navbar, hero, cada estação, Chegada e rodapé.
 
-Ritmo vertical: o hero ocupa o primeiro viewport inteiro (`min-h-[calc(100svh-73px)]`); cada estação é uma grade de duas colunas (`lg:grid-cols-2`, hero em `1.05fr/1fr` assimétrico) com `min-h-[80vh]` e `py-24`; Chegada colapsa para coluna única centralizada (`pt-40 pb-16 text-center`). Abaixo de `lg` (1024px) toda grade empilha em coluna única.
+Ritmo vertical: o hero ocupa o primeiro viewport inteiro (`min-h-[100svh]`); cada estação é uma grade de duas colunas (`lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]`, hero em `1.05fr/minmax(0,1fr)` assimétrico) com `lg:min-h-[80vh]` e `py-20 sm:py-24`; Chegada colapsa para coluna única centralizada (`pt-24 sm:pt-32 text-center`). Abaixo de `lg` (1024px) toda grade empilha em coluna única, sem altura mínima — o vão entre seções é só o `py`.
+
+**Medidas fluidas abaixo de `lg`.** A coluna visual do hero mede `h-[clamp(14rem,72vw,26rem)]` (560px em `lg`) e o marco da caixa é `size-[30%]` dela (`lg:size-32`), para a caixa estática escalar junto com a bolha; os slots de bolha das estações e o mapa medem `size-64` (`sm:size-72`, `sm:size-96` nas estações sem mapa) — 256px cabe nos 272px úteis de um viewport de 320. Nenhuma largura fixa em px fica acima de `calc(100vw - 3rem)` em telas pequenas; `html` e `body` levam `overflow-x-clip`.
 
 O componente `Station` alterna texto e visual de lado (`flip`), criando um zigue-zague de leitura: estação 1 (modelo) tem texto à esquerda e bolha à direita; estação 2 (qualidade) inverte; estação 3 (malha) volta ao padrão. A névoa aqua daquela seção (`mist-side`, via `--mist-x`) sempre acompanha o mesmo lado do objeto 3D, nunca o do texto.
 
 ### Named Rules
 
-**A Regra do Limiar da Jornada.** A coreografia de scroll (caixa viajante + caminho líquido + estouro da bolha) só roda em telas ≥1024px sem `prefers-reduced-motion` (`useJourneyActive`). Abaixo desse limiar, ou com movimento reduzido, a página nunca fica num estado parcialmente animado: a caixa fica parada dentro da bolha do hero e o SVG do caminho líquido simplesmente não renderiza.
+**A Regra do Limiar da Jornada.** A coreografia de scroll (caixa viajante + caminho líquido + estouro da bolha) só roda em telas ≥1024px sem `prefers-reduced-motion` (`useJourneyActive`). Abaixo desse limiar, ou com movimento reduzido, a página nunca fica num estado parcialmente animado: a caixa fica parada dentro da bolha do hero, o caminhão já nasce estacionado na doca e o SVG do caminho líquido simplesmente não renderiza. Nesse modo o `<Canvas>` roda em `frameloop="demand"` — um quadro por scroll/resize (`DemandRedraw`), para os grupos ancorados seguirem a página — em vez de rAF contínuo, com o `THREE.Clock` parado (delta 0), então microbolhas, `Float` e o bob da caixa ficam de fato parados em vez de saltar a cada quadro. A cena inteira entra por `dynamic()` (`Scene3DLazy`, sem SSR) e as constantes que o DOM lê (`JOURNEY_ANCHORS`, `DOCK_HANDOFF_END`) vivem em `journey-constants.ts`, fora de `scene3d.tsx`, para three.js não entrar no bundle inicial.
 
 ## Elevation & Depth
 
@@ -157,7 +159,9 @@ Na camada 3D, o motivo de forma é a esfera de vidro: todo objeto de estação (
 - **Shape:** pílula completa (`rounded-full`, `9999px`) em todos os três botões do sistema.
 - **Primary (`CtaWhatsApp`):** preenchimento navy (`#0f1c2b`), texto branco, `px-8 py-4`, ícone WhatsApp inline (SVG, não pacote de ícone), sombra `shadow-brand-navy/25`. No hover: preenchimento azul (`#1d9dd8`), sombra recolore para `shadow-brand-blue/30`, sobe 2px (`-translate-y-0.5`), ícone escala 110%.
 - **Secondary/Ghost (`CtaEmail`):** fundo branco a 60% de opacidade, borda `border-brand-navy/15`, texto navy, ícone de e-mail (lucide). No hover: borda e texto viram azul, sobe 2px — sem sombra.
-- **Nav CTA:** versão compacta do primário (`px-5 py-2.5`, `text-sm`), sem sombra, sem elevação no hover — só troca de cor de fundo.
+- **Nav CTA:** versão compacta do primário (`px-5 py-2.5 min-h-11`, `text-sm`), sem sombra, sem elevação no hover — só troca de cor de fundo.
+
+**A Regra dos 44px.** Todo alvo de toque (CTA da navbar, links de seção, logo, link de e-mail do rodapé) mede ao menos 44px de altura via `min-h-11`; o padding visual não muda, a área cresce.
 
 ### Chips (praças da malha)
 - **Style:** fundo `brand-mist` (`#dcf3fa`), texto navy, `text-sm font-medium`, `px-4 py-1.5`, pílula completa.
@@ -168,7 +172,7 @@ Na camada 3D, o motivo de forma é a esfera de vidro: todo objeto de estação (
 - **Content:** logo (`public/cbs-logo.jpeg`) à esquerda, um único CTA de WhatsApp compacto à direita — sem menu de links, sem hambúrguer; a navegação da home é toda por scroll.
 
 ### Mapa da malha
-O Brasil como tinta atrás da estação "Fábricas onde o frete nasce menor.": `Map blank` do mapcn (MapLibre, sem tiles, sem controles, `interactive={false}`, `pointer-events-none`) com o GeoJSON local dos estados (`#f0f9fc`, divisas navy a 25% de 1px) e o contorno do país em navy a 60% de 1.5px (`brasil-pais.json` no GL; `drop-shadow` navy no SVG) — a variante "Linha navy" escolhida em 21/08/2026: peso de linha sem escurecer o papel. Um marcador por praça: `brand-blue` r=7 com anel branco de 3px, sem halo. Composição D2: mapa de 380px no alto-direita da coluna visual, bolha da fábrica (320px) em baixo-esquerda — a diagonal do rio líquido. Abaixo de `lg`, mapa (288px) acima da bolha. Os pontos nascem a 35% e acendem em sequência de 60ms quando a caixa chega à estação (`journeyProgress` ≥ fração da âncora "malha"); com `prefers-reduced-motion` ou abaixo de 1024px já nascem acesos. Um SVG com a mesma geometria (`MapaMalhaPlaceholder`) ocupa o lugar até o MapLibre desenhar e permanece se não houver WebGL.
+O Brasil como tinta atrás da estação "Fábricas onde o frete nasce menor.": `Map blank` do mapcn (MapLibre, sem tiles, sem controles, `interactive={false}`, `pointer-events-none`) com o GeoJSON local dos estados (`#f0f9fc`, divisas navy a 25% de 1px) e o contorno do país em navy a 60% de 1.5px (`brasil-pais.json` no GL; `drop-shadow` navy no SVG) — a variante "Linha navy" escolhida em 21/08/2026: peso de linha sem escurecer o papel. Um marcador por praça: `brand-blue` r=7 com anel branco de 3px, sem halo. Composição D2: mapa de 380px no alto-direita da coluna visual, bolha da fábrica (320px) em baixo-esquerda — a diagonal do rio líquido. Abaixo de `lg`, mapa (`size-64`, `sm:size-72`) acima da bolha, e só o SVG renderiza: `MapaMalhaLazy` decide por `matchMedia` (≥1024px, reagindo a mudanças) antes do `import()` do módulo, para o chunk do maplibre-gl nem descer ao celular; dentro do módulo, `hasWebGL()` continua o gate de contexto. Os pontos nascem a 35% e acendem em sequência de 60ms quando a caixa chega à estação (`journeyProgress` ≥ fração da âncora "malha"); com `prefers-reduced-motion` ou abaixo de 1024px já nascem acesos. Um SVG com a mesma geometria (`MapaMalhaPlaceholder`) ocupa o lugar até o MapLibre desenhar e permanece se não houver WebGL.
 
 **A Regra do Mapa-Tinta.** O mapa nunca é interface: sem zoom, pan, tooltip, popup, rótulo ou controle; os chips da estação continuam sendo a legenda. Só as 7 praças do cliente aparecem — nada de CDs, rotas ou endereços.
 

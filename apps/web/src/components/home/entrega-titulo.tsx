@@ -2,9 +2,8 @@
 
 import { useMotionValueEvent } from "motion/react";
 import { useEffect, useState } from "react";
-
+import { DOCK_HANDOFF_END } from "./journey-constants";
 import { journeyProgress } from "./journey-progress";
-import { DOCK_HANDOFF_END } from "./scene3d";
 import { useJourneyActive } from "./use-journey-active";
 
 /**
@@ -29,9 +28,9 @@ export function EntregaTitulo() {
 	});
 
 	return (
-		<h2 className="relative z-20 mx-auto max-w-2xl font-bold font-display text-4xl text-brand-navy leading-tight tracking-tight sm:text-6xl">
+		<h2 className="relative z-20 mx-auto max-w-2xl text-balance font-bold font-display text-4xl text-brand-navy leading-tight tracking-tight sm:text-5xl md:text-6xl">
 			Entregue no CD.
-			<br />
+			<br className="hidden sm:block" />{" "}
 			<span
 				className="text-brand-navy/30 transition-colors duration-300 ease-brand data-delivered:text-brand-ink"
 				data-delivered={delivered ? "" : undefined}
