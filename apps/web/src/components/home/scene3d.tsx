@@ -1220,8 +1220,11 @@ function DemandRedraw({ active }: { active: boolean }) {
 			observer.disconnect();
 			window.clearInterval(warmup);
 			window.clearTimeout(stop);
+			// Retoma sem `start()`: ele zera elapsedTime e faria a fase das
+			// animações senoidais saltar ao cruzar o limiar da jornada.
+			clock.oldTime = performance.now();
+			clock.running = true;
 			clock.autoStart = true;
-			clock.start();
 		};
 	}, [active, clock, invalidate]);
 
