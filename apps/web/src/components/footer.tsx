@@ -46,27 +46,27 @@ function SeloAnvisa({ className }: { className?: string }) {
 export function Footer() {
 	return (
 		<footer className="relative">
-			<div className="relative z-20 mx-auto max-w-6xl px-6 pt-20 pb-8">
-				<div className="grid gap-12 lg:grid-cols-[1.4fr_1fr] lg:items-center">
+			<div className="relative z-20 mx-auto max-w-6xl px-6 pt-14 pb-8 sm:pt-20">
+				<div className="grid gap-8 sm:gap-12 lg:grid-cols-[1.4fr_1fr] lg:items-center">
 					<div>
 						<a
 							aria-label="Voltar ao topo"
-							className="inline-block rounded-full font-bold font-display text-7xl text-brand-navy leading-[0.9] tracking-[-0.03em] focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-8 sm:text-8xl"
+							className="inline-block rounded-full font-bold font-display text-6xl text-brand-navy leading-[0.9] tracking-[-0.03em] focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-8 sm:text-8xl"
 							href="#topo"
 						>
 							C<span className="text-brand-blue">B</span>S
 						</a>
-						<p className="mt-6 max-w-md text-base text-brand-navy/75 leading-relaxed">
+						<p className="mt-5 max-w-md text-base text-brand-navy/75 leading-relaxed sm:mt-6">
 							Companhia Brasileira de Saneantes. Terceirização de produção de
 							saneantes, com fábricas junto aos CDs do Mercado Livre.
 						</p>
 					</div>
-					<div className="flex flex-wrap items-center gap-4 lg:justify-end">
-						<CtaWhatsApp label="Falar com a CBS" />
-						<CtaEmail />
+					<div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 lg:justify-end">
+						<CtaWhatsApp className="justify-center" label="Falar com a CBS" />
+						<CtaEmail className="justify-center" />
 					</div>
 				</div>
-				<div className="mt-14 flex flex-col gap-4 border-brand-navy/10 border-t pt-5 text-brand-navy/70 text-sm sm:flex-row sm:items-center sm:justify-between">
+				<div className="mt-10 flex flex-col gap-4 border-brand-navy/10 border-t pt-5 text-brand-navy/70 text-sm sm:mt-14 sm:flex-row sm:items-center sm:justify-between">
 					<p className="flex flex-wrap items-center gap-x-1.5">
 						<span>© 2026 CBS · Companhia Brasileira de Saneantes ·</span>
 						<a

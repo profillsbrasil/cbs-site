@@ -109,7 +109,7 @@ function StationSlot({ variant }: { variant: string }) {
 				   imagem; como documento embutido a animação roda. */
 				<object
 					aria-hidden
-					className="pointer-events-none absolute top-1/2 left-1/2 w-[120%] max-w-none -translate-x-1/2 -translate-y-[54%] contrast-[1.06] saturate-[1.4] sm:w-[135%]"
+					className="pointer-events-none absolute top-1/2 left-1/2 w-[110%] max-w-none -translate-x-1/2 -translate-y-[54%] contrast-[1.06] saturate-[1.4] sm:w-[135%]"
 					data="/warehouse-delivery.svg"
 					title=""
 					type="image/svg+xml"
@@ -136,9 +136,22 @@ function Station({
 	variant: "fabrica" | "frasco" | "selo";
 }) {
 	const hasBackdrop = Boolean(backdrop);
+	// Abaixo de lg o wrapper de texto vira `contents`: título, visual e corpo
+	// são itens diretos do grid e a bolha entra ENTRE o título e o parágrafo,
+	// sangrando pelo lado que alterna (o zigue-zague do desktop, num só eixo).
+	const textCol = flip ? "lg:order-2" : "";
+	// Em md (tablet) título e corpo dividem a coluna 1 e a bolha ocupa a 2,
+	// nas duas linhas; em lg o wrapper volta a ser bloco e isso é ignorado.
+	const textMd = flip ? "md:col-start-2" : "md:col-start-1";
+	const visualMd = flip
+		? "md:col-start-1 md:justify-self-start md:ml-0"
+		: "md:col-start-2 md:justify-self-end md:mr-0";
+	const sideBleed = flip
+		? "justify-self-start -ml-12 sm:-ml-8"
+		: "justify-self-end -mr-12 sm:-mr-8";
 	return (
 		<section
-			className="relative mx-auto grid max-w-6xl scroll-mt-24 items-center gap-10 px-6 py-20 sm:py-24 lg:min-h-[80vh] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]"
+			className="relative mx-auto grid max-w-6xl scroll-mt-24 items-center gap-y-5 px-6 py-14 sm:gap-y-8 sm:py-24 md:grid-cols-[minmax(0,1fr)_auto] md:grid-rows-[auto_auto] md:gap-x-8 lg:min-h-[80vh] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:grid-rows-none lg:gap-10"
 			id={anchor}
 		>
 			{hasBackdrop ? null : (
@@ -147,24 +160,33 @@ function Station({
 					style={{ "--mist-x": flip ? "18%" : "82%" } as React.CSSProperties}
 				/>
 			)}
-			<div className={`relative z-20 ${flip ? "lg:order-2" : ""}`}>
-				<Reveal>
+			<div className={`contents lg:relative lg:z-20 lg:block ${textCol}`}>
+				<Reveal
+					className={`relative z-20 order-1 md:row-start-1 lg:order-none ${textMd}`}
+				>
 					<h2 className="max-w-md font-bold font-display text-4xl text-brand-navy leading-tight tracking-tight sm:text-5xl">
 						{title}
 					</h2>
 				</Reveal>
-				{children}
+				<div
+					className={`relative z-20 order-3 md:row-start-2 lg:order-none ${textMd}`}
+				>
+					{children}
+				</div>
 			</div>
 			{hasBackdrop ? (
 				/* Composição D2: mapa no alto-direita, bolha em baixo-esquerda —
-				   a diagonal do rio líquido. Abaixo de lg empilha. */
-				<div className="relative z-10 flex flex-col items-center gap-6 lg:block lg:min-h-[520px]">
-					<div className="relative size-64 sm:size-72 lg:absolute lg:top-0 lg:right-0 lg:size-[380px]">
+				   a diagonal do rio líquido. Abaixo de lg a mesma diagonal,
+				   condensada: mapa sangrando à direita, bolha à esquerda. */
+				<div
+					className={`relative z-10 order-2 h-[clamp(20rem,88vw,26rem)] w-full md:row-span-2 md:row-start-1 md:w-[22rem] lg:order-none lg:col-auto lg:row-auto lg:h-auto lg:min-h-[520px] lg:w-auto lg:justify-self-auto ${visualMd}`}
+				>
+					<div className="absolute top-0 -right-4 size-[clamp(13rem,60vw,17rem)] sm:right-0 lg:size-[380px]">
 						{backdrop}
 					</div>
 					<div
 						aria-hidden
-						className="relative size-64 sm:size-72 lg:absolute lg:bottom-0 lg:left-0 lg:size-80"
+						className="absolute bottom-0 left-0 size-[clamp(11rem,50vw,14rem)] lg:size-80"
 					>
 						<StationSlot variant={variant} />
 						<div
@@ -175,9 +197,14 @@ function Station({
 				</div>
 			) : (
 				<div
-					className={`relative z-10 flex justify-center ${flip ? "lg:order-1" : ""}`}
+					className={`relative z-10 order-2 md:row-span-2 md:row-start-1 lg:order-none lg:col-auto lg:row-auto lg:mx-0 lg:flex lg:justify-center lg:justify-self-auto ${sideBleed} ${visualMd} ${
+						flip ? "lg:order-1" : ""
+					}`}
 				>
-					<div aria-hidden className="relative size-64 sm:size-96">
+					<div
+						aria-hidden
+						className="relative size-[clamp(13rem,62vw,17rem)] lg:size-96"
+					>
 						<StationSlot variant={variant} />
 						{/* Parada da caixa: logo abaixo da bolha, na coluna dela — a
 						    travessia nunca atravessa a coluna de texto. */}
@@ -199,7 +226,7 @@ const RESPOSTA = ["produto", "rótulo", "produção", "envio"] as const;
 
 function Chegada() {
 	return (
-		<section className="relative mx-auto max-w-6xl px-6 pt-24 text-center sm:pt-32">
+		<section className="relative mx-auto max-w-6xl px-6 pt-14 text-center sm:pt-32">
 			<div className="mist-final absolute inset-y-0 left-1/2 w-screen -translate-x-1/2" />
 			{/* Curva de chegada: rio e caixa descem pela margem direita e só
 			    então entram na doca — nunca por cima do título. */}
@@ -212,7 +239,7 @@ function Chegada() {
 				<EntregaTitulo />
 			</Reveal>
 			<Reveal delay={0.12}>
-				<p className="relative z-20 mx-auto mt-7 max-w-xl text-pretty text-brand-navy/75 text-xl leading-relaxed">
+				<p className="relative z-20 mx-auto mt-5 max-w-xl text-pretty text-brand-navy/75 text-lg leading-relaxed sm:mt-7 sm:text-xl">
 					Diga o que você quer vender e em qual volume. A CBS responde com:
 				</p>
 				<ul className="relative z-20 mt-5 flex flex-wrap items-center justify-center gap-2">
@@ -227,7 +254,7 @@ function Chegada() {
 				</ul>
 			</Reveal>
 			<Reveal delay={0.22}>
-				<div className="relative z-20 mt-11 flex flex-wrap items-center justify-center gap-4">
+				<div className="relative z-20 mt-8 flex flex-col items-stretch gap-3 sm:mt-11 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
 					<CtaWhatsApp label="Falar com a CBS" />
 					<CtaEmail />
 				</div>
@@ -275,7 +302,7 @@ export default function Home() {
 					variant="frasco"
 				>
 					<Reveal delay={0.1}>
-						<p className="mt-6 max-w-md text-pretty text-brand-navy/75 text-lg leading-relaxed">
+						<p className="max-w-md text-pretty text-brand-navy/75 text-lg leading-relaxed lg:mt-6">
 							Terceirização completa de produção: a CBS produz o saneante,
 							aplica o seu rótulo e despacha para o CD. Você anuncia, precifica
 							e vende. A marca no rótulo é sua; a CBS não assina o produto
@@ -291,7 +318,7 @@ export default function Home() {
 					variant="selo"
 				>
 					<Reveal delay={0.1}>
-						<p className="mt-6 max-w-md text-pretty text-brand-navy/75 text-lg leading-relaxed">
+						<p className="max-w-md text-pretty text-brand-navy/75 text-lg leading-relaxed lg:mt-6">
 							A CBS tem{" "}
 							<strong className="text-brand-navy">
 								autorização da ANVISA para fabricar saneantes
@@ -309,7 +336,7 @@ export default function Home() {
 					variant="fabrica"
 				>
 					<Reveal delay={0.1}>
-						<p className="mt-6 max-w-md text-pretty text-brand-navy/75 text-lg leading-relaxed">
+						<p className="max-w-md text-pretty text-brand-navy/75 text-lg leading-relaxed lg:mt-6">
 							<strong className="text-brand-navy">
 								Quem vende no Full paga a remessa até o CD.
 							</strong>{" "}
@@ -318,7 +345,7 @@ export default function Home() {
 						</p>
 					</Reveal>
 					<RevealGroups
-						className="mt-7 flex max-w-md flex-col gap-3"
+						className="mt-6 flex max-w-md flex-col gap-2.5 sm:gap-3 lg:mt-7"
 						groups={pracasPorRegiao()}
 						itemClassName="rounded-full bg-brand-mist px-4 py-1.5 font-medium text-brand-navy text-sm transition-[transform,background-color,color] duration-200 hover:-translate-y-0.5 hover:bg-brand-ink hover:text-white motion-reduce:transition-none motion-reduce:hover:translate-y-0"
 						labelClassName="w-full text-brand-navy/60 text-sm sm:w-24 sm:shrink-0"
