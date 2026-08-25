@@ -51,7 +51,7 @@ function Hero() {
 					className="rise"
 					style={{ "--rise-delay": "120ms" } as React.CSSProperties}
 				>
-					<p className="mt-7 max-w-lg text-pretty text-brand-navy/75 text-xl leading-relaxed">
+					<p className="mt-[clamp(2rem,22vw,7rem)] max-w-lg text-pretty text-brand-navy/75 text-lg leading-relaxed sm:text-xl lg:mt-7">
 						A CBS fabrica o seu saneante, aplica o seu rótulo e entrega no
 						centro de distribuição do Mercado Livre, com autorização ANVISA.
 						Cada fábrica fica ao lado de um CD, e{" "}
@@ -65,15 +65,18 @@ function Hero() {
 					className="rise"
 					style={{ "--rise-delay": "220ms" } as React.CSSProperties}
 				>
-					<div className="mt-10 flex flex-wrap items-center gap-4">
-						<CtaWhatsApp label="Chamar no WhatsApp" />
-						<CtaEmail />
+					<div className="mt-8 flex flex-col items-stretch gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+						<CtaWhatsApp
+							className="justify-center"
+							label="Chamar no WhatsApp"
+						/>
+						<CtaEmail className="justify-center" />
 					</div>
-					<CtaReassurance className="mt-4" />
+					<CtaReassurance className="mt-4 text-center sm:text-left" />
 				</div>
 			</div>
 			<div
-				className="relative h-[clamp(14rem,72vw,26rem)] lg:h-[560px]"
+				className="absolute top-10 -right-24 size-[clamp(13rem,66vw,17rem)] sm:top-16 sm:-right-16 lg:relative lg:top-auto lg:right-auto lg:h-[560px] lg:w-auto"
 				data-s-anchor="hero-cluster"
 			>
 				<HeroPlaceholder />
