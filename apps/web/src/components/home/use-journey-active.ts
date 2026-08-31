@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { WIDE_QUERY } from "./use-wide";
+
 /**
  * A jornada contínua da caixa (canvas fixo + explosão da bolha) só roda em
  * telas largas e sem prefers-reduced-motion. Fora disso, a caixa fica
@@ -11,7 +13,7 @@ export function useJourneyActive(): boolean {
 	const [active, setActive] = useState(false);
 
 	useEffect(() => {
-		const wide = window.matchMedia("(min-width: 1024px)");
+		const wide = window.matchMedia(WIDE_QUERY);
 		const motionOk = window.matchMedia(
 			"(prefers-reduced-motion: no-preference)"
 		);

@@ -20,7 +20,7 @@
 - Comandos, sempre em `apps/web`: `bun test`, `bun run check-types`; na raiz: `bun run check`. Dev server desta sessão: porta 3005 (`/tmp/dev-up-3005.log`); porta padrão do projeto: 3001.
 - Hook do projeto roda `bun run fix` no repo inteiro após cada Write/Edit e reformata `apps/web/public/warehouse-delivery.svg`. Antes de cada commit: `git diff --quiet -- apps/web/public/warehouse-delivery.svg || git checkout -- apps/web/public/warehouse-delivery.svg`.
 - Commits em Conventional Commits, português, subject ≤ 50 caracteres. Branch `reatividade`. Sem `--no-verify`, sem push em `main`.
-- Capturas de verificação com agent-browser (`set viewport 390 844 2`), nunca com o `computer` da extensão Chrome (DPR 3,5 devolve 99×220).
+- Capturas de verificação com agent-browser: **definir o viewport ANTES de navegar** (`open about:blank` → `set viewport` → `open <url>`), senão a página carrega no viewport default ≥1024px, `useWide` vira true por um instante e os chunks pesados descem — foi exatamente o falso positivo medido em 31/08. Nunca usar o `computer` da extensão Chrome (DPR 3,5 devolve 99×220).
 - Componentes R3F novos levam a diretiva `"use no memo"` (React Compiler), como `scene3d.tsx`.
 
 ---
@@ -57,7 +57,7 @@ Tem de rodar **antes da Task 1** — a partir da Task 2 o celular já perde o ca
 ```bash
 mkdir -p /tmp/cbs-mobile/antes
 export AGENT_BROWSER_SESSION="$(agent-browser session id --scope worktree --prefix antes)"
-agent-browser open http://localhost:3005 >/dev/null; agent-browser set viewport 390 844 2 >/dev/null
+agent-browser open about:blank >/dev/null; agent-browser set viewport 390 844 2 >/dev/null; agent-browser open http://localhost:3005 >/dev/null
 agent-browser wait --load networkidle >/dev/null; agent-browser wait 1500 >/dev/null
 agent-browser screenshot /tmp/cbs-mobile/antes/390-hero.png
 agent-browser screenshot --full /tmp/cbs-mobile/antes/390-full.png
@@ -678,7 +678,7 @@ Nota sobre o desktop: o cluster perdeu as classes `absolute top-14 -right-24 siz
 ```bash
 mkdir -p /tmp/cbs-mobile/depois
 export AGENT_BROWSER_SESSION="$(agent-browser session id --scope worktree --prefix hero)"
-agent-browser open http://localhost:3005 >/dev/null; agent-browser set viewport 390 844 2 >/dev/null
+agent-browser open about:blank >/dev/null; agent-browser set viewport 390 844 2 >/dev/null; agent-browser open http://localhost:3005 >/dev/null
 agent-browser wait --load networkidle >/dev/null; agent-browser wait 1500 >/dev/null
 agent-browser screenshot /tmp/cbs-mobile/depois/390-hero.png
 agent-browser eval "(()=>{const cta=document.querySelector('#topo a[href^=\"https://wa.me\"]').getBoundingClientRect();const h1=document.querySelector('h1').getBoundingClientRect();const img=document.querySelector('#topo img[src*=\"caixa\"]').getBoundingClientRect();return JSON.stringify({ctaBottom:Math.round(cta.bottom),vh:innerHeight,h1Top:Math.round(h1.top),imgBottom:Math.round(img.bottom),h1Size:getComputedStyle(document.querySelector('h1')).fontSize})})()"
@@ -863,7 +863,7 @@ Nos três `<Station>`, os parágrafos têm `lg:mt-6` — manter. Nada mais muda 
 
 ```bash
 export AGENT_BROWSER_SESSION="$(agent-browser session id --scope worktree --prefix est)"
-agent-browser open http://localhost:3005 >/dev/null; agent-browser set viewport 390 844 2 >/dev/null
+agent-browser open about:blank >/dev/null; agent-browser set viewport 390 844 2 >/dev/null; agent-browser open http://localhost:3005 >/dev/null
 agent-browser wait --load networkidle >/dev/null; agent-browser wait 1500 >/dev/null
 agent-browser eval "JSON.stringify(['modelo','qualidade','malha'].map(id=>{const s=document.getElementById(id);const h2=s.querySelector('h2').getBoundingClientRect();const img=s.querySelector('img,object').getBoundingClientRect();return {id,h:Math.round(s.getBoundingClientRect().height),imgBottom:Math.round(img.bottom),h2Top:Math.round(h2.top),h2Size:getComputedStyle(s.querySelector('h2')).fontSize}}))"
 for id in modelo qualidade malha; do agent-browser eval "document.getElementById('$id').scrollIntoView(); scrollY" >/dev/null; agent-browser wait 700 >/dev/null; agent-browser screenshot /tmp/cbs-mobile/depois/390-$id.png; done
@@ -985,7 +985,7 @@ Confirmar que `MapaMalhaPlaceholder` aceita `className` e que o `data-lit` (pont
 
 ```bash
 export AGENT_BROWSER_SESSION="$(agent-browser session id --scope worktree --prefix malha)"
-agent-browser open http://localhost:3005 >/dev/null; agent-browser set viewport 390 844 2 >/dev/null
+agent-browser open about:blank >/dev/null; agent-browser set viewport 390 844 2 >/dev/null; agent-browser open http://localhost:3005 >/dev/null
 agent-browser wait --load networkidle >/dev/null; agent-browser wait 1500 >/dev/null
 agent-browser eval "document.getElementById('malha').scrollIntoView(); scrollY" >/dev/null; agent-browser wait 800 >/dev/null
 agent-browser screenshot /tmp/cbs-mobile/depois/390-malha.png
@@ -1123,7 +1123,7 @@ Remover o import de `CtaEmail, CtaWhatsApp` do rodapé. `WhatsAppIcon` já é ex
 
 ```bash
 export AGENT_BROWSER_SESSION="$(agent-browser session id --scope worktree --prefix fim)"
-agent-browser open http://localhost:3005 >/dev/null; agent-browser set viewport 390 844 2 >/dev/null
+agent-browser open about:blank >/dev/null; agent-browser set viewport 390 844 2 >/dev/null; agent-browser open http://localhost:3005 >/dev/null
 agent-browser wait --load networkidle >/dev/null; agent-browser wait 1500 >/dev/null
 agent-browser eval "JSON.stringify({pillsTopo:[...document.querySelectorAll('header a[href^=\"https://wa.me\"]')].filter(a=>getComputedStyle(a).display!=='none').length, waTotal:[...document.querySelectorAll('a[href^=\"https://wa.me\"]')].filter(a=>getComputedStyle(a).display!=='none').length, footerH:Math.round(document.querySelector('footer').getBoundingClientRect().height), docH:document.documentElement.scrollHeight})"
 agent-browser eval "window.scrollTo(0,400); scrollY" >/dev/null; agent-browser wait 900 >/dev/null
@@ -1219,7 +1219,7 @@ for vp in "320 700" "390 844" "768 1024"; do
   agent-browser eval "JSON.stringify({vp:'$1x$2', docH:document.documentElement.scrollHeight, chunks:performance.getEntriesByType('resource').map(r=>r.name).filter(n=>/three|react-three|maplibre|scene3d/i.test(n)).length, ctaBottom:Math.round(document.querySelector('#topo a[href^=\"https://wa.me\"]').getBoundingClientRect().bottom), scrollX:document.documentElement.scrollWidth>innerWidth})"
 done
 if agent-browser set media reduce-motion >/dev/null 2>&1; then RM_OK=1; else RM_OK=0; echo "emulação de reduced-motion indisponível — checar manualmente"; fi
-agent-browser open http://localhost:3005 >/dev/null; agent-browser set viewport 390 844 2 >/dev/null; agent-browser wait 1500 >/dev/null
+agent-browser open about:blank >/dev/null; agent-browser set viewport 390 844 2 >/dev/null; agent-browser open http://localhost:3005 >/dev/null; agent-browser wait 1500 >/dev/null
 agent-browser eval "document.getElementById('malha').scrollIntoView(); scrollY" >/dev/null; agent-browser wait 800 >/dev/null
 agent-browser eval "JSON.stringify({reduced:matchMedia('(prefers-reduced-motion: reduce)').matches, png:!!document.querySelector('#malha img[src*=\"warehouse-delivery.png\"]')})"
 agent-browser set viewport 1440 900 1 >/dev/null; agent-browser wait 3000 >/dev/null
