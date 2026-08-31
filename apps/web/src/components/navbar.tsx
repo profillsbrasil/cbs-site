@@ -132,8 +132,11 @@ export function Navbar() {
 						</a>
 					))}
 				</motion.nav>
+				{/* Abaixo de md, no topo só o logo: o pill entra junto com a
+				    cápsula ao rolar, para não duplicar o CTA do hero no
+				    primeiro viewport. */}
 				<motion.a
-					className="inline-flex min-h-11 items-center gap-2 rounded-full bg-brand-navy px-5 py-2.5 font-semibold text-sm text-white transition-[background-color,transform] duration-150 ease-brand hover:bg-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2 active:scale-[0.97]"
+					className={`${scrolled ? "inline-flex" : "hidden md:inline-flex"} min-h-11 items-center gap-2 rounded-full bg-brand-navy px-5 py-2.5 font-semibold text-sm text-white transition-[background-color,transform] duration-150 ease-brand hover:bg-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2 active:scale-[0.97]`}
 					href={WHATSAPP_URL}
 					layout
 					rel="noopener"

@@ -246,8 +246,9 @@ const RESPOSTA = ["produto", "rótulo", "produção", "envio"] as const;
 
 function Chegada() {
 	return (
-		<section className="relative mx-auto max-w-6xl px-6 pt-14 text-center sm:pt-32">
+		<section className="relative mx-auto max-w-6xl px-6 pt-10 text-center md:pt-20 lg:pt-32">
 			<div className="mist-final absolute inset-y-0 left-1/2 w-screen -translate-x-1/2" />
+			<BubbleGhosts variant="chegada" />
 			{/* Curva de chegada: rio e caixa descem pela margem direita e só
 			    então entram na doca — nunca por cima do título. */}
 			<div
