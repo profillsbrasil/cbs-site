@@ -45,10 +45,12 @@ export function BolhaImagem({
 		<Image
 			alt=""
 			className={`size-full rounded-full object-contain ${className}`}
-			height={800}
 			/* Sem priority nem eager: ambos injetam ReactDOM.preload sem media
-			   query e o desktop (lg:hidden) baixava a caixa sem usá-la. Lazy
-			   no 1º viewport carrega de imediato do mesmo jeito. */
+			   query e o desktop (lg:hidden) baixava a caixa sem usá-la. O
+			   fetchPriority mantém a caixa (LCP do hero mobile) na frente da
+			   fila quando o lazy resolver que ela está no viewport. */
+			fetchPriority={obj === "caixa" ? "high" : undefined}
+			height={800}
 			sizes="(max-width: 767px) 62vw, 272px"
 			src={`/bolhas/${obj}.webp`}
 			width={800}
