@@ -364,3 +364,10 @@ html[data-scene-ready] .scene-canvas {
 		animation: none;
 	}
 }
+
+/* Rota de render das bolhas (/render-bolhas): fundo transparente para a
+   captura com alfa. */
+html:has([data-render-bolha]),
+html:has([data-render-bolha]) body {
+	background: transparent;
+}
