@@ -198,7 +198,7 @@ No hero, a bolha principal (raio 1.85) mais três satélites menores flutuam com
 
 Todo arquivo desse sistema (`scene3d.tsx`, `scene-bits.tsx`, `cardboard-box.tsx`, `station-models.tsx`) carrega a diretiva `"use no memo"` — necessária para compatibilidade com o React Compiler; qualquer novo componente three.js/R3F nesta base precisa repetir a diretiva.
 
-**Bolhas pré-renderizadas (abaixo de `lg`).** `public/bolhas/{caixa,frasco,selo,vidro}.webp` (800px, alfa real) são capturas da própria cena (`/render-bolhas?obj=…`, rota só em desenvolvimento; receita em `scripts/render-bolhas.md`) e entram no fluxo como `<Image>` (`BolhaImagem`). A fábrica mantém a ilustração SMIL (`warehouse-delivery.svg`) com o vidro vazio (`vidro.webp`) por cima (`BolhaFabrica`); com `prefers-reduced-motion` entra `textures/warehouse-delivery.png`. **Regra da Regeneração:** mudou `cardboard-box.tsx`, `station-models.tsx` ou `scene-bits.tsx` → regerar os quatro assets e anotar o commit de origem na receita.
+**Bolhas pré-renderizadas (abaixo de `lg`).** `public/bolhas/{caixa,frasco,selo,vidro}.webp` (800px, alfa real) são capturas da própria cena (`/render-bolhas?obj=…`, rota só em desenvolvimento; receita em `scripts/render-bolhas.md`) e entram no fluxo como `<Image>` (`BolhaImagem`). A fábrica mantém a ilustração SMIL (`warehouse-delivery.svg`) com o vidro vazio (`vidro.webp`) por cima (`BolhaFabrica`); com `prefers-reduced-motion` entra `textures/warehouse-delivery.png`. **Regra da Regeneração:** mudou `cardboard-box.tsx`, `station-models.tsx` ou `scene-bits.tsx` → regerar os cinco assets (a van da doca, `caminhao.webp`, incluída) e anotar o commit de origem na receita.
 
 ### Named Rules
 
