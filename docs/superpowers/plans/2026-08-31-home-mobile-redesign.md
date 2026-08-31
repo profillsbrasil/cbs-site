@@ -46,6 +46,35 @@
 
 ---
 
+### Task 0: Capturas de referência ("antes")
+
+**Files:** nenhum no repo; saída em `/tmp/cbs-mobile/antes/`.
+
+Tem de rodar **antes da Task 1** — a partir da Task 2 o celular já perde o canvas e a captura deixaria de ser o baseline. As capturas do brainstorm em `/tmp/claude-1000/-home-othavio-Work-cbs-site/a4c79f6d-1878-4b05-9be3-b3b34f55c004/scratchpad/shots/cbs-*.png` servem como reserva se `/tmp/cbs-mobile` se perder.
+
+- [ ] **Step 1: Capturar e medir**
+
+```bash
+mkdir -p /tmp/cbs-mobile/antes
+export AGENT_BROWSER_SESSION="$(agent-browser session id --scope worktree --prefix antes)"
+agent-browser open http://localhost:3005 >/dev/null; agent-browser set viewport 390 844 2 >/dev/null
+agent-browser wait --load networkidle >/dev/null; agent-browser wait 1500 >/dev/null
+agent-browser screenshot /tmp/cbs-mobile/antes/390-hero.png
+agent-browser screenshot --full /tmp/cbs-mobile/antes/390-full.png
+agent-browser eval "JSON.stringify({docH:document.documentElement.scrollHeight, hero:document.getElementById('topo').getBoundingClientRect().height, footer:document.querySelector('footer').getBoundingClientRect().height})"
+agent-browser set viewport 320 700 2 >/dev/null; agent-browser wait 800 >/dev/null
+agent-browser screenshot /tmp/cbs-mobile/antes/320-hero.png
+agent-browser set viewport 768 1024 2 >/dev/null; agent-browser wait 800 >/dev/null
+agent-browser screenshot --full /tmp/cbs-mobile/antes/768-full.png
+agent-browser set viewport 1440 900 1 >/dev/null; agent-browser wait 2500 >/dev/null
+agent-browser screenshot --full /tmp/cbs-mobile/antes/1440-full.png
+agent-browser close
+```
+
+Guardar a saída do `eval` em `/tmp/cbs-mobile/antes/metricas.json` (esperado hoje: `docH` ≈ 4457, `hero` ≈ 844–915, `footer` ≈ 576).
+
+---
+
 ### Task 1: Rota de render e os 4 assets WebP
 
 **Files:**
@@ -326,6 +355,8 @@ export function Scene3DLazy() {
 }
 ```
 
+**Desvio deliberado da spec §1:** `LiquidPath` **não** recebe gate. Ele não importa `three` (só `motion/react`) e já devolve `null` fora da jornada (`use-journey-active.ts` exige ≥ 1024px), então o gate só duplicaria a condição. Registrar no relatório final.
+
 - [ ] **Step 4: Verificar que o chunk do three não desce em 390px**
 
 ```bash
@@ -546,26 +577,9 @@ git commit -m "feat(web): bolhas-fantasma e bolha-imagem"
 - Consumes: `BubbleGhosts`, `BolhaImagem` (Task 3).
 - Produces: hero em `flex-col min-h-[100svh]` abaixo de `lg`, grid inalterado em `lg`; `data-s-anchor="hero-cluster"` e `data-j-anchor="hero"` só em `lg`.
 
-- [ ] **Step 1: Medir o estado atual (prova "antes")**
+- [ ] **Step 1: Conferir que o baseline da Task 0 existe**
 
-```bash
-mkdir -p /tmp/cbs-mobile/antes
-export AGENT_BROWSER_SESSION="$(agent-browser session id --scope worktree --prefix antes)"
-agent-browser open http://localhost:3005 >/dev/null; agent-browser set viewport 390 844 2 >/dev/null
-agent-browser wait --load networkidle >/dev/null; agent-browser wait 1500 >/dev/null
-agent-browser screenshot /tmp/cbs-mobile/antes/390-hero.png
-agent-browser screenshot --full /tmp/cbs-mobile/antes/390-full.png
-agent-browser eval "JSON.stringify({docH:document.documentElement.scrollHeight, hero:document.getElementById('topo').getBoundingClientRect().height})"
-agent-browser set viewport 320 700 2 >/dev/null; agent-browser wait 800 >/dev/null
-agent-browser screenshot /tmp/cbs-mobile/antes/320-hero.png
-agent-browser set viewport 768 1024 2 >/dev/null; agent-browser wait 800 >/dev/null
-agent-browser screenshot /tmp/cbs-mobile/antes/768-hero.png
-agent-browser set viewport 1440 900 1 >/dev/null; agent-browser wait 2500 >/dev/null
-agent-browser screenshot --full /tmp/cbs-mobile/antes/1440-full.png
-agent-browser close
-```
-
-Guardar a saída do `eval` (esperado hoje: `docH` ≈ 4457, `hero` ≈ 844–915).
+Run: `ls /tmp/cbs-mobile/antes/` → Expected: `390-hero.png 390-full.png 320-hero.png 768-full.png 1440-full.png metricas.json`. Se faltar, usar as capturas do brainstorm indicadas na Task 0 — **não** recapturar agora (o estado já é intermediário).
 
 - [ ] **Step 2: `HeroPlaceholder` só em `lg`**
 
@@ -700,41 +714,51 @@ git commit -m "feat(web): hero mobile com bolha acima do título"
 - Consumes: `BubbleGhosts`, `BolhaImagem`, `BolhaFabrica` (Task 3).
 - Produces: `Station` com prop `anchor: "modelo" | "qualidade" | "malha"` tipada (o `BubbleGhosts` precisa do variant); abaixo de `lg`: visual → H2 → corpo; em `lg`: grid, `flip`, `mist-side`, `data-j-anchor` inalterados. A composição da malha (`backdrop`) abaixo de `lg` fica para a Task 6 — nesta task ela recebe o mesmo tratamento das outras duas (bolha da fábrica acima do título) e o mapa fica só em `lg`.
 
-- [ ] **Step 1: Reescrever `StationSlot`**
+- [ ] **Step 1: Dividir `StationSlot` em desktop e mobile**
+
+Cada um é renderizado **uma vez**, no wrapper do seu breakpoint (Step 2). Assim `data-s-anchor` continua único no DOM (o `AnchoredGroup` da cena usa `querySelector`) e o `<object>` do SVG de 254 KB não é instanciado em cópias escondidas — `display:none` não impede `<object>` de carregar e rodar SMIL.
 
 ```tsx
+type StationVariant = "fabrica" | "frasco" | "selo";
+
 /**
- * Slot do objeto de uma estação. Em lg é a âncora do vidro WebGL (na
- * "fabrica" a ilustração SMIL vive aqui, atrás do canvas). Abaixo de lg é
- * a bolha pré-renderizada (ou SVG + vidro, na fábrica).
+ * Slot do objeto em lg: a âncora do vidro WebGL. Na "fabrica" a ilustração
+ * animada (SVG com SMIL) vive aqui no DOM, atrás do canvas: o vidro é pintado
+ * por cima e ela fica "dentro" da bolha sem perder a animação.
  */
-function StationSlot({ variant }: { variant: "fabrica" | "frasco" | "selo" }) {
+function StationSlotDesktop({ variant }: { variant: StationVariant }) {
 	return (
-		<>
-			<div className="absolute inset-0 hidden lg:block" data-s-anchor={variant}>
-				{variant === "fabrica" ? (
-					/* <object> e não <img>: o Chrome congela SMIL em contexto de
-					   imagem; como documento embutido a animação roda. */
-					<object
-						aria-hidden
-						className="pointer-events-none absolute top-1/2 left-1/2 w-[135%] max-w-none -translate-x-1/2 -translate-y-[54%] contrast-[1.06] saturate-[1.4]"
-						data="/warehouse-delivery.svg"
-						title=""
-						type="image/svg+xml"
-					/>
-				) : null}
-			</div>
-			<div className="absolute inset-0 lg:hidden">
-				{variant === "fabrica" ? (
-					<BolhaFabrica />
-				) : (
-					<BolhaImagem obj={variant} />
-				)}
-			</div>
-		</>
+		<div className="absolute inset-0" data-s-anchor={variant}>
+			{variant === "fabrica" ? (
+				/* <object> e não <img>: o Chrome congela SMIL em contexto de
+				   imagem; como documento embutido a animação roda. */
+				<object
+					aria-hidden
+					className="pointer-events-none absolute top-1/2 left-1/2 w-[135%] max-w-none -translate-x-1/2 -translate-y-[54%] contrast-[1.06] saturate-[1.4]"
+					data="/warehouse-delivery.svg"
+					title=""
+					type="image/svg+xml"
+				/>
+			) : null}
+		</div>
+	);
+}
+
+/** Slot do objeto abaixo de lg: bolha pré-renderizada (ou SVG + vidro, na fábrica). */
+function StationSlotMobile({ variant }: { variant: StationVariant }) {
+	return (
+		<div className="absolute inset-0">
+			{variant === "fabrica" ? (
+				<BolhaFabrica />
+			) : (
+				<BolhaImagem obj={variant} />
+			)}
+		</div>
 	);
 }
 ```
+
+Apagar o `StationSlot` antigo.
 
 - [ ] **Step 2: Reescrever `Station`**
 
@@ -755,7 +779,7 @@ function Station({
 	children: React.ReactNode;
 	flip?: boolean;
 	title: string;
-	variant: "fabrica" | "frasco" | "selo";
+	variant: StationVariant;
 }) {
 	const hasBackdrop = Boolean(backdrop);
 	// Em lg o texto alterna de lado (zigue-zague do desktop); abaixo de lg o
@@ -787,7 +811,7 @@ function Station({
 					<div className="relative z-10 hidden lg:block lg:min-h-[520px]">
 						<div className="absolute top-0 right-0 size-[380px]">{backdrop}</div>
 						<div aria-hidden className="absolute bottom-0 left-0 size-80">
-							<StationSlot variant={variant} />
+							<StationSlotDesktop variant={variant} />
 							<div
 								className="absolute top-full -right-10 h-24 w-24 -translate-y-1/2"
 								data-j-anchor={anchor}
@@ -799,14 +823,14 @@ function Station({
 						aria-hidden
 						className="relative z-10 order-1 ml-auto size-[clamp(11rem,55vw,14rem)] -mr-8 sm:-mr-4 lg:hidden"
 					>
-						<StationSlot variant={variant} />
+						<StationSlotMobile variant={variant} />
 					</div>
 				</>
 			) : (
 				<>
 					<div className="relative z-10 hidden lg:flex lg:justify-center">
 						<div aria-hidden className="relative size-96">
-							<StationSlot variant={variant} />
+							<StationSlotDesktop variant={variant} />
 							{/* Parada da caixa: logo abaixo da bolha, na coluna dela. */}
 							<div
 								className={`absolute top-full h-24 w-24 -translate-y-1/2 ${
@@ -820,7 +844,7 @@ function Station({
 						aria-hidden
 						className="relative z-10 order-1 ml-auto size-[clamp(11rem,55vw,14rem)] -mr-8 sm:-mr-4 lg:hidden"
 					>
-						<StationSlot variant={variant} />
+						<StationSlotMobile variant={variant} />
 					</div>
 				</>
 			)}
@@ -829,7 +853,7 @@ function Station({
 }
 ```
 
-Atenção: `StationSlot` renderiza o par (`hidden lg:block` + `lg:hidden`) — em cada bloco só um dos dois aparece, então `data-s-anchor` continua único por variante no DOM (o `AnchoredGroup` usa `querySelector`).
+Conferir depois de montar: `document.querySelectorAll('[data-s-anchor="frasco"]').length` = 1 e `document.querySelectorAll('object[data*="warehouse"]').length` = 1 em qualquer largura (o `hidden lg:flex` esconde o wrapper desktop, mas o `<object>` dentro dele ainda existe — é 1 cópia, igual a hoje; abaixo de `lg` a `BolhaFabrica` adiciona a segunda, e é isso: no máximo 2).
 
 - [ ] **Step 3: Ajustar as chamadas em `Home`**
 
@@ -1194,22 +1218,26 @@ for vp in "320 700" "390 844" "768 1024"; do
   agent-browser screenshot --full "/tmp/cbs-mobile/depois/$1-full.png"
   agent-browser eval "JSON.stringify({vp:'$1x$2', docH:document.documentElement.scrollHeight, chunks:performance.getEntriesByType('resource').map(r=>r.name).filter(n=>/three|react-three|maplibre|scene3d/i.test(n)).length, ctaBottom:Math.round(document.querySelector('#topo a[href^=\"https://wa.me\"]').getBoundingClientRect().bottom), scrollX:document.documentElement.scrollWidth>innerWidth})"
 done
-agent-browser set media reduce-motion >/dev/null 2>&1 || true
+if agent-browser set media reduce-motion >/dev/null 2>&1; then RM_OK=1; else RM_OK=0; echo "emulação de reduced-motion indisponível — checar manualmente"; fi
 agent-browser open http://localhost:3005 >/dev/null; agent-browser set viewport 390 844 2 >/dev/null; agent-browser wait 1500 >/dev/null
 agent-browser eval "document.getElementById('malha').scrollIntoView(); scrollY" >/dev/null; agent-browser wait 800 >/dev/null
-agent-browser eval "!!document.querySelector('#malha img[src*=\"warehouse-delivery.png\"]')"
+agent-browser eval "JSON.stringify({reduced:matchMedia('(prefers-reduced-motion: reduce)').matches, png:!!document.querySelector('#malha img[src*=\"warehouse-delivery.png\"]')})"
 agent-browser set viewport 1440 900 1 >/dev/null; agent-browser wait 3000 >/dev/null
 agent-browser screenshot --full /tmp/cbs-mobile/depois/1440-full-final.png
 agent-browser close
 ```
 
-Expected: `chunks` = 0 nas três larguras; `docH` ≤ 3200 em 390; `ctaBottom` ≤ altura do viewport em 320 e 390; `scrollX` = false; com reduced-motion a fábrica mostra o PNG (`true`); `1440-full-final.png` idêntico ao "antes" fora do rodapé (comparar com `Read`).
+Expected: `chunks` = 0 nas três larguras; `docH` ≤ 3200 em 390; `ctaBottom` ≤ altura do viewport em 320 e 390; `scrollX` = false; `1440-full-final.png` idêntico ao "antes" fora do rodapé (comparar com `Read`). Reduced-motion: a asserção só vale se `reduced` vier `true` — então `png` tem de ser `true`; se `reduced` for `false` (emulação indisponível), registrar "não testado" no relatório em vez de reprovar.
 
 - [ ] **Step 3: Relatório**
 
 Listar no relatório: os números "antes" (Task 4 Step 1) e "depois" (acima), os caminhos das capturas, a saída real de `bun run check`, `check-types`, `bun test`, e qualquer desvio da spec (ex.: plano B dos assets, `-top-8` no mapa).
 
-- [ ] **Step 4: Push e PR**
+- [ ] **Step 4: Escrever o corpo do PR e passar pelos filtros de texto**
+
+Escrever `/tmp/cbs-mobile/pr-body.md`: resumo em português das oito decisões, os números antes/depois (Task 0 × Step 2), os caminhos das capturas (`gh pr create` não anexa imagens — descrever o que cada uma mostra), o desvio declarado do `LiquidPath` (Task 2) e a nota de que o merge dispara deploy em produção. Sem atribuição de IA no corpo. Em seguida rodar `/unslop` e `/humanize-pt-br` sobre o arquivo e reler o resultado antes do próximo step.
+
+- [ ] **Step 5: Push e PR**
 
 ```bash
 cd /home/othavio/Work/cbs-site
@@ -1218,7 +1246,7 @@ git push -u origin reatividade
 gh pr create --base main --title "Home mobile: bolhas como imagem e lado fixo" --body-file /tmp/cbs-mobile/pr-body.md
 ```
 
-`pr-body.md`: resumo em português das oito decisões, os números antes/depois, as capturas anexadas (`gh pr create` não anexa imagens — colar os caminhos e descrever), e a nota de que o merge dispara deploy em produção. Sem atribuição de IA no corpo. Não fazer merge.
+Não fazer merge — `main` tem deploy automático.
 
 ---
 
@@ -1226,4 +1254,5 @@ gh pr create --base main --title "Home mobile: bolhas como imagem e lado fixo" -
 
 - **Cobertura da spec:** §1 assets → Task 1; gates → Task 2; §2 fantasmas → Task 3/4/5/7; §3 hero → Task 4; §4 estações → Task 5; §5 malha → Task 6; §6 navbar/chegada/rodapé → Task 7; §7 tokens → Tasks 4–7 (classes literais); §8 DESIGN.md → Task 8; §10 verificação → Steps de verificação por task + Task 9; §11 plano B dos assets → Task 1 Step 5.
 - **Nomes consistentes:** `useWide`/`WIDE_QUERY` (Task 2) usados em `scene3d-lazy.tsx`; `BubbleGhosts` com `variant` `"hero" | "modelo" | "qualidade" | "malha" | "chegada"` (Task 3) e `Station.anchor: StationAnchor` (Task 5) casam; `BolhaImagem obj: "caixa" | "frasco" | "selo"` (Task 3) usado em Task 4 (`caixa`) e Task 5 (`variant` frasco/selo — `StationSlot` só chama `BolhaImagem` quando `variant !== "fabrica"`, então o tipo fecha); `pracasPlanas()` (Task 6) importado em `page.tsx`.
-- **Risco declarado:** o `AnchoredGroup` da cena usa `querySelector('[data-s-anchor=…]')` — Task 5 mantém um único `data-s-anchor` por variante (o bloco mobile não leva o atributo).
+- **Risco declarado:** o `AnchoredGroup` da cena usa `querySelector('[data-s-anchor=…]')` — Task 5 separa `StationSlotDesktop` (única cópia do atributo e do `<object>` da fábrica) de `StationSlotMobile`, cada um renderizado uma vez no wrapper do seu breakpoint.
+- **Desvios da spec, declarados:** `LiquidPath` sem gate (Task 2); baseline capturado na Task 0, antes de qualquer mudança.
