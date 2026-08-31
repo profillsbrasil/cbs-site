@@ -2,7 +2,7 @@ import { ArrowDown } from "lucide-react";
 
 import { CtaEmail, CtaReassurance, CtaWhatsApp } from "@/components/cta";
 import { Footer } from "@/components/footer";
-import { BolhaImagem } from "@/components/home/bolha-imagem";
+import { BolhaFabrica, BolhaImagem } from "@/components/home/bolha-imagem";
 import { BubbleGhosts } from "@/components/home/bubble-ghosts";
 import { EntregaTitulo } from "@/components/home/entrega-titulo";
 import { LiquidPath } from "@/components/home/liquid-path";
@@ -113,7 +113,15 @@ function Hero() {
  * canvas: o vidro da bolha é pintado por cima e ela fica "dentro" da bolha
  * sem perder a animação (uma textura WebGL a congelaria).
  */
-function StationSlot({ variant }: { variant: string }) {
+type StationVariant = "fabrica" | "frasco" | "selo";
+type StationAnchor = "modelo" | "qualidade" | "malha";
+
+/**
+ * Slot do objeto em lg: a âncora do vidro WebGL. Na "fabrica" a ilustração
+ * animada (SVG com SMIL) vive aqui no DOM, atrás do canvas: o vidro é pintado
+ * por cima e ela fica "dentro" da bolha sem perder a animação.
+ */
+function StationSlotDesktop({ variant }: { variant: StationVariant }) {
 	return (
 		<div className="absolute inset-0" data-s-anchor={variant}>
 			{variant === "fabrica" ? (
@@ -121,12 +129,21 @@ function StationSlot({ variant }: { variant: string }) {
 				   imagem; como documento embutido a animação roda. */
 				<object
 					aria-hidden
-					className="pointer-events-none absolute top-1/2 left-1/2 w-[110%] max-w-none -translate-x-1/2 -translate-y-[54%] contrast-[1.06] saturate-[1.4] sm:w-[135%]"
+					className="pointer-events-none absolute top-1/2 left-1/2 w-[135%] max-w-none -translate-x-1/2 -translate-y-[54%] contrast-[1.06] saturate-[1.4]"
 					data="/warehouse-delivery.svg"
 					title=""
 					type="image/svg+xml"
 				/>
 			) : null}
+		</div>
+	);
+}
+
+/** Slot do objeto abaixo de lg: bolha pré-renderizada (ou SVG + vidro, na fábrica). */
+function StationSlotMobile({ variant }: { variant: StationVariant }) {
+	return (
+		<div className="absolute inset-0">
+			{variant === "fabrica" ? <BolhaFabrica /> : <BolhaImagem obj={variant} />}
 		</div>
 	);
 }
@@ -139,97 +156,85 @@ function Station({
 	title,
 	variant,
 }: {
-	anchor: string;
-	/** Camada atrás do objeto 3D (ex.: o mapa da malha). Substitui a névoa. */
+	anchor: StationAnchor;
+	/** Camada atrás do objeto 3D em lg (ex.: o mapa da malha). Substitui a névoa. */
 	backdrop?: React.ReactNode;
 	children: React.ReactNode;
 	flip?: boolean;
 	title: string;
-	variant: "fabrica" | "frasco" | "selo";
+	variant: StationVariant;
 }) {
 	const hasBackdrop = Boolean(backdrop);
-	// Abaixo de lg o wrapper de texto vira `contents`: título, visual e corpo
-	// são itens diretos do grid e a bolha entra ENTRE o título e o parágrafo,
-	// sangrando pelo lado que alterna (o zigue-zague do desktop, num só eixo).
-	const textCol = flip ? "lg:order-2" : "";
-	// Em md (tablet) título e corpo dividem a coluna 1 e a bolha ocupa a 2,
-	// nas duas linhas; em lg o wrapper volta a ser bloco e isso é ignorado.
-	const textMd = flip ? "md:col-start-2" : "md:col-start-1";
-	// As tracks também espelham: o texto sempre fica na coluna flexível.
-	const gridMd = flip
-		? "md:grid-cols-[auto_minmax(0,1fr)]"
-		: "md:grid-cols-[minmax(0,1fr)_auto]";
-	const visualMd = flip
-		? "md:col-start-1 md:justify-self-start md:ml-0"
-		: "md:col-start-2 md:justify-self-end md:mr-0";
-	const sideBleed = flip
-		? "justify-self-start -ml-12 sm:-ml-8"
-		: "justify-self-end -mr-12 sm:-mr-8";
+	// Em lg o texto alterna de lado (zigue-zague do desktop); abaixo de lg o
+	// lado é fixo: visual sangrando à direita, acima do título (Regra do
+	// Lado Fixo).
+	const textCol = flip ? "lg:order-2" : "lg:order-none";
 	return (
 		<section
-			className={`relative mx-auto grid max-w-6xl scroll-mt-24 items-center gap-y-5 px-6 py-14 sm:gap-y-8 sm:py-24 md:grid-rows-[auto_auto] md:gap-x-8 lg:min-h-[80vh] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:grid-rows-none lg:gap-10 ${gridMd}`}
+			className="relative mx-auto flex max-w-6xl scroll-mt-24 flex-col px-6 py-10 md:py-14 lg:grid lg:min-h-[80vh] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-10 lg:py-24"
 			id={anchor}
 		>
 			{hasBackdrop ? null : (
 				<div
-					className="mist-side absolute inset-y-0 left-1/2 w-screen -translate-x-1/2"
+					className="mist-side absolute inset-y-0 left-1/2 hidden w-screen -translate-x-1/2 lg:block"
 					style={{ "--mist-x": flip ? "18%" : "82%" } as React.CSSProperties}
 				/>
 			)}
-			<div className={`contents lg:relative lg:z-20 lg:block ${textCol}`}>
-				<Reveal
-					className={`relative z-20 order-1 md:row-start-1 lg:order-none ${textMd}`}
-				>
-					<h2 className="max-w-md font-bold font-display text-4xl text-brand-navy leading-tight tracking-tight sm:text-5xl">
+			<BubbleGhosts variant={anchor} />
+			<div className={`relative z-20 order-2 ${textCol}`}>
+				<Reveal>
+					<h2 className="mt-3 max-w-md font-bold font-display text-3xl text-brand-navy leading-tight tracking-tight md:text-4xl lg:mt-0 lg:text-5xl">
 						{title}
 					</h2>
 				</Reveal>
-				<div
-					className={`relative z-20 order-3 md:row-start-2 lg:order-none ${textMd}`}
-				>
-					{children}
-				</div>
+				<div className="relative mt-3 lg:mt-0">{children}</div>
 			</div>
 			{hasBackdrop ? (
-				/* Composição D2: mapa no alto-direita, bolha em baixo-esquerda —
-				   a diagonal do rio líquido. Abaixo de lg a mesma diagonal,
-				   condensada: mapa sangrando à direita, bolha à esquerda. */
-				<div
-					className={`relative z-10 order-2 h-[clamp(20rem,88vw,26rem)] w-full md:row-span-2 md:row-start-1 md:w-[22rem] lg:order-none lg:col-auto lg:row-auto lg:h-auto lg:min-h-[520px] lg:w-auto lg:justify-self-auto ${visualMd}`}
-				>
-					<div className="absolute top-0 -right-4 size-[clamp(13rem,60vw,17rem)] sm:right-0 lg:size-[380px]">
-						{backdrop}
+				<>
+					{/* lg — composição D2: mapa no alto-direita, bolha em
+					    baixo-esquerda, a diagonal do rio líquido. */}
+					<div className="relative z-10 hidden lg:block lg:min-h-[520px]">
+						<div className="absolute top-0 right-0 size-[380px]">
+							{backdrop}
+						</div>
+						<div aria-hidden className="absolute bottom-0 left-0 size-80">
+							<StationSlotDesktop variant={variant} />
+							<div
+								className="absolute top-full -right-10 h-24 w-24 -translate-y-1/2"
+								data-j-anchor={anchor}
+							/>
+						</div>
 					</div>
+					{/* < lg — a bolha da fábrica segue a regra das outras estações. */}
 					<div
 						aria-hidden
-						className="absolute bottom-0 left-0 size-[clamp(11rem,50vw,14rem)] lg:size-80"
+						className="relative z-10 order-1 -mr-8 ml-auto size-[clamp(11rem,55vw,14rem)] sm:-mr-4 lg:hidden"
 					>
-						<StationSlot variant={variant} />
-						<div
-							className="absolute top-full -right-10 hidden h-24 w-24 -translate-y-1/2 lg:block"
-							data-j-anchor={anchor}
-						/>
+						<StationSlotMobile variant={variant} />
 					</div>
-				</div>
+				</>
 			) : (
-				<div
-					className={`relative z-10 order-2 md:row-span-2 md:row-start-1 lg:order-none lg:col-auto lg:row-auto lg:mx-0 lg:flex lg:justify-center lg:justify-self-auto ${sideBleed} ${visualMd}`}
-				>
+				<>
+					<div className="relative z-10 hidden lg:flex lg:justify-center">
+						<div aria-hidden className="relative size-96">
+							<StationSlotDesktop variant={variant} />
+							{/* Parada da caixa: logo abaixo da bolha, na coluna dela — a
+							    travessia nunca atravessa a coluna de texto. */}
+							<div
+								className={`absolute top-full h-24 w-24 -translate-y-1/2 ${
+									flip ? "-left-10" : "-right-10"
+								}`}
+								data-j-anchor={anchor}
+							/>
+						</div>
+					</div>
 					<div
 						aria-hidden
-						className="relative size-[clamp(13rem,62vw,17rem)] lg:size-96"
+						className="relative z-10 order-1 -mr-8 ml-auto size-[clamp(11rem,55vw,14rem)] sm:-mr-4 lg:hidden"
 					>
-						<StationSlot variant={variant} />
-						{/* Parada da caixa: logo abaixo da bolha, na coluna dela — a
-						    travessia nunca atravessa a coluna de texto. */}
-						<div
-							className={`absolute top-full hidden h-24 w-24 -translate-y-1/2 lg:block ${
-								flip ? "-left-10" : "-right-10"
-							}`}
-							data-j-anchor={anchor}
-						/>
+						<StationSlotMobile variant={variant} />
 					</div>
-				</div>
+				</>
 			)}
 		</section>
 	);
