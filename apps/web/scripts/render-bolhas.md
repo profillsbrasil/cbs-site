@@ -1,8 +1,10 @@
 # Bolhas pré-renderizadas (`public/bolhas/*.webp`)
 
-Abaixo de 1024px o canvas WebGL não monta; as bolhas do hero e das estações são
-estas imagens. **Modelo 3D mudou (`cardboard-box.tsx`, `station-models.tsx`,
-`scene-bits.tsx`) → regerar.**
+Abaixo de 1024px o canvas WebGL não monta; as bolhas do hero e das estações e a
+van da doca são estas imagens. **Modelo 3D mudou (`cardboard-box.tsx`,
+`station-models.tsx`, `scene-bits.tsx`) → regerar.** Objetos: `caixa`, `frasco`,
+`selo`, `vidro` (bolha vazia da fábrica) e `caminhao` (sem bolha; o `-trim`
+deixa o WebP retangular, ~800×387).
 
 - Origem: commit `4859205` (código da cena), gerado em 2026-08-31.
 - Modo: alfa transparente real (filme da bolha com alfa ≈ 0,33, fora da bolha alfa 0) —
@@ -18,7 +20,7 @@ estas imagens. **Modelo 3D mudou (`cardboard-box.tsx`, `station-models.tsx`,
 ```bash
 cd apps/web && mkdir -p public/bolhas /tmp/bolhas
 export AGENT_BROWSER_SESSION="$(agent-browser session id --scope worktree --prefix bolhas)"
-for obj in caixa frasco selo vidro; do
+for obj in caixa caminhao frasco selo vidro; do
   agent-browser open "http://localhost:3001/render-bolhas?obj=$obj" >/dev/null
   agent-browser set viewport 800 800 1 >/dev/null
   agent-browser wait --load networkidle >/dev/null; agent-browser wait 3000 >/dev/null

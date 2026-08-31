@@ -1,8 +1,9 @@
 /** Objetos que a rota /render-bolhas sabe renderizar (um asset WebP por item). */
-export type BolhaObj = "caixa" | "frasco" | "selo" | "vidro";
+export type BolhaObj = "caixa" | "caminhao" | "frasco" | "selo" | "vidro";
 
 export const BOLHA_OBJS: readonly BolhaObj[] = [
 	"caixa",
+	"caminhao",
 	"frasco",
 	"selo",
 	"vidro",

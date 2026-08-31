@@ -1,8 +1,13 @@
 import { ArrowDown } from "lucide-react";
+import Image from "next/image";
 
 import { CtaEmail, CtaReassurance, CtaWhatsApp } from "@/components/cta";
 import { Footer } from "@/components/footer";
-import { BolhaFabrica, BolhaImagem } from "@/components/home/bolha-imagem";
+import {
+	BolhaFabrica,
+	BolhaImagem,
+	FabricaIlustracaoDesktop,
+} from "@/components/home/bolha-imagem";
 import { BubbleGhosts } from "@/components/home/bubble-ghosts";
 import { EntregaTitulo } from "@/components/home/entrega-titulo";
 import { LiquidPath } from "@/components/home/liquid-path";
@@ -38,7 +43,7 @@ function HeroPlaceholder() {
 function Hero() {
 	return (
 		<section
-			className="relative mx-auto flex min-h-[100svh] max-w-6xl flex-col px-6 pt-20 pb-8 lg:grid lg:grid-cols-[1.05fr_minmax(0,1fr)] lg:items-center lg:gap-10 lg:pt-28 lg:pb-16"
+			className="relative mx-auto flex min-h-[100svh] max-w-6xl flex-col px-6 pt-20 pb-8 md:min-h-0 md:pb-14 lg:grid lg:min-h-[100svh] lg:grid-cols-[1.05fr_minmax(0,1fr)] lg:items-center lg:gap-10 lg:pt-28 lg:pb-16"
 			id="topo"
 		>
 			<div className="mist-hero absolute inset-y-0 left-1/2 w-screen -translate-x-1/2" />
@@ -75,7 +80,7 @@ function Hero() {
 					</p>
 				</div>
 				<div
-					className="rise mt-auto pt-6 lg:mt-10 lg:pt-0"
+					className="rise mt-auto pt-6 md:mt-12 md:pt-0 lg:mt-10"
 					style={{ "--rise-delay": "220ms" } as React.CSSProperties}
 				>
 					<div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
@@ -125,17 +130,7 @@ type StationAnchor = "modelo" | "qualidade" | "malha";
 function StationSlotDesktop({ variant }: { variant: StationVariant }) {
 	return (
 		<div className="absolute inset-0" data-s-anchor={variant}>
-			{variant === "fabrica" ? (
-				/* <object> e não <img>: o Chrome congela SMIL em contexto de
-				   imagem; como documento embutido a animação roda. */
-				<object
-					aria-hidden
-					className="pointer-events-none absolute top-1/2 left-1/2 w-[135%] max-w-none -translate-x-1/2 -translate-y-[54%] contrast-[1.06] saturate-[1.4]"
-					data="/warehouse-delivery.svg"
-					title=""
-					type="image/svg+xml"
-				/>
-			) : null}
+			{variant === "fabrica" ? <FabricaIlustracaoDesktop /> : null}
 		</div>
 	);
 }
@@ -288,6 +283,15 @@ function Chegada() {
 				className="relative mx-auto mt-12 h-28 w-full max-w-xl sm:mt-16 sm:h-40"
 				data-s-anchor="caminhao-doca"
 			>
+				{/* Abaixo de lg não há canvas: a van entra como imagem, parada
+				    na doca, com as rodas alinhadas ao asfalto logo abaixo. */}
+				<Image
+					alt=""
+					className="pointer-events-none absolute bottom-[-1.75rem] left-1/2 w-[min(20rem,72vw)] -translate-x-1/2 lg:hidden"
+					height={450}
+					src="/bolhas/caminhao.webp"
+					width={800}
+				/>
 				{/* Marco da caixa separado da âncora do caminhão: a escala da
 				    caixa segue o tamanho do marco, e ela precisa chegar pequena
 				    (na traseira, à altura da porta) para caber no baú. */}
