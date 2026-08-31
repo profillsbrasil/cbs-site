@@ -35,6 +35,11 @@ const ORDEM_REGIOES: readonly Regiao[] = [
 	"Centro-Oeste",
 ];
 
+/** Só os nomes, na ordem informada: a nuvem de chips do celular, sem rótulo de região. */
+export function pracasPlanas(): string[] {
+	return PRACAS.map((p) => p.nome);
+}
+
 /** Grupos no formato que `RevealGroups` consome (rótulo + chips). */
 export function pracasPorRegiao(): { label: string; items: string[] }[] {
 	return ORDEM_REGIOES.map((regiao) => ({

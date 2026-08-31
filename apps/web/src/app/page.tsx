@@ -1,11 +1,19 @@
 import { ArrowDown } from "lucide-react";
+import Image from "next/image";
 
 import { CtaEmail, CtaReassurance, CtaWhatsApp } from "@/components/cta";
 import { Footer } from "@/components/footer";
+import {
+	BolhaFabrica,
+	BolhaImagem,
+	FabricaIlustracaoDesktop,
+} from "@/components/home/bolha-imagem";
+import { BubbleGhosts } from "@/components/home/bubble-ghosts";
 import { EntregaTitulo } from "@/components/home/entrega-titulo";
 import { LiquidPath } from "@/components/home/liquid-path";
 import { MapaMalhaLazy } from "@/components/home/mapa-malha-lazy";
-import { pracasPorRegiao } from "@/components/home/pracas";
+import { MapaMalhaPlaceholder } from "@/components/home/mapa-malha-placeholder";
+import { pracasPlanas, pracasPorRegiao } from "@/components/home/pracas";
 import { Reveal, RevealGroups } from "@/components/home/reveal";
 import { Scene3DLazy } from "@/components/home/scene3d-lazy";
 import { Navbar } from "@/components/navbar";
@@ -20,7 +28,7 @@ function HeroPlaceholder() {
 	return (
 		<div
 			aria-hidden
-			className="hero-placeholder pointer-events-none absolute inset-0 flex items-center justify-center"
+			className="hero-placeholder pointer-events-none absolute inset-0 hidden items-center justify-center lg:flex"
 		>
 			<div className="relative aspect-square h-full">
 				<div className="bubble-ghost absolute top-[11%] left-[13%] size-[74%]" />
@@ -35,13 +43,25 @@ function HeroPlaceholder() {
 function Hero() {
 	return (
 		<section
-			className="relative mx-auto grid min-h-[100svh] max-w-6xl items-start gap-8 px-6 pt-20 pb-12 sm:gap-10 sm:pt-28 sm:pb-16 lg:grid-cols-[1.05fr_minmax(0,1fr)] lg:items-center lg:pt-28"
+			className="relative mx-auto flex min-h-[100svh] max-w-6xl flex-col px-6 pt-20 pb-8 md:min-h-0 md:pb-14 lg:grid lg:min-h-[100svh] lg:grid-cols-[1.05fr_minmax(0,1fr)] lg:items-center lg:gap-10 lg:pt-28 lg:pb-16"
 			id="topo"
 		>
 			<div className="mist-hero absolute inset-y-0 left-1/2 w-screen -translate-x-1/2" />
-			<div className="relative z-20">
+			<BubbleGhosts variant="hero" />
+			{/* Celular/tablet: a bolha-caixa vem ANTES do título, sangrando pela
+			    direita (o <main> recorta com overflow-x-clip). Em lg o visual é
+			    o cluster WebGL na segunda coluna. */}
+			<div
+				aria-hidden
+				className="rise relative z-10 -mr-10 ml-auto size-[clamp(13rem,62vw,17rem)] sm:-mr-6 md:size-[clamp(17rem,40vw,22rem)] lg:hidden"
+			>
+				<BolhaImagem obj="caixa" />
+			</div>
+			<div className="relative z-20 flex flex-1 flex-col lg:flex-none">
 				<div className="rise">
-					<h1 className="max-w-xl font-bold font-display text-5xl text-brand-navy leading-[1.02] tracking-tight sm:text-7xl">
+					{/* clamp: 36px em 320 (senão "nossa fábrica." quebra em 3 linhas),
+					    40px de 380 em diante. */}
+					<h1 className="mt-2 max-w-xl font-bold font-display text-[clamp(2.25rem,10.5vw,2.5rem)] text-brand-navy leading-[1.02] tracking-tight md:text-6xl lg:mt-0 lg:text-7xl">
 						Sua marca,
 						<br />
 						<span className="text-brand-ink">nossa fábrica.</span>
@@ -51,7 +71,7 @@ function Hero() {
 					className="rise"
 					style={{ "--rise-delay": "120ms" } as React.CSSProperties}
 				>
-					<p className="mt-[clamp(1.5rem,20vw,7rem)] max-w-lg text-pretty text-base text-brand-navy/75 leading-relaxed sm:mt-8 sm:text-xl lg:mt-7">
+					<p className="mt-4 max-w-lg text-pretty text-base text-brand-navy/75 leading-relaxed md:mt-6 md:text-lg lg:mt-7 lg:text-xl">
 						A CBS fabrica o seu saneante, aplica o seu rótulo e entrega no
 						centro de distribuição do Mercado Livre, com autorização ANVISA.
 						Cada fábrica fica ao lado de um CD, e{" "}
@@ -62,10 +82,10 @@ function Hero() {
 					</p>
 				</div>
 				<div
-					className="rise"
+					className="rise mt-auto pt-6 md:mt-12 md:pt-0 lg:mt-10"
 					style={{ "--rise-delay": "220ms" } as React.CSSProperties}
 				>
-					<div className="mt-6 flex flex-col items-stretch gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+					<div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
 						<CtaWhatsApp
 							className="justify-center"
 							label="Chamar no WhatsApp"
@@ -76,14 +96,14 @@ function Hero() {
 				</div>
 			</div>
 			<div
-				className="absolute top-14 -right-24 size-[clamp(13rem,66vw,17rem)] sm:top-16 sm:-right-16 sm:size-[clamp(17rem,40vw,24rem)] lg:relative lg:top-auto lg:right-auto lg:h-[560px] lg:w-auto"
+				className="relative hidden h-[560px] lg:block"
 				data-s-anchor="hero-cluster"
 			>
 				<HeroPlaceholder />
-				{/* Marco da caixa: proporcional à bolha abaixo de lg (a caixa
-				    estática escala por este marco, a bolha pela âncora acima). */}
+				{/* Marco da caixa: a caixa estática escala por este marco, a
+				    bolha pela âncora acima. */}
 				<div
-					className="absolute top-1/2 left-1/2 size-[23%] -translate-x-1/2 -translate-y-1/2 lg:size-32"
+					className="absolute top-1/2 left-1/2 size-32 -translate-x-1/2 -translate-y-1/2"
 					data-j-anchor="hero"
 				/>
 			</div>
@@ -101,20 +121,27 @@ function Hero() {
  * canvas: o vidro da bolha é pintado por cima e ela fica "dentro" da bolha
  * sem perder a animação (uma textura WebGL a congelaria).
  */
-function StationSlot({ variant }: { variant: string }) {
+type StationVariant = "fabrica" | "frasco" | "selo";
+type StationAnchor = "modelo" | "qualidade" | "malha";
+
+/**
+ * Slot do objeto em lg: a âncora do vidro WebGL. Na "fabrica" a ilustração
+ * animada (SVG com SMIL) vive aqui no DOM, atrás do canvas: o vidro é pintado
+ * por cima e ela fica "dentro" da bolha sem perder a animação.
+ */
+function StationSlotDesktop({ variant }: { variant: StationVariant }) {
 	return (
 		<div className="absolute inset-0" data-s-anchor={variant}>
-			{variant === "fabrica" ? (
-				/* <object> e não <img>: o Chrome congela SMIL em contexto de
-				   imagem; como documento embutido a animação roda. */
-				<object
-					aria-hidden
-					className="pointer-events-none absolute top-1/2 left-1/2 w-[110%] max-w-none -translate-x-1/2 -translate-y-[54%] contrast-[1.06] saturate-[1.4] sm:w-[135%]"
-					data="/warehouse-delivery.svg"
-					title=""
-					type="image/svg+xml"
-				/>
-			) : null}
+			{variant === "fabrica" ? <FabricaIlustracaoDesktop /> : null}
+		</div>
+	);
+}
+
+/** Slot do objeto abaixo de lg: bolha pré-renderizada (ou SVG + vidro, na fábrica). */
+function StationSlotMobile({ variant }: { variant: StationVariant }) {
+	return (
+		<div className="absolute inset-0">
+			{variant === "fabrica" ? <BolhaFabrica /> : <BolhaImagem obj={variant} />}
 		</div>
 	);
 }
@@ -127,97 +154,87 @@ function Station({
 	title,
 	variant,
 }: {
-	anchor: string;
-	/** Camada atrás do objeto 3D (ex.: o mapa da malha). Substitui a névoa. */
+	anchor: StationAnchor;
+	/** Camada atrás do objeto 3D em lg (ex.: o mapa da malha). Substitui a névoa. */
 	backdrop?: React.ReactNode;
 	children: React.ReactNode;
 	flip?: boolean;
 	title: string;
-	variant: "fabrica" | "frasco" | "selo";
+	variant: StationVariant;
 }) {
 	const hasBackdrop = Boolean(backdrop);
-	// Abaixo de lg o wrapper de texto vira `contents`: título, visual e corpo
-	// são itens diretos do grid e a bolha entra ENTRE o título e o parágrafo,
-	// sangrando pelo lado que alterna (o zigue-zague do desktop, num só eixo).
-	const textCol = flip ? "lg:order-2" : "";
-	// Em md (tablet) título e corpo dividem a coluna 1 e a bolha ocupa a 2,
-	// nas duas linhas; em lg o wrapper volta a ser bloco e isso é ignorado.
-	const textMd = flip ? "md:col-start-2" : "md:col-start-1";
-	// As tracks também espelham: o texto sempre fica na coluna flexível.
-	const gridMd = flip
-		? "md:grid-cols-[auto_minmax(0,1fr)]"
-		: "md:grid-cols-[minmax(0,1fr)_auto]";
-	const visualMd = flip
-		? "md:col-start-1 md:justify-self-start md:ml-0"
-		: "md:col-start-2 md:justify-self-end md:mr-0";
-	const sideBleed = flip
-		? "justify-self-start -ml-12 sm:-ml-8"
-		: "justify-self-end -mr-12 sm:-mr-8";
+	// Em lg o texto alterna de lado (zigue-zague do desktop); abaixo de lg o
+	// lado é fixo: visual sangrando à direita, acima do título (Regra do
+	// Lado Fixo).
+	const textCol = flip ? "lg:order-2" : "lg:order-none";
 	return (
 		<section
-			className={`relative mx-auto grid max-w-6xl scroll-mt-24 items-center gap-y-5 px-6 py-14 sm:gap-y-8 sm:py-24 md:grid-rows-[auto_auto] md:gap-x-8 lg:min-h-[80vh] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:grid-rows-none lg:gap-10 ${gridMd}`}
+			className="relative mx-auto flex max-w-6xl scroll-mt-24 flex-col px-6 py-10 md:py-14 lg:grid lg:min-h-[80vh] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-10 lg:py-24"
 			id={anchor}
 		>
 			{hasBackdrop ? null : (
 				<div
-					className="mist-side absolute inset-y-0 left-1/2 w-screen -translate-x-1/2"
+					className="mist-side absolute inset-y-0 left-1/2 hidden w-screen -translate-x-1/2 lg:block"
 					style={{ "--mist-x": flip ? "18%" : "82%" } as React.CSSProperties}
 				/>
 			)}
-			<div className={`contents lg:relative lg:z-20 lg:block ${textCol}`}>
-				<Reveal
-					className={`relative z-20 order-1 md:row-start-1 lg:order-none ${textMd}`}
-				>
-					<h2 className="max-w-md font-bold font-display text-4xl text-brand-navy leading-tight tracking-tight sm:text-5xl">
+			<BubbleGhosts variant={anchor} />
+			<div className={`relative z-20 order-2 ${textCol}`}>
+				{/* z-10: o mapa da malha é absolute dentro do bloco de children;
+				    sem posicionar o título, a ordem de pintura o cobriria. */}
+				<Reveal className="relative z-10">
+					<h2 className="mt-3 max-w-md font-bold font-display text-3xl text-brand-navy leading-tight tracking-tight md:text-4xl lg:mt-0 lg:text-5xl">
 						{title}
 					</h2>
 				</Reveal>
-				<div
-					className={`relative z-20 order-3 md:row-start-2 lg:order-none ${textMd}`}
-				>
-					{children}
-				</div>
+				<div className="relative mt-3 lg:mt-0">{children}</div>
 			</div>
 			{hasBackdrop ? (
-				/* Composição D2: mapa no alto-direita, bolha em baixo-esquerda —
-				   a diagonal do rio líquido. Abaixo de lg a mesma diagonal,
-				   condensada: mapa sangrando à direita, bolha à esquerda. */
-				<div
-					className={`relative z-10 order-2 h-[clamp(20rem,88vw,26rem)] w-full md:row-span-2 md:row-start-1 md:w-[22rem] lg:order-none lg:col-auto lg:row-auto lg:h-auto lg:min-h-[520px] lg:w-auto lg:justify-self-auto ${visualMd}`}
-				>
-					<div className="absolute top-0 -right-4 size-[clamp(13rem,60vw,17rem)] sm:right-0 lg:size-[380px]">
-						{backdrop}
+				<>
+					{/* lg — composição D2: mapa no alto-direita, bolha em
+					    baixo-esquerda, a diagonal do rio líquido. */}
+					<div className="relative z-10 hidden lg:block lg:min-h-[520px]">
+						<div className="absolute top-0 right-0 size-[380px]">
+							{backdrop}
+						</div>
+						<div aria-hidden className="absolute bottom-0 left-0 size-80">
+							<StationSlotDesktop variant={variant} />
+							<div
+								className="absolute top-full -right-10 h-24 w-24 -translate-y-1/2"
+								data-j-anchor={anchor}
+							/>
+						</div>
 					</div>
+					{/* < lg — a bolha da fábrica segue a regra das outras estações. */}
 					<div
 						aria-hidden
-						className="absolute bottom-0 left-0 size-[clamp(11rem,50vw,14rem)] lg:size-80"
+						className="relative z-10 order-1 -mr-8 ml-auto size-[clamp(11rem,55vw,14rem)] sm:-mr-4 lg:hidden"
 					>
-						<StationSlot variant={variant} />
-						<div
-							className="absolute top-full -right-10 hidden h-24 w-24 -translate-y-1/2 lg:block"
-							data-j-anchor={anchor}
-						/>
+						<StationSlotMobile variant={variant} />
 					</div>
-				</div>
+				</>
 			) : (
-				<div
-					className={`relative z-10 order-2 md:row-span-2 md:row-start-1 lg:order-none lg:col-auto lg:row-auto lg:mx-0 lg:flex lg:justify-center lg:justify-self-auto ${sideBleed} ${visualMd}`}
-				>
+				<>
+					<div className="relative z-10 hidden lg:flex lg:justify-center">
+						<div aria-hidden className="relative size-96">
+							<StationSlotDesktop variant={variant} />
+							{/* Parada da caixa: logo abaixo da bolha, na coluna dela — a
+							    travessia nunca atravessa a coluna de texto. */}
+							<div
+								className={`absolute top-full h-24 w-24 -translate-y-1/2 ${
+									flip ? "-left-10" : "-right-10"
+								}`}
+								data-j-anchor={anchor}
+							/>
+						</div>
+					</div>
 					<div
 						aria-hidden
-						className="relative size-[clamp(13rem,62vw,17rem)] lg:size-96"
+						className="relative z-10 order-1 -mr-8 ml-auto size-[clamp(11rem,55vw,14rem)] sm:-mr-4 lg:hidden"
 					>
-						<StationSlot variant={variant} />
-						{/* Parada da caixa: logo abaixo da bolha, na coluna dela — a
-						    travessia nunca atravessa a coluna de texto. */}
-						<div
-							className={`absolute top-full hidden h-24 w-24 -translate-y-1/2 lg:block ${
-								flip ? "-left-10" : "-right-10"
-							}`}
-							data-j-anchor={anchor}
-						/>
+						<StationSlotMobile variant={variant} />
 					</div>
-				</div>
+				</>
 			)}
 		</section>
 	);
@@ -228,8 +245,9 @@ const RESPOSTA = ["produto", "rótulo", "produção", "envio"] as const;
 
 function Chegada() {
 	return (
-		<section className="relative mx-auto max-w-6xl px-6 pt-14 text-center sm:pt-32">
+		<section className="relative mx-auto max-w-6xl px-6 pt-10 text-center md:pt-20 lg:pt-32">
 			<div className="mist-final absolute inset-y-0 left-1/2 w-screen -translate-x-1/2" />
+			<BubbleGhosts variant="chegada" />
 			{/* Curva de chegada: rio e caixa descem pela margem direita e só
 			    então entram na doca — nunca por cima do título. */}
 			<div
@@ -269,6 +287,15 @@ function Chegada() {
 				className="relative mx-auto mt-12 h-28 w-full max-w-xl sm:mt-16 sm:h-40"
 				data-s-anchor="caminhao-doca"
 			>
+				{/* Abaixo de lg não há canvas: a van entra como imagem, parada
+				    na doca, com as rodas alinhadas ao asfalto logo abaixo. */}
+				<Image
+					alt=""
+					className="pointer-events-none absolute bottom-[-1.75rem] left-1/2 z-10 w-[min(20rem,72vw)] -translate-x-1/2 lg:hidden"
+					height={387}
+					src="/bolhas/caminhao.webp"
+					width={800}
+				/>
 				{/* Marco da caixa separado da âncora do caminhão: a escala da
 				    caixa segue o tamanho do marco, e ela precisa chegar pequena
 				    (na traseira, à altura da porta) para caber no baú. */}
@@ -337,8 +364,18 @@ export default function Home() {
 					title="6 a 7 fábricas, uma por CD."
 					variant="fabrica"
 				>
+					{/* < lg: o Brasil é tinta atrás do parágrafo (Regra do Mapa-Tinta);
+					    o SVG do placeholder já nasce com os pontos acesos. */}
+					<div
+						aria-hidden
+						className="pointer-events-none absolute -top-16 -right-6 z-0 w-[clamp(11rem,52vw,15rem)] opacity-90 lg:hidden"
+					>
+						<div className="malha-map" data-lit="">
+							<MapaMalhaPlaceholder className="malha-map-fallback" />
+						</div>
+					</div>
 					<Reveal delay={0.1}>
-						<p className="max-w-md text-pretty text-brand-navy/75 text-lg leading-relaxed lg:mt-6">
+						<p className="relative z-10 max-w-[62%] text-pretty text-brand-navy/75 text-lg leading-relaxed sm:max-w-md lg:mt-6">
 							<strong className="text-brand-navy">
 								Quem vende no Full paga a remessa até o CD.
 							</strong>{" "}
@@ -346,8 +383,20 @@ export default function Home() {
 							margem, e é ele que a fábrica ao lado encurta.
 						</p>
 					</Reveal>
+					<Reveal className="lg:hidden" delay={0.16}>
+						<ul className="relative z-10 mt-5 flex flex-wrap gap-2">
+							{pracasPlanas().map((nome) => (
+								<li
+									className="rounded-full bg-brand-mist px-4 py-1.5 font-medium text-brand-navy text-sm"
+									key={nome}
+								>
+									{nome}
+								</li>
+							))}
+						</ul>
+					</Reveal>
 					<RevealGroups
-						className="mt-6 flex max-w-md flex-col gap-2.5 sm:gap-3 lg:mt-7"
+						className="mt-6 hidden max-w-md flex-col gap-2.5 sm:gap-3 lg:mt-7 lg:flex"
 						groups={pracasPorRegiao()}
 						itemClassName="rounded-full bg-brand-mist px-4 py-1.5 font-medium text-brand-navy text-sm transition-[transform,background-color,color] duration-200 hover:-translate-y-0.5 hover:bg-brand-ink hover:text-white motion-reduce:transition-none motion-reduce:hover:translate-y-0"
 						labelClassName="w-full text-brand-navy/60 text-sm sm:w-24 sm:shrink-0"

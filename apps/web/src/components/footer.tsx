@@ -1,6 +1,3 @@
-import { EMAIL_ADDRESS, EMAIL_URL } from "@/components/contact";
-import { CtaEmail, CtaWhatsApp } from "@/components/cta";
-
 /**
  * Selo de autorização: anel pontilhado com visto — o mesmo vocabulário do
  * selo 3D da estação Qualidade, agora como carimbo da credencial ANVISA.
@@ -38,44 +35,32 @@ function SeloAnvisa({ className }: { className?: string }) {
 
 /**
  * Rodapé-wordmark: a página abre com Sora gigante no hero e fecha com o
- * nome da marca na mesma escala. O `<footer>` fica sem z-index para as
- * microbolhas do canvas fixo (z-10) atravessarem até o fim da página; só
- * o conteúdo sobe para z-20. O asfalto da doca é a única divisa: o rodapé
- * só respira abaixo dele, sem fio nem faixa própria.
+ * nome da marca na mesma escala. Sem CTAs — a Chegada, logo acima, já fechou
+ * com o par de botões; aqui o contato é informação (links de texto de 44px).
+ * O `<footer>` fica sem z-index para as microbolhas do canvas fixo (z-10)
+ * atravessarem até o fim da página; só o conteúdo sobe para z-20. O asfalto
+ * da doca é a única divisa: o rodapé só respira abaixo dele, sem fio nem
+ * faixa própria.
  */
 export function Footer() {
 	return (
 		<footer className="relative">
-			<div className="relative z-20 mx-auto max-w-6xl px-6 pt-14 pb-8 sm:pt-20">
-				<div className="grid gap-8 sm:gap-12 lg:grid-cols-[1.4fr_1fr] lg:items-center">
-					<div>
-						<a
-							aria-label="Voltar ao topo"
-							className="inline-block rounded-full font-bold font-display text-6xl text-brand-navy leading-[0.9] tracking-[-0.03em] focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-8 sm:text-8xl"
-							href="#topo"
-						>
-							C<span className="text-brand-blue">B</span>S
-						</a>
-						<p className="mt-5 max-w-md text-base text-brand-navy/75 leading-relaxed sm:mt-6">
-							Companhia Brasileira de Saneantes. Terceirização de produção de
-							saneantes, com fábricas junto aos CDs do Mercado Livre.
-						</p>
-					</div>
-					<div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 lg:justify-end">
-						<CtaWhatsApp className="justify-center" label="Falar com a CBS" />
-						<CtaEmail className="justify-center" />
-					</div>
-				</div>
-				<div className="mt-10 flex flex-col gap-4 border-brand-navy/10 border-t pt-5 text-brand-navy/70 text-sm sm:mt-14 sm:flex-row sm:items-center sm:justify-between">
-					<p className="flex flex-wrap items-center gap-x-1.5">
-						<span>© 2026 CBS · Companhia Brasileira de Saneantes ·</span>
-						<a
-							className="inline-flex min-h-11 items-center underline decoration-brand-navy/30 underline-offset-4 transition-colors hover:text-brand-ink hover:decoration-brand-ink focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-2"
-							href={EMAIL_URL}
-						>
-							{EMAIL_ADDRESS}
-						</a>
-					</p>
+			<div className="relative z-20 mx-auto max-w-6xl px-6 pt-10 pb-8 sm:pt-16">
+				<a
+					aria-label="Voltar ao topo"
+					className="inline-block rounded-full font-bold font-display text-6xl text-brand-navy leading-[0.9] tracking-[-0.03em] focus-visible:outline-2 focus-visible:outline-brand-blue focus-visible:outline-offset-8 sm:text-8xl"
+					href="#topo"
+				>
+					C<span className="text-brand-blue">B</span>S
+				</a>
+				<p className="mt-5 max-w-md text-base text-brand-navy/75 leading-relaxed sm:mt-6">
+					Companhia Brasileira de Saneantes. Terceirização de produção de
+					saneantes, com fábricas junto aos CDs do Mercado Livre.
+				</p>
+				<div className="mt-8 flex flex-col gap-4 border-brand-navy/10 border-t pt-5 text-brand-navy/70 text-sm sm:mt-12 sm:flex-row sm:items-center sm:justify-between">
+					<span className="inline-flex min-h-11 items-center">
+						© 2026 CBS · Companhia Brasileira de Saneantes
+					</span>
 					<p className="flex items-center gap-3">
 						<SeloAnvisa className="size-9 shrink-0" />
 						<span>

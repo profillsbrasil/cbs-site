@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import { BRASIL_BOUNDS } from "./brasil-outline";
-import { PRACAS, pracasPorRegiao } from "./pracas";
+import { PRACAS, pracasPlanas, pracasPorRegiao } from "./pracas";
 
 describe("pracas", () => {
 	test("são as 7 praças do cliente", () => {
@@ -24,6 +24,11 @@ describe("pracas", () => {
 			expect(lngLat[1]).toBeGreaterThan(south);
 			expect(lngLat[1]).toBeLessThan(north);
 		}
+	});
+
+	test("lista plana mantém as 7 praças na ordem do cliente", () => {
+		expect(pracasPlanas()).toEqual(PRACAS.map((p) => p.nome));
+		expect(pracasPlanas()).toHaveLength(7);
 	});
 
 	test("agrupa em 4 regiões na ordem Sudeste, Sul, Nordeste, Centro-Oeste", () => {
