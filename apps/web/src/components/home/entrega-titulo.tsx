@@ -28,7 +28,7 @@ export function EntregaTitulo() {
 	});
 
 	return (
-		<h2 className="relative z-20 mx-auto max-w-2xl text-balance font-bold font-display text-4xl text-brand-navy leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+		<h2 className="relative z-20 mx-auto max-w-2xl text-balance font-bold font-display text-4xl text-brand-navy leading-tight tracking-tight md:text-5xl lg:text-6xl">
 			Entregue no CD.
 			<br className="hidden sm:block" />{" "}
 			<span

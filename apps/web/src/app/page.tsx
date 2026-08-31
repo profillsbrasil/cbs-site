@@ -59,7 +59,9 @@ function Hero() {
 			</div>
 			<div className="relative z-20 flex flex-1 flex-col lg:flex-none">
 				<div className="rise">
-					<h1 className="mt-2 max-w-xl font-bold font-display text-[2.5rem] text-brand-navy leading-[1.02] tracking-tight md:text-6xl lg:mt-0 lg:text-7xl">
+					{/* clamp: 36px em 320 (senão "nossa fábrica." quebra em 3 linhas),
+					    40px de 380 em diante. */}
+					<h1 className="mt-2 max-w-xl font-bold font-display text-[clamp(2.25rem,10.5vw,2.5rem)] text-brand-navy leading-[1.02] tracking-tight md:text-6xl lg:mt-0 lg:text-7xl">
 						Sua marca,
 						<br />
 						<span className="text-brand-ink">nossa fábrica.</span>
@@ -178,7 +180,9 @@ function Station({
 			)}
 			<BubbleGhosts variant={anchor} />
 			<div className={`relative z-20 order-2 ${textCol}`}>
-				<Reveal>
+				{/* z-10: o mapa da malha é absolute dentro do bloco de children;
+				    sem posicionar o título, a ordem de pintura o cobriria. */}
+				<Reveal className="relative z-10">
 					<h2 className="mt-3 max-w-md font-bold font-display text-3xl text-brand-navy leading-tight tracking-tight md:text-4xl lg:mt-0 lg:text-5xl">
 						{title}
 					</h2>
@@ -288,7 +292,7 @@ function Chegada() {
 				<Image
 					alt=""
 					className="pointer-events-none absolute bottom-[-1.75rem] left-1/2 w-[min(20rem,72vw)] -translate-x-1/2 lg:hidden"
-					height={450}
+					height={387}
 					src="/bolhas/caminhao.webp"
 					width={800}
 				/>

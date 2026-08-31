@@ -11,8 +11,9 @@ interface Ghost {
 }
 
 /**
- * Posições fixas por seção: 3–5 fantasmas de 14–44px, à esquerda (a bolha
- * de imagem sangra pela direita). Em `lg` o canvas fixo faz esse papel com
+ * Posições fixas por seção: 3–5 fantasmas de 14–44px, quase todos à
+ * esquerda (a bolha de imagem sangra pela direita); os poucos à direita
+ * ficam fora das caixas de texto. Em `lg` o canvas fixo faz esse papel com
  * microbolhas reais, então o componente não renderiza.
  */
 const GHOSTS: Record<GhostVariant, Ghost[]> = {
@@ -25,7 +26,6 @@ const GHOSTS: Record<GhostVariant, Ghost[]> = {
 		{ className: "top-28 left-5 size-11" },
 		{ className: "top-52 left-20 size-5" },
 		{ className: "top-20 right-16 size-3.5" },
-		{ className: "top-[62%] right-4 size-7" },
 		{ className: "bottom-40 -left-3 size-9" },
 	],
 	malha: [

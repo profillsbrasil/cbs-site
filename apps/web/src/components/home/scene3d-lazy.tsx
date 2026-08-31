@@ -6,7 +6,7 @@ import { useWide } from "./use-wide";
 
 // `React.lazy` + gate: o `import()` só roda quando o componente renderiza,
 // isto é, quando `useWide()` vira `true` — o chunk do three não desce ao
-// celular (medido em produção: 219 KB de JS em 390px, +522 KB só ao alargar).
+// celular (medido em produção: 8 arquivos JS em 390px contra 13 em 1440px).
 const Scene3DLazyInner = lazy(() =>
 	import("./scene3d").then((m) => ({ default: m.Scene3D }))
 );

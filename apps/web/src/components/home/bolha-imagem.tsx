@@ -46,7 +46,9 @@ export function BolhaImagem({
 			alt=""
 			className={`size-full rounded-full object-contain ${className}`}
 			height={800}
-			priority={obj === "caixa"}
+			/* Sem priority nem eager: ambos injetam ReactDOM.preload sem media
+			   query e o desktop (lg:hidden) baixava a caixa sem usá-la. Lazy
+			   no 1º viewport carrega de imediato do mesmo jeito. */
 			sizes="(max-width: 767px) 62vw, 272px"
 			src={`/bolhas/${obj}.webp`}
 			width={800}
@@ -79,10 +81,13 @@ export function BolhaFabrica({ className = "" }: { className?: string }) {
 
 	return (
 		<div className={`relative size-full ${className}`}>
+			{/* 92% e não os 110% do desktop: aqui o vidro (vidro.webp) cobre o
+			    quadrado inteiro, e a ilustração maior escapava da bolha
+			    (Regra do Envelope de Bolha). */}
 			{reduced ? (
 				<Image
 					alt=""
-					className="pointer-events-none absolute top-1/2 left-1/2 w-[110%] max-w-none -translate-x-1/2 -translate-y-[54%]"
+					className="pointer-events-none absolute top-1/2 left-1/2 w-[92%] max-w-none -translate-x-1/2 -translate-y-[54%]"
 					height={661}
 					src="/textures/warehouse-delivery.png"
 					width={1296}
@@ -91,7 +96,7 @@ export function BolhaFabrica({ className = "" }: { className?: string }) {
 				/* <object> e não <img>: o Chrome congela SMIL em contexto de imagem. */
 				<object
 					aria-hidden
-					className="pointer-events-none absolute top-1/2 left-1/2 w-[110%] max-w-none -translate-x-1/2 -translate-y-[54%] contrast-[1.06] saturate-[1.4]"
+					className="pointer-events-none absolute top-1/2 left-1/2 w-[92%] max-w-none -translate-x-1/2 -translate-y-[54%] contrast-[1.06] saturate-[1.4]"
 					data="/warehouse-delivery.svg"
 					title=""
 					type="image/svg+xml"
