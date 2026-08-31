@@ -291,7 +291,7 @@ function Chegada() {
 				    na doca, com as rodas alinhadas ao asfalto logo abaixo. */}
 				<Image
 					alt=""
-					className="pointer-events-none absolute bottom-[-1.75rem] left-1/2 w-[min(20rem,72vw)] -translate-x-1/2 lg:hidden"
+					className="pointer-events-none absolute bottom-[-1.75rem] left-1/2 z-10 w-[min(20rem,72vw)] -translate-x-1/2 lg:hidden"
 					height={387}
 					src="/bolhas/caminhao.webp"
 					width={800}

@@ -1,6 +1,4 @@
 import {
-	EMAIL_ADDRESS,
-	EMAIL_URL,
 	WHATSAPP_NUMBER,
 	WHATSAPP_URL,
 	WhatsAppIcon,
@@ -82,9 +80,6 @@ export function Footer() {
 							<WhatsAppIcon className="size-4" />
 							{WHATSAPP_NUMBER}
 							<span className="sr-only"> (abre em nova aba)</span>
-						</a>
-						<a className={LINK} href={EMAIL_URL}>
-							{EMAIL_ADDRESS}
 						</a>
 					</div>
 					<p className="flex items-center gap-3">
