@@ -7,7 +7,8 @@ import { BubbleGhosts } from "@/components/home/bubble-ghosts";
 import { EntregaTitulo } from "@/components/home/entrega-titulo";
 import { LiquidPath } from "@/components/home/liquid-path";
 import { MapaMalhaLazy } from "@/components/home/mapa-malha-lazy";
-import { pracasPorRegiao } from "@/components/home/pracas";
+import { MapaMalhaPlaceholder } from "@/components/home/mapa-malha-placeholder";
+import { pracasPlanas, pracasPorRegiao } from "@/components/home/pracas";
 import { Reveal, RevealGroups } from "@/components/home/reveal";
 import { Scene3DLazy } from "@/components/home/scene3d-lazy";
 import { Navbar } from "@/components/navbar";
@@ -354,8 +355,18 @@ export default function Home() {
 					title="6 a 7 fábricas, uma por CD."
 					variant="fabrica"
 				>
+					{/* < lg: o Brasil é tinta atrás do parágrafo (Regra do Mapa-Tinta);
+					    o SVG do placeholder já nasce com os pontos acesos. */}
+					<div
+						aria-hidden
+						className="pointer-events-none absolute -top-16 -right-6 z-0 w-[clamp(11rem,52vw,15rem)] opacity-90 lg:hidden"
+					>
+						<div className="malha-map" data-lit="">
+							<MapaMalhaPlaceholder className="malha-map-fallback" />
+						</div>
+					</div>
 					<Reveal delay={0.1}>
-						<p className="max-w-md text-pretty text-brand-navy/75 text-lg leading-relaxed lg:mt-6">
+						<p className="relative z-10 max-w-[62%] text-pretty text-brand-navy/75 text-lg leading-relaxed sm:max-w-md lg:mt-6">
 							<strong className="text-brand-navy">
 								Quem vende no Full paga a remessa até o CD.
 							</strong>{" "}
@@ -363,8 +374,20 @@ export default function Home() {
 							margem, e é ele que a fábrica ao lado encurta.
 						</p>
 					</Reveal>
+					<Reveal className="lg:hidden" delay={0.16}>
+						<ul className="relative z-10 mt-5 flex flex-wrap gap-2">
+							{pracasPlanas().map((nome) => (
+								<li
+									className="rounded-full bg-brand-mist px-4 py-1.5 font-medium text-brand-navy text-sm"
+									key={nome}
+								>
+									{nome}
+								</li>
+							))}
+						</ul>
+					</Reveal>
 					<RevealGroups
-						className="mt-6 flex max-w-md flex-col gap-2.5 sm:gap-3 lg:mt-7"
+						className="mt-6 hidden max-w-md flex-col gap-2.5 sm:gap-3 lg:mt-7 lg:flex"
 						groups={pracasPorRegiao()}
 						itemClassName="rounded-full bg-brand-mist px-4 py-1.5 font-medium text-brand-navy text-sm transition-[transform,background-color,color] duration-200 hover:-translate-y-0.5 hover:bg-brand-ink hover:text-white motion-reduce:transition-none motion-reduce:hover:translate-y-0"
 						labelClassName="w-full text-brand-navy/60 text-sm sm:w-24 sm:shrink-0"
