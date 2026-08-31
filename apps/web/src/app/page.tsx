@@ -2,6 +2,8 @@ import { ArrowDown } from "lucide-react";
 
 import { CtaEmail, CtaReassurance, CtaWhatsApp } from "@/components/cta";
 import { Footer } from "@/components/footer";
+import { BolhaImagem } from "@/components/home/bolha-imagem";
+import { BubbleGhosts } from "@/components/home/bubble-ghosts";
 import { EntregaTitulo } from "@/components/home/entrega-titulo";
 import { LiquidPath } from "@/components/home/liquid-path";
 import { MapaMalhaLazy } from "@/components/home/mapa-malha-lazy";
@@ -20,7 +22,7 @@ function HeroPlaceholder() {
 	return (
 		<div
 			aria-hidden
-			className="hero-placeholder pointer-events-none absolute inset-0 flex items-center justify-center"
+			className="hero-placeholder pointer-events-none absolute inset-0 hidden items-center justify-center lg:flex"
 		>
 			<div className="relative aspect-square h-full">
 				<div className="bubble-ghost absolute top-[11%] left-[13%] size-[74%]" />
@@ -35,13 +37,23 @@ function HeroPlaceholder() {
 function Hero() {
 	return (
 		<section
-			className="relative mx-auto grid min-h-[100svh] max-w-6xl items-start gap-8 px-6 pt-20 pb-12 sm:gap-10 sm:pt-28 sm:pb-16 lg:grid-cols-[1.05fr_minmax(0,1fr)] lg:items-center lg:pt-28"
+			className="relative mx-auto flex min-h-[100svh] max-w-6xl flex-col px-6 pt-20 pb-8 lg:grid lg:grid-cols-[1.05fr_minmax(0,1fr)] lg:items-center lg:gap-10 lg:pt-28 lg:pb-16"
 			id="topo"
 		>
 			<div className="mist-hero absolute inset-y-0 left-1/2 w-screen -translate-x-1/2" />
-			<div className="relative z-20">
+			<BubbleGhosts variant="hero" />
+			{/* Celular/tablet: a bolha-caixa vem ANTES do título, sangrando pela
+			    direita (o <main> recorta com overflow-x-clip). Em lg o visual é
+			    o cluster WebGL na segunda coluna. */}
+			<div
+				aria-hidden
+				className="rise relative z-10 -mr-10 ml-auto size-[clamp(13rem,62vw,17rem)] sm:-mr-6 md:size-[clamp(17rem,40vw,22rem)] lg:hidden"
+			>
+				<BolhaImagem obj="caixa" />
+			</div>
+			<div className="relative z-20 flex flex-1 flex-col lg:flex-none">
 				<div className="rise">
-					<h1 className="max-w-xl font-bold font-display text-5xl text-brand-navy leading-[1.02] tracking-tight sm:text-7xl">
+					<h1 className="mt-2 max-w-xl font-bold font-display text-[2.5rem] text-brand-navy leading-[1.02] tracking-tight md:text-6xl lg:mt-0 lg:text-7xl">
 						Sua marca,
 						<br />
 						<span className="text-brand-ink">nossa fábrica.</span>
@@ -51,7 +63,7 @@ function Hero() {
 					className="rise"
 					style={{ "--rise-delay": "120ms" } as React.CSSProperties}
 				>
-					<p className="mt-[clamp(1.5rem,20vw,7rem)] max-w-lg text-pretty text-base text-brand-navy/75 leading-relaxed sm:mt-8 sm:text-xl lg:mt-7">
+					<p className="mt-4 max-w-lg text-pretty text-base text-brand-navy/75 leading-relaxed md:mt-6 md:text-lg lg:mt-7 lg:text-xl">
 						A CBS fabrica o seu saneante, aplica o seu rótulo e entrega no
 						centro de distribuição do Mercado Livre, com autorização ANVISA.
 						Cada fábrica fica ao lado de um CD, e{" "}
@@ -62,10 +74,10 @@ function Hero() {
 					</p>
 				</div>
 				<div
-					className="rise"
+					className="rise mt-auto pt-6 lg:mt-10 lg:pt-0"
 					style={{ "--rise-delay": "220ms" } as React.CSSProperties}
 				>
-					<div className="mt-6 flex flex-col items-stretch gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+					<div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
 						<CtaWhatsApp
 							className="justify-center"
 							label="Chamar no WhatsApp"
@@ -76,14 +88,14 @@ function Hero() {
 				</div>
 			</div>
 			<div
-				className="absolute top-14 -right-24 size-[clamp(13rem,66vw,17rem)] sm:top-16 sm:-right-16 sm:size-[clamp(17rem,40vw,24rem)] lg:relative lg:top-auto lg:right-auto lg:h-[560px] lg:w-auto"
+				className="relative hidden h-[560px] lg:block"
 				data-s-anchor="hero-cluster"
 			>
 				<HeroPlaceholder />
-				{/* Marco da caixa: proporcional à bolha abaixo de lg (a caixa
-				    estática escala por este marco, a bolha pela âncora acima). */}
+				{/* Marco da caixa: a caixa estática escala por este marco, a
+				    bolha pela âncora acima. */}
 				<div
-					className="absolute top-1/2 left-1/2 size-[23%] -translate-x-1/2 -translate-y-1/2 lg:size-32"
+					className="absolute top-1/2 left-1/2 size-32 -translate-x-1/2 -translate-y-1/2"
 					data-j-anchor="hero"
 				/>
 			</div>
