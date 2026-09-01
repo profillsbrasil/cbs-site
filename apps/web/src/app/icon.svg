@@ -1,0 +1,25 @@
+<svg
+	height="32"
+	viewBox="0 0 32 32"
+	width="32"
+	xmlns="http://www.w3.org/2000/svg"
+>
+	<title>CBS</title>
+	<circle
+		cx="16"
+		cy="16"
+		fill="none"
+		r="15"
+		stroke="#A8E0F0"
+		stroke-width="1.2"
+	/>
+	<g transform="translate(16 16) scale(0.8) translate(-15.8 -16)">
+		<path
+			d="M7 4 L17 4 A5.4 5.4 0 0 1 17 14.8 L18 14.8 A6.6 6.6 0 0 1 18 28 L7 28 Z
+			   M12 8.4 L13 8.4 A5 2.1 0 0 1 13 12.6 L12 12.6 Z
+			   M12 17 L13.5 17 A6.7 3.3 0 0 1 13.5 23.6 L12 23.6 Z"
+			fill="#1D9DD8"
+			fill-rule="evenodd"
+		/>
+	</g>
+</svg>
