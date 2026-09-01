@@ -1,7 +1,15 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Sora } from "next/font/google";
 
 import { AppMotionConfig } from "@/components/motion-config";
+import {
+	organizationJsonLd,
+	SITE_DESCRIPTION,
+	SITE_NAME,
+	SITE_TITLE,
+	SITE_URL,
+	serializeJsonLd,
+} from "@/lib/site";
 
 import "../index.css";
 
@@ -10,10 +18,31 @@ const sora = Sora({
 	variable: "--font-sora",
 });
 
+export const viewport: Viewport = {
+	initialScale: 1,
+	themeColor: "#fafbfc",
+	width: "device-width",
+};
+
 export const metadata: Metadata = {
-	description:
-		"A CBS fabrica saneantes com a sua marca, com autorização ANVISA, em fábricas junto aos CDs do Mercado Livre. Você vende, a remessa até o CD sai mais barata.",
-	title: "CBS | Terceirização de produção de saneantes",
+	alternates: { canonical: "/" },
+	description: SITE_DESCRIPTION,
+	metadataBase: new URL(SITE_URL),
+	openGraph: {
+		description: SITE_DESCRIPTION,
+		locale: "pt_BR",
+		siteName: SITE_NAME,
+		title: SITE_TITLE,
+		type: "website",
+		url: "/",
+	},
+	robots: { follow: true, index: true },
+	title: SITE_TITLE,
+	twitter: {
+		card: "summary_large_image",
+		description: SITE_DESCRIPTION,
+		title: SITE_TITLE,
+	},
 };
 
 const DIRECTION_CONTRACT = `impeccable-direction b61342a9/870fbad3 (user-pinned)
@@ -41,6 +70,14 @@ export default function RootLayout({
 				<script id="direction-contract" type="text/x-impeccable-contract">
 					{DIRECTION_CONTRACT}
 				</script>
+				<script
+					// biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD é o padrão do Next para dados estruturados; o conteúdo é gerado aqui e escapado em serializeJsonLd.
+					dangerouslySetInnerHTML={{
+						__html: serializeJsonLd(organizationJsonLd()),
+					}}
+					id="organization-jsonld"
+					type="application/ld+json"
+				/>
 				<AppMotionConfig>{children}</AppMotionConfig>
 			</body>
 		</html>

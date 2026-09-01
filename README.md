@@ -11,6 +11,14 @@ bun install
 bun run dev:web   # http://localhost:3001 (porta pinada)
 ```
 
+## Build e SEO
+
+```bash
+NEXT_PUBLIC_SITE_URL=http://localhost:3001 bun run build   # build local
+```
+
+`NEXT_PUBLIC_SITE_URL` (com esquema, ex.: `https://exemplo.com.br`) é a URL base de canonical, sitemap, robots, Open Graph e JSON-LD. Na Vercel ela pode ficar vazia: o build usa `VERCEL_PROJECT_PRODUCTION_URL`. Sem nenhuma das duas, o build de produção falha de propósito, para nunca publicar links apontando para localhost.
+
 ## Qualidade
 
 ```bash

@@ -72,9 +72,9 @@ function Hero() {
 					style={{ "--rise-delay": "120ms" } as React.CSSProperties}
 				>
 					<p className="mt-4 max-w-lg text-pretty text-base text-brand-navy/75 leading-relaxed md:mt-6 md:text-lg lg:mt-7 lg:text-xl">
-						A CBS fabrica o seu saneante, aplica o seu rótulo e entrega no
-						centro de distribuição do Mercado Livre, com autorização ANVISA.
-						Cada fábrica fica ao lado de um CD, e{" "}
+						Terceirização de produção de saneantes: a CBS fabrica o seu produto,
+						aplica o seu rótulo e entrega no centro de distribuição do Mercado
+						Livre, com autorização ANVISA. Cada fábrica fica ao lado de um CD, e{" "}
 						<strong className="text-brand-navy">
 							a remessa até lá sai mais barata
 						</strong>
